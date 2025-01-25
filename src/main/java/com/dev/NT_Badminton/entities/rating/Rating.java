@@ -1,0 +1,24 @@
+package com.dev.NT_Badminton.entities.rating;
+
+import com.dev.NT_Badminton.entities.BaseEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Getter
+@Setter
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "rating")
+public class Rating extends BaseEntity {
+    Integer productId;
+
+    Integer userId;
+
+    Integer rate;
+
+    String description;
+}
