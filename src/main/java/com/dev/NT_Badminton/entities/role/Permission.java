@@ -17,22 +17,29 @@ import lombok.experimental.FieldDefaults;
 @Entity
 public class Permission extends BaseEntity {
     String title;
+
     @Enumerated(value = EnumType.STRING)
     PermissionType permission;
+
     @Column(name = "parent_permission")
     @Enumerated(value = EnumType.STRING)
     PermissionGroup parentPermission;
+
     @Column(name = "is_view")
     boolean isView;
+
     @Column(name = "is_write")
     boolean isWrite;
+
     @Column(name = "is_approval")
     boolean isApproval;
+
     @Column(name = "is_decision")
     boolean isDecision;
 
     @Column(name = "type", columnDefinition = "tinyint")
     int type;
+
     @Column(name="status", columnDefinition = "tinyint")
     ActiveStatus status;
 }

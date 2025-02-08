@@ -18,15 +18,24 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "upload_files")
 @Entity
 public class UploadFile extends BaseEntity {
+
     String originFilePath;
+
     String thumbFilePath;
+
     String originUrl;
+
     String thumbUrl;
+
     @Column(columnDefinition = "tinyint")
     UploadFileType type;
+
     Integer width;
+
     Integer height;
+
     Integer duration;
+
     Long size;
 
 }

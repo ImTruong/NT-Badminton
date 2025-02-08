@@ -16,12 +16,20 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "contacts")
 public class Contact extends BaseEntity {
     String firstName;
+
     String lastName;
+
     String phone;
+
     String email;
+
     String address;
+
     String subject;
+
     String content;
+
     ActiveStatus status;
+
     String note;
 }

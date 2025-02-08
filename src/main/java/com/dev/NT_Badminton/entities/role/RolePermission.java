@@ -16,16 +16,22 @@ import lombok.Setter;
 @Table(name = "role_permission")
 @Entity
 public class RolePermission extends BaseEntity {
+
     @Column(name = "role_id")
     int roleId;
+
     @Column(name = "permission_id")
     int permissionId;
+
     @Column(name = "is_view")
     boolean isView;
+
     @Column(name = "is_write")
     boolean isWrite;
+
     @Column(name = "is_approval")
     boolean isApproval;
+
     @Column(name = "is_decision")
     boolean isDecision;
 }

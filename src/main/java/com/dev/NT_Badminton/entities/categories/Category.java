@@ -21,7 +21,9 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "categories")
 public class Category extends BaseEntity {
     String name;
+
     String slug;
+
     String shortDescription;
 
     @Column(name = "status", columnDefinition = "tinyint")

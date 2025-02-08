@@ -17,10 +17,12 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "roles")
 public class Role extends BaseEntity {
     String name;
+
     String note;
 
     @Column(name = "type", columnDefinition = "tinyint")
     int type;
+
     @Column(name = "status", columnDefinition = "tinyint")
     ActiveStatus status;
 }
