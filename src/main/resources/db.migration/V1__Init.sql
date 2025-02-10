@@ -91,10 +91,8 @@ CREATE TABLE `users`
 (
     `id`         int unsigned NOT NULL AUTO_INCREMENT,
     `code`       varchar(50) NOT NULL COMMENT 'Mã người dùng duy nhất',
-    `phone`      varchar(20) NOT NULL,
     `email`      varchar(255)         DEFAULT NULL,
     `name`       varchar(255)         DEFAULT NULL,
-    `address`    varchar(255)         DEFAULT NULL,
     `password`   varchar(255)         DEFAULT NULL COMMENT 'Mật khẩu của người dùng',
     `birthday`   date                 DEFAULT NULL,
     `gender`     tinyint              DEFAULT NULL,
@@ -106,7 +104,6 @@ CREATE TABLE `users`
     `updated_at` datetime    NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY (`code`),
-    UNIQUE KEY (`phone`),
     FOREIGN KEY (`avatar_id`) REFERENCES `upload_files` (`id`),
     FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`)
 ) ;
@@ -289,14 +286,16 @@ CREATE TABLE `contacts`
     `phone`         varchar(20)  NOT NULL,
     `email`         varchar(255) NOT NULL,
     `address`       varchar(255) NOT NULL,
-    `subject`       varchar(500) NOT NULL,
-    `content`       text         NOT NULL,
-    `status`        tinyint      NOT NULL DEFAULT 0,
+--     `subject`       varchar(500) NOT NULL,
+--     `content`       text         NOT NULL,
     `note`          text                  DEFAULT NULL,
+    `type`          tinyint      NOT NULL, -- 0 - Contact chính của user, 1 - Contact phụ của user
     `deleted`       bit(1)       NOT NULL DEFAULT 0,
     `created_at`    datetime     NOT NULL,
     `updated_at`    datetime     NOT NULL,
+    `user_id`       int unsigned DEFAULT NULL, -- Khóa ngoại tham chiếu đến người dùng
     PRIMARY KEY (`id`)
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 );
 
 CREATE TABLE `product_options` (
@@ -325,21 +324,21 @@ CREATE TABLE `product_option_values` (
 --
 -- INSERT INTO `permissions` (`title`, `permission`, `parent_permission`, `is_view`, `is_write`, `is_approval`, `is_decision`, `type`, `status`, `deleted`, `created_at`, `updated_at`)
 -- VALUES
---     ('Admin', 'Everything', NULL, 1, 1, 1, 1, 1, 1, 1, NOW(), NOW());
+--     ('ADMIN', 'Everything', NULL, 1, 1, 1, 1, 1, 1, 1, NOW(), NOW()),
+--     ('USER', 'Nothing', NULL, 0, 0, 0, 0, 0, 1, 1, NOW(), NOW());
 --
 -- INSERT INTO `roles` (`name`, `note`, `type`, `status`, `deleted`, `created_at`, `updated_at`)
 -- VALUES
---     ('Admin', 'Quản trị viên hệ thống', 1, 1, 0, NOW(), NOW());
+--     ('ADMIN', 'Quản trị viên hệ thống', 1, 1, 0, NOW(), NOW()),
+--     ('USER', 'Người dùng', 1, 1, 0, NOW(), NOW());
+--
 --
 -- INSERT INTO `role_permission` (`role_id`, `permission_id`, `deleted`, `created_at`, `updated_at`)
 -- VALUES
---     (1, 1, 0, NOW(), NOW());
+--     (1, 1, 0, NOW(), NOW()),
+--     (2, 2, 0, NOW(), NOW());
 --
 -- INSERT INTO `branches` (`name`, `address`, `phone`, `deleted`, `created_at`, `updated_at`)
 -- VALUES
 --     ('Chi nhánh Hà Nội', '123 Đường Láng, Hà Nội', '0123456789', 0, NOW(), NOW()),
 --     ('Chi nhánh Hồ Chí Minh', '456 Đường Nguyễn Văn Linh, TP.HCM', '0987654321', 0, NOW(), NOW());
---
--- INSERT INTO `users` (`code`, `phone`, `email`, `name`, `address`, `password`, `birthday`, `gender`, `role_id`, `avatar_id`, `status`, `deleted`, `created_at`, `updated_at`)
--- VALUES
---     ('USER001', '0123456789', 'admin@gmail.com', 'Nguyễn Văn A', '123 Đường Láng, Hà Nội', '123456', '1990-01-01', 1, 1, NULL, 1, 0, NOW(), NOW());

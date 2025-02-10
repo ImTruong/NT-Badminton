@@ -15,6 +15,7 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name = "users")
@@ -22,26 +23,23 @@ import java.util.Date;
 public class AppUser extends BaseEntity {
     String code;
 
-    String phone;
-
     String email;
 
     String name;
-
-    String address;
 
     String password;
 
     Date birthday;
 
+    @Column(name = "role_id")
+    private Integer roleId;
+
     @Column(name = "gender", columnDefinition = "int")
     Gender gender;
 
     @ManyToOne(fetch = FetchType.EAGER) // Lấy role ngay khi load user
-    @JoinColumn(name = "roleId", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
     Role role;
-
-    Integer userId;
 
     Integer avatarId;
 

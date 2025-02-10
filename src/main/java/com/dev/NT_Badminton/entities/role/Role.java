@@ -13,9 +13,11 @@ import lombok.experimental.FieldDefaults;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "roles")
 public class Role extends BaseEntity {
+
     String name;
 
     String note;
@@ -25,4 +27,5 @@ public class Role extends BaseEntity {
 
     @Column(name = "status", columnDefinition = "tinyint")
     ActiveStatus status;
+
 }

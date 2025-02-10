@@ -2,6 +2,7 @@ package com.dev.NT_Badminton.entities.contacts;
 
 import com.dev.NT_Badminton.dto.constant.ActiveStatus;
 import com.dev.NT_Badminton.entities.BaseEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.*;
@@ -12,6 +13,7 @@ import lombok.experimental.FieldDefaults;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "contacts")
 public class Contact extends BaseEntity {
@@ -25,11 +27,11 @@ public class Contact extends BaseEntity {
 
     String address;
 
-    String subject;
-
-    String content;
-
-    ActiveStatus status;
-
     String note;
+
+    @Column(name = "type", columnDefinition = "tinyint")
+    int type;
+
+    @Column(name = "user_id", columnDefinition = "int")
+    Integer userId;
 }

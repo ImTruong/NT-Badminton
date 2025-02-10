@@ -22,7 +22,6 @@ public class CustomUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         Optional<AppUser> optionalUserEntity = userRepository.findByEmailAndDeleted(username, false);
-
         AppUser userEntity = optionalUserEntity
                 .orElseThrow(() -> new UsernameNotFoundException("AppUser doesn't exist"));
 
