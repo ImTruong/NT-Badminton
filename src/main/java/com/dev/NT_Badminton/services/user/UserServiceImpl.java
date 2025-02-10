@@ -9,6 +9,8 @@ import com.dev.NT_Badminton.entities.contacts.Contact;
 import com.dev.NT_Badminton.entities.contacts.ContactType;
 import com.dev.NT_Badminton.entities.role.Role;
 import com.dev.NT_Badminton.entities.role.constant.PermissionType;
+import com.dev.NT_Badminton.entities.upload_file.UploadFile;
+import com.dev.NT_Badminton.entities.upload_file.constant.UploadFileType;
 import com.dev.NT_Badminton.entities.users.AppUser;
 import com.dev.NT_Badminton.entities.users.constant.Gender;
 import com.dev.NT_Badminton.exception.AuthenticationFailedException;
@@ -17,7 +19,9 @@ import com.dev.NT_Badminton.exception.ResourceAlreadyExistsException;
 import com.dev.NT_Badminton.exception.UserNotAuthenticatedException;
 import com.dev.NT_Badminton.repositories.user.UserRepository;
 import com.dev.NT_Badminton.security.CustomUserDetails;
+import com.dev.NT_Badminton.services.cloudinary.CloudinaryService;
 import com.dev.NT_Badminton.services.contact.ContactService;
+import com.dev.NT_Badminton.services.uploadFile.UploadFileService;
 import com.dev.NT_Badminton.util.JwtUtil;
 import com.dev.NT_Badminton.util.Utils;
 import jakarta.transaction.Transactional;
@@ -30,6 +34,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -54,6 +63,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private Utils utils;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private UploadFileService uploadFileService;
 
     @Override
     public String login(LoginRequest loginRequest) {
@@ -83,7 +98,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public AppUser register(RegisterRequest registerRequest) {
+    public AppUser register(RegisterRequest registerRequest) throws Exception {
         if (userRepository.existsByEmailAndDeleted(registerRequest.getEmail(), false))
             throw new ResourceAlreadyExistsException("Email is already taken");
         if (contactService.checkPhoneNumberExistence(registerRequest.getPhone()))
@@ -91,6 +106,30 @@ public class UserServiceImpl implements UserService {
         String userPassword = passwordEncoder.encode(registerRequest.getPassword());
         Role roleUser = new Role();
         roleUser.setId(PermissionType.USER.getRoleId());
+        UploadFile avatar = null;
+        if (registerRequest.getAvatar() != null && !registerRequest.getAvatar().isEmpty()) {
+            // Cho phép nhiều định dạng (png, jpg, jpeg)
+            List<String> validImageTypes = Arrays.asList("image/png", "image/jpeg", "image/jpg");
+            if (!validImageTypes.contains(registerRequest.getAvatar().getContentType())) {
+                throw new IllegalArgumentException("Please send a valid image file (png, jpg, jpeg)");
+            }
+            Map<String, String> uploadResult = cloudinaryService.uploadFile(registerRequest.getAvatar(), "avatars");
+            String imageUrl = uploadResult.get("url");
+            String publicId = uploadResult.get("publicId");
+
+            Map details = cloudinaryService.getFileDetails(publicId);
+            Integer width = (Integer) details.get("width");
+            Integer height = (Integer) details.get("height");
+            Integer size = (Integer) details.get("bytes");
+
+            UploadFile uploadFile = new UploadFile();
+            uploadFile.setOriginUrl(imageUrl);
+            uploadFile.setType(UploadFileType.IMAGE);
+            uploadFile.setWidth(width);
+            uploadFile.setHeight(height);
+            uploadFile.setSize(size);
+            avatar = uploadFileService.createUploadFile(uploadFile);
+        }
         AppUser appUser = AppUser.builder()
                 .email(registerRequest.getEmail())
                 .password(userPassword)
@@ -99,6 +138,7 @@ public class UserServiceImpl implements UserService {
                 .gender(Gender.fromValue(registerRequest.getGender()))
                 .status(ActiveStatus.ACTIVE)
                 .roleId(roleUser.getId())
+                .avatarId(avatar != null ? avatar.getId() : null)
                 .build();
         appUser.setCode("USER"+utils.randomString(8));
         appUser = userRepository.save(appUser);

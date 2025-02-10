@@ -2,13 +2,10 @@ CREATE TABLE `upload_files`
 (
     `id`               int unsigned NOT NULL AUTO_INCREMENT,
     `origin_url`       varchar(500)      DEFAULT NULL COMMENT 'Lưu trữ URL gốc của tệp tin, nếu tệp được lấy từ một nguồn trực tuyến',
-    `origin_file_path` varchar(500)      DEFAULT NULL COMMENT 'Đường dẫn tệp gốc trên hệ thống lưu trữ',
     `thumb_url`        varchar(500)      DEFAULT NULL COMMENT 'URL của thumbnail',
-    `thumb_file_path`  varchar(500)      DEFAULT NULL COMMENT 'Đường dẫn đến thumbnail trên hệ thống lưu trữ',
     `type`             tinyint  NOT NULL COMMENT 'Loại tệp tin: `0`: Hình ảnh, `1`: Video, `2`:PDF',
     `width`            int               DEFAULT NULL COMMENT 'Chiều rộng của tập tin (Áp dụng cho hình ảnh hoặc video) - Pixel',
     `height`           int               DEFAULT NULL COMMENT 'Chiều cao của tập tin (Áp dụng cho hình ảnh hoặc video) - Pixel',
-    `duration`         int               DEFAULT NULL COMMENT 'Dung lượng của tệp',
     `size`             bigint            DEFAULT NULL COMMENT 'Kích thước tập tin - tính bằng byte',
     `deleted`          bit(1)   NOT NULL DEFAULT b'0' COMMENT 'Đánh dấu trạng thái xóa của bản ghi: `0`: Chưa xóa, `1`: Đã xóa',
     `created_at`       datetime NOT NULL,
@@ -321,24 +318,24 @@ CREATE TABLE `product_option_values` (
     PRIMARY KEY (`id`),
     FOREIGN KEY (`product_option_id`) REFERENCES `product_options` (`id`) ON DELETE CASCADE
 );
---
--- INSERT INTO `permissions` (`title`, `permission`, `parent_permission`, `is_view`, `is_write`, `is_approval`, `is_decision`, `type`, `status`, `deleted`, `created_at`, `updated_at`)
--- VALUES
---     ('ADMIN', 'Everything', NULL, 1, 1, 1, 1, 1, 1, 1, NOW(), NOW()),
---     ('USER', 'Nothing', NULL, 0, 0, 0, 0, 0, 1, 1, NOW(), NOW());
---
--- INSERT INTO `roles` (`name`, `note`, `type`, `status`, `deleted`, `created_at`, `updated_at`)
--- VALUES
---     ('ADMIN', 'Quản trị viên hệ thống', 1, 1, 0, NOW(), NOW()),
---     ('USER', 'Người dùng', 1, 1, 0, NOW(), NOW());
---
---
--- INSERT INTO `role_permission` (`role_id`, `permission_id`, `deleted`, `created_at`, `updated_at`)
--- VALUES
---     (1, 1, 0, NOW(), NOW()),
---     (2, 2, 0, NOW(), NOW());
---
--- INSERT INTO `branches` (`name`, `address`, `phone`, `deleted`, `created_at`, `updated_at`)
--- VALUES
---     ('Chi nhánh Hà Nội', '123 Đường Láng, Hà Nội', '0123456789', 0, NOW(), NOW()),
---     ('Chi nhánh Hồ Chí Minh', '456 Đường Nguyễn Văn Linh, TP.HCM', '0987654321', 0, NOW(), NOW());
+
+INSERT INTO `permissions` (`title`, `permission`, `parent_permission`, `is_view`, `is_write`, `is_approval`, `is_decision`, `type`, `status`, `deleted`, `created_at`, `updated_at`)
+VALUES
+    ('ADMIN', 'Everything', NULL, 1, 1, 1, 1, 1, 1, 1, NOW(), NOW()),
+    ('USER', 'Nothing', NULL, 0, 0, 0, 0, 0, 1, 1, NOW(), NOW());
+
+INSERT INTO `roles` (`name`, `note`, `type`, `status`, `deleted`, `created_at`, `updated_at`)
+VALUES
+    ('ADMIN', 'Quản trị viên hệ thống', 1, 1, 0, NOW(), NOW()),
+    ('USER', 'Người dùng', 1, 1, 0, NOW(), NOW());
+
+
+INSERT INTO `role_permission` (`role_id`, `permission_id`, `deleted`, `created_at`, `updated_at`)
+VALUES
+    (1, 1, 0, NOW(), NOW()),
+    (2, 2, 0, NOW(), NOW());
+
+INSERT INTO `branches` (`name`, `address`, `phone`, `deleted`, `created_at`, `updated_at`)
+VALUES
+    ('Chi nhánh Hà Nội', '123 Đường Láng, Hà Nội', '0123456789', 0, NOW(), NOW()),
+    ('Chi nhánh Hồ Chí Minh', '456 Đường Nguyễn Văn Linh, TP.HCM', '0987654321', 0, NOW(), NOW());

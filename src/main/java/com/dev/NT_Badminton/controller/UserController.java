@@ -11,8 +11,10 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @FieldDefaults(level = AccessLevel.PUBLIC)
 @RestController
@@ -28,10 +30,12 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+    @PostMapping(value = "/register", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE })
+    public ResponseEntity<?> register(@Valid @RequestPart("registerRequest") RegisterRequest registerRequest,
+                                      @RequestPart(value = "avatar", required = false) MultipartFile avatar) throws Exception {
+        if (avatar != null && !avatar.isEmpty()) registerRequest.setAvatar(avatar);
         userService.register(registerRequest);
-        ApiResponse<String> response = new ApiResponse<String>(true,"Registration Successful");
+        ApiResponse<String> response = new ApiResponse<String>(true, "Registration Successful");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

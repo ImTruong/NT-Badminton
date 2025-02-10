@@ -6,13 +6,15 @@ import com.dev.NT_Badminton.dto.request.UpdateUserPasswordRequest;
 import com.dev.NT_Badminton.dto.request.UpdateUserProfileRequest;
 import com.dev.NT_Badminton.entities.users.AppUser;
 
+import java.io.IOException;
+
 public interface UserService {
 
     String login(LoginRequest loginRequest);
 
     AppUser getUserFromSecurityContext();
 
-    AppUser register(RegisterRequest registerRequest);
+    AppUser register(RegisterRequest registerRequest) throws Exception;
 
     boolean updatePassword(UpdateUserPasswordRequest updateUserPasswordRequest);
 

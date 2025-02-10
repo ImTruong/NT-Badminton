@@ -46,4 +46,10 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         Map deleteResult = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
         return deleteResult.get("result").toString();
     }
+
+    public Map<String, Object> getFileDetails(String publicId) throws Exception {
+        return cloudinary.api().resource(publicId,
+                ObjectUtils.asMap("resource_type", "image"));
+    }
+
 }

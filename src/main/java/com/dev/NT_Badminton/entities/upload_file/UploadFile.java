@@ -19,10 +19,6 @@ import lombok.experimental.FieldDefaults;
 @Entity
 public class UploadFile extends BaseEntity {
 
-    String originFilePath;
-
-    String thumbFilePath;
-
     String originUrl;
 
     String thumbUrl;
@@ -34,8 +30,6 @@ public class UploadFile extends BaseEntity {
 
     Integer height;
 
-    Integer duration;
-
-    Long size;
+    Integer size;
 
 }

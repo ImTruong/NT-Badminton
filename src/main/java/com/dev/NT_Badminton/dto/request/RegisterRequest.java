@@ -3,6 +3,7 @@ package com.dev.NT_Badminton.dto.request;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 
@@ -35,6 +36,6 @@ public class RegisterRequest {
 
     private String address;
 
-    private Integer avatarId;
+    private MultipartFile avatar;
 
 }
