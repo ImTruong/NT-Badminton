@@ -11,7 +11,7 @@ public class SecurityPermitAllHttp {
     private static final Map<String, Set<String>> PERMIT_ALL_ENDPOINTS = new HashMap<>();
 
     static {
-        PERMIT_ALL_ENDPOINTS.put("/**", Set.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+//        PERMIT_ALL_ENDPOINTS.put("/**", Set.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         PERMIT_ALL_ENDPOINTS.put("/user/login", Set.of("POST"));
         PERMIT_ALL_ENDPOINTS.put("/user/register", Set.of("POST"));
     }

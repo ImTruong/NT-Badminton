@@ -13,6 +13,7 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name = "upload_files")
@@ -31,5 +32,8 @@ public class UploadFile extends BaseEntity {
     Integer height;
 
     Integer size;
+
+    @Column(name = "public_id")
+    String publicId;
 
 }

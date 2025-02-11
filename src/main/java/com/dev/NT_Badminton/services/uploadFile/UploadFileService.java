@@ -4,6 +4,6 @@ import com.dev.NT_Badminton.entities.upload_file.UploadFile;
 
 public interface UploadFileService {
 
-    UploadFile createUploadFile(UploadFile uploadFile);
+    UploadFile insertFile(UploadFile uploadFile);
 
 }

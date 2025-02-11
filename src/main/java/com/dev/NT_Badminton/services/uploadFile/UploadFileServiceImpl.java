@@ -12,7 +12,7 @@ public class UploadFileServiceImpl implements UploadFileService {
     private UploadFileRepository uploadFileRepository;
 
     @Override
-    public UploadFile createUploadFile(UploadFile uploadFile) {
+    public UploadFile insertFile(UploadFile uploadFile) {
         return uploadFileRepository.save(uploadFile);
     }
 

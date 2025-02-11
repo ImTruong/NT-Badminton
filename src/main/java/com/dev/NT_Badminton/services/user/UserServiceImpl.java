@@ -34,6 +34,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -106,30 +107,7 @@ public class UserServiceImpl implements UserService {
         String userPassword = passwordEncoder.encode(registerRequest.getPassword());
         Role roleUser = new Role();
         roleUser.setId(PermissionType.USER.getRoleId());
-        UploadFile avatar = null;
-        if (registerRequest.getAvatar() != null && !registerRequest.getAvatar().isEmpty()) {
-            // Cho phép nhiều định dạng (png, jpg, jpeg)
-            List<String> validImageTypes = Arrays.asList("image/png", "image/jpeg", "image/jpg");
-            if (!validImageTypes.contains(registerRequest.getAvatar().getContentType())) {
-                throw new IllegalArgumentException("Please send a valid image file (png, jpg, jpeg)");
-            }
-            Map<String, String> uploadResult = cloudinaryService.uploadFile(registerRequest.getAvatar(), "avatars");
-            String imageUrl = uploadResult.get("url");
-            String publicId = uploadResult.get("publicId");
-
-            Map details = cloudinaryService.getFileDetails(publicId);
-            Integer width = (Integer) details.get("width");
-            Integer height = (Integer) details.get("height");
-            Integer size = (Integer) details.get("bytes");
-
-            UploadFile uploadFile = new UploadFile();
-            uploadFile.setOriginUrl(imageUrl);
-            uploadFile.setType(UploadFileType.IMAGE);
-            uploadFile.setWidth(width);
-            uploadFile.setHeight(height);
-            uploadFile.setSize(size);
-            avatar = uploadFileService.createUploadFile(uploadFile);
-        }
+        UploadFile avatar = createAvatar(registerRequest.getAvatar());
         AppUser appUser = AppUser.builder()
                 .email(registerRequest.getEmail())
                 .password(userPassword)
@@ -164,13 +142,60 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public boolean updateProfile(UpdateUserProfileRequest updateUserProfileRequest) {
+    public boolean updateProfile(UpdateUserProfileRequest updateUserProfileRequest) throws Exception {
         AppUser user = getUserFromSecurityContext();
+        if (updateUserProfileRequest.getAvatar() != null && !updateUserProfileRequest.getAvatar().isEmpty()){
+            UploadFile avatar = null;
+            List<String> validImageTypes = Arrays.asList("image/png", "image/jpeg", "image/jpg");
+            if (!validImageTypes.contains(updateUserProfileRequest.getAvatar().getContentType())) {
+                throw new IllegalArgumentException("Please send a valid image file (png, jpg, jpeg)");
+            }
+            if (user.getAvatar()!=null){
+                Map<String,String> newImage = cloudinaryService.updateFile(user.getAvatar().getPublicId(), updateUserProfileRequest.getAvatar());
+                Map details = cloudinaryService.getFileDetails(newImage.get("public_id"));
+                UploadFile oldAvatar = user.getAvatar();
+                oldAvatar.setOriginUrl(details.get("url").toString());
+                oldAvatar.setWidth((Integer) details.get("width"));
+                oldAvatar.setHeight((Integer) details.get("height"));
+                oldAvatar.setSize((Integer) details.get("bytes"));
+                uploadFileService.insertFile(oldAvatar);
+            }
+            else{
+                avatar = createAvatar(updateUserProfileRequest.getAvatar());
+                user.setAvatarId(avatar.getId());
+            }
+        }
         Contact contact = contactService.findUserMainContact(user.getId());
         modelMapper.map(updateUserProfileRequest, contact);
-        contact = contactService.saveContact(contact);
+        contactService.saveContact(contact);
         modelMapper.map(updateUserProfileRequest, user);
         userRepository.save(user);
         return true;
     }
+
+    private UploadFile createAvatar(MultipartFile avatar) throws Exception {
+        if (avatar != null && !avatar.isEmpty()) {
+            // Cho phép nhiều định dạng (png, jpg, jpeg)
+            List<String> validImageTypes = Arrays.asList("image/png", "image/jpeg", "image/jpg");
+            if (!validImageTypes.contains(avatar.getContentType())) {
+                throw new IllegalArgumentException("Please send a valid image file (png, jpg, jpeg)");
+            }
+            Map<String, String> uploadResult = cloudinaryService.uploadFile(avatar, "avatars");
+
+            Map details = cloudinaryService.getFileDetails(uploadResult.get("publicId"));
+
+            UploadFile uploadFile =
+                    UploadFile.builder()
+                            .originUrl(uploadResult.get("url"))
+                            .type(UploadFileType.IMAGE)
+                            .width((Integer) details.get("width"))
+                            .height((Integer) details.get("height"))
+                            .size((Integer) details.get("bytes"))
+                            .publicId( (String) details.get("publicId"))
+                            .build();
+            return uploadFileService.insertFile(uploadFile);
+        }
+        return null;
+    }
+
 }

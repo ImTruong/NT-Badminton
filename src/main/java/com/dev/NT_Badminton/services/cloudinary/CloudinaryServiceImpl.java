@@ -32,13 +32,13 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     }
 
     // Cập nhật ảnh với public ID (truyền vào file mới nếu muốn thay thế ảnh cũ)
-    public String updateFile(String publicId, MultipartFile newFile) throws IOException {
+    public Map<String, String> updateFile(String publicId, MultipartFile newFile) throws IOException {
         Map updateResult = cloudinary.uploader().upload(newFile.getBytes(),
                 ObjectUtils.asMap(
                         "public_id", publicId,
                         "overwrite", true // Ghi đè lên ảnh cũ
                 ));
-        return updateResult.get("url").toString();
+        return updateResult;
     }
 
     // Xóa ảnh với public ID

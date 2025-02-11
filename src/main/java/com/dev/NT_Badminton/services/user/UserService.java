@@ -18,6 +18,6 @@ public interface UserService {
 
     boolean updatePassword(UpdateUserPasswordRequest updateUserPasswordRequest);
 
-    boolean updateProfile(UpdateUserProfileRequest updateUserProfileRequest);
+    boolean updateProfile(UpdateUserProfileRequest updateUserProfileRequest) throws Exception;
 
 }

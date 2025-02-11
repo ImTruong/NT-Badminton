@@ -16,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 @Entity
 @Table(name = "product_images")
 public class ProductImage extends BaseEntity {
+
     Integer productId;
 
     Integer imageId;

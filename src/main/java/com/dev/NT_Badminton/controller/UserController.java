@@ -45,8 +45,10 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateUserProfileRequest updateUserProfileRequest) {
+    @PutMapping(value = "/profile", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE })
+    public ResponseEntity<?> updateProfile(@Valid @RequestPart("updateUserProfileRequest") UpdateUserProfileRequest updateUserProfileRequest,
+                                           @RequestPart(value = "avatar", required = false) MultipartFile avatar) throws Exception {
+        if (avatar != null && !avatar.isEmpty()) updateUserProfileRequest.setAvatar(avatar);
         ApiResponse<String> response = new ApiResponse<String>(userService.updateProfile(updateUserProfileRequest),"User Profile Updated Successfully");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
