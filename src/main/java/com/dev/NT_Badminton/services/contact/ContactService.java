@@ -8,7 +8,7 @@ public interface ContactService {
 
     boolean checkPhoneNumberExistence(String phoneNumber);
 
-    Contact findUserMainContact(int userId);
+    Contact getUserMainContact(int userId);
 
     Contact saveContact(Contact contact);
 

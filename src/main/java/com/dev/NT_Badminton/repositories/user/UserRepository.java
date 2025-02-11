@@ -7,6 +7,5 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<AppUser, Integer>, UserRepositoryCustom {
-    Optional<AppUser> findByEmailAndDeleted(String email, boolean deleted);
-    boolean existsByEmailAndDeleted(String email, boolean deleted);
+
 }

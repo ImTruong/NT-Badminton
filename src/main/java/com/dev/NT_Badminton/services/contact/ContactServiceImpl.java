@@ -27,7 +27,7 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public Contact findUserMainContact(int userId) {
+    public Contact getUserMainContact(int userId) {
         Optional<Contact> optinonalContact = contactRepository.findByUserIdAndType(userId, ContactType.MAIN.getTypeId());
         if (optinonalContact.isPresent())
             return optinonalContact.get();

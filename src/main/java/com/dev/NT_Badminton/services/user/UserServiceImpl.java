@@ -5,6 +5,7 @@ import com.dev.NT_Badminton.dto.request.LoginRequest;
 import com.dev.NT_Badminton.dto.request.RegisterRequest;
 import com.dev.NT_Badminton.dto.request.UpdateUserPasswordRequest;
 import com.dev.NT_Badminton.dto.request.UpdateUserProfileRequest;
+import com.dev.NT_Badminton.dto.response.UserDetailResponse;
 import com.dev.NT_Badminton.entities.contacts.Contact;
 import com.dev.NT_Badminton.entities.contacts.ContactType;
 import com.dev.NT_Badminton.entities.role.Role;
@@ -36,7 +37,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -165,7 +165,7 @@ public class UserServiceImpl implements UserService {
                 user.setAvatarId(avatar.getId());
             }
         }
-        Contact contact = contactService.findUserMainContact(user.getId());
+        Contact contact = contactService.getUserMainContact(user.getId());
         modelMapper.map(updateUserProfileRequest, contact);
         contactService.saveContact(contact);
         modelMapper.map(updateUserProfileRequest, user);
@@ -198,4 +198,13 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
+    @Override
+    public UserDetailResponse getUserDetail() {
+        AppUser user = getUserFromSecurityContext();
+        Contact contact = contactService.getUserMainContact(user.getId());
+        UserDetailResponse userDetail = modelMapper.map(user, UserDetailResponse.class);
+        modelMapper.map(contact, userDetail);
+        userDetail.setAvatarUrl(user.getAvatar() != null ? user.getAvatar().getOriginUrl() : null);
+        return userDetail;
+    }
 }

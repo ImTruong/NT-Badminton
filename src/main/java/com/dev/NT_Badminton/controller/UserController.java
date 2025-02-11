@@ -53,4 +53,10 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<?> getUserDetail() {
+        ApiResponse<?> response = new ApiResponse<>(true,"User Detail Fetched Successfully",userService.getUserDetail());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }
