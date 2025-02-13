@@ -26,6 +26,7 @@ import com.dev.NT_Badminton.services.uploadFile.UploadFileService;
 import com.dev.NT_Badminton.util.JwtUtil;
 import com.dev.NT_Badminton.util.Utils;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,6 +42,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
 

@@ -2,7 +2,9 @@ package com.dev.NT_Badminton.entities.blogs;
 
 import com.dev.NT_Badminton.dto.constant.ActiveStatus;
 import com.dev.NT_Badminton.entities.BaseEntity;
+import com.dev.NT_Badminton.entities.categories.Category;
 import com.dev.NT_Badminton.entities.upload_file.UploadFile;
+import com.dev.NT_Badminton.entities.users.AppUser;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -41,4 +43,10 @@ public class Blog extends BaseEntity {
 
     @Transient
     UploadFile image;
+
+    @Transient
+    AppUser author;
+
+    @Transient
+    Category category;
 }
