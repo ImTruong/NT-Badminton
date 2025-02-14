@@ -25,7 +25,11 @@ public class Contact extends BaseEntity {
 
     String email;
 
-    String address;
+    Integer city;
+
+    Integer district;
+
+    String streetAddress;
 
     String note;
 

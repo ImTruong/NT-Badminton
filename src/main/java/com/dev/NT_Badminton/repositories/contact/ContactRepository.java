@@ -7,10 +7,5 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ContactRepository extends JpaRepository<Contact, Long> {
-
-    boolean existsByPhoneAndType(String phoneNumber,int type);
-
-    Optional<Contact> findByUserIdAndType(int userId, int type);
-
+public interface ContactRepository extends JpaRepository<Contact, Long>, ContactRepositoryCustom {
 }

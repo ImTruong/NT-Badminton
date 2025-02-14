@@ -278,20 +278,20 @@ CREATE TABLE `order_items`
 
 CREATE TABLE `contacts`
 (
-    `id`            int unsigned NOT NULL AUTO_INCREMENT,
-    `first_name`    varchar(255) NOT NULL,
-    `last_name`     varchar(255) NOT NULL,
-    `phone`         varchar(20)  NOT NULL,
-    `email`         varchar(255) NOT NULL,
-    `address`       varchar(255) NOT NULL,
---     `subject`       varchar(500) NOT NULL,
---     `content`       text         NOT NULL,
-    `note`          text                  DEFAULT NULL,
-    `type`          tinyint      NOT NULL, -- 0 - Contact chính của user, 1 - Contact phụ của user
-    `deleted`       bit(1)       NOT NULL DEFAULT 0,
-    `created_at`    datetime     NOT NULL,
-    `updated_at`    datetime     NOT NULL,
-    `user_id`       int unsigned DEFAULT NULL, -- Khóa ngoại tham chiếu đến người dùng
+    `id`                int unsigned NOT NULL AUTO_INCREMENT,
+    `first_name`        varchar(255) NOT NULL,
+    `last_name`         varchar(255) NOT NULL,
+    `phone`             varchar(20)  NOT NULL,
+    `email`             varchar(255) NOT NULL,
+    `city`              int unsigned DEFAULT NULL,
+    `district`          int unsigned DEFAULT NULL,
+    `street_address`    varchar(255) NOT NULL,
+    `note`              text         DEFAULT NULL,
+    `type`              tinyint      NOT NULL, -- 0 - Contact chính của user, 1 - Contact phụ của user
+    `deleted`           bit(1)       NOT NULL DEFAULT 0,
+    `created_at`        datetime     NOT NULL,
+    `updated_at`        datetime     NOT NULL,
+    `user_id`           int unsigned DEFAULT NULL, -- Khóa ngoại tham chiếu đến người dùng
     PRIMARY KEY (`id`)
     FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 );
@@ -320,23 +320,23 @@ CREATE TABLE `product_option_values` (
     FOREIGN KEY (`product_option_id`) REFERENCES `product_options` (`id`) ON DELETE CASCADE
 );
 
--- INSERT INTO `permissions` (`title`, `permission`, `parent_permission`, `is_view`, `is_write`, `is_approval`, `is_decision`, `type`, `status`, `deleted`, `created_at`, `updated_at`)
--- VALUES
---     ('ADMIN', 'Everything', NULL, 1, 1, 1, 1, 1, 1, 1, NOW(), NOW()),
---     ('USER', 'Nothing', NULL, 0, 0, 0, 0, 0, 1, 1, NOW(), NOW());
---
--- INSERT INTO `roles` (`name`, `note`, `type`, `status`, `deleted`, `created_at`, `updated_at`)
--- VALUES
---     ('ADMIN', 'Quản trị viên hệ thống', 1, 1, 0, NOW(), NOW()),
---     ('USER', 'Người dùng', 1, 1, 0, NOW(), NOW());
---
---
--- INSERT INTO `role_permission` (`role_id`, `permission_id`, `deleted`, `created_at`, `updated_at`)
--- VALUES
---     (1, 1, 0, NOW(), NOW()),
---     (2, 2, 0, NOW(), NOW());
---
--- INSERT INTO `branches` (`name`, `address`, `phone`, `deleted`, `created_at`, `updated_at`)
--- VALUES
---     ('Chi nhánh Hà Nội', '123 Đường Láng, Hà Nội', '0123456789', 0, NOW(), NOW()),
---     ('Chi nhánh Hồ Chí Minh', '456 Đường Nguyễn Văn Linh, TP.HCM', '0987654321', 0, NOW(), NOW());
+INSERT INTO `permissions` (`title`, `permission`, `parent_permission`, `is_view`, `is_write`, `is_approval`, `is_decision`, `type`, `status`, `deleted`, `created_at`, `updated_at`)
+VALUES
+    ('ADMIN', 'Everything', NULL, 1, 1, 1, 1, 1, 1, 1, NOW(), NOW()),
+    ('USER', 'Nothing', NULL, 0, 0, 0, 0, 0, 1, 1, NOW(), NOW());
+
+INSERT INTO `roles` (`name`, `note`, `type`, `status`, `deleted`, `created_at`, `updated_at`)
+VALUES
+    ('ADMIN', 'Quản trị viên hệ thống', 1, 1, 0, NOW(), NOW()),
+    ('USER', 'Người dùng', 1, 1, 0, NOW(), NOW());
+
+
+INSERT INTO `role_permission` (`role_id`, `permission_id`, `deleted`, `created_at`, `updated_at`)
+VALUES
+    (1, 1, 0, NOW(), NOW()),
+    (2, 2, 0, NOW(), NOW());
+
+INSERT INTO `branches` (`name`, `address`, `phone`, `deleted`, `created_at`, `updated_at`)
+VALUES
+    ('Chi nhánh Hà Nội', '123 Đường Láng, Hà Nội', '0123456789', 0, NOW(), NOW()),
+    ('Chi nhánh Hồ Chí Minh', '456 Đường Nguyễn Văn Linh, TP.HCM', '0987654321', 0, NOW(), NOW());

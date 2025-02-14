@@ -28,4 +28,8 @@ public class Role extends BaseEntity {
     @Column(name = "status", columnDefinition = "tinyint")
     ActiveStatus status;
 
+    public Role(int roleId){
+        this.setId(roleId);
+    }
+
 }

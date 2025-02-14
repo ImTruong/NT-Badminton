@@ -34,7 +34,11 @@ public class RegisterRequest {
     @NotNull(message = "Gender is required")
     private int gender;
 
-    private String address;
+    Integer city;
+
+    Integer district;
+
+    String streetAddress;
 
     private MultipartFile avatar;
 

@@ -1,12 +1,16 @@
 package com.dev.NT_Badminton.services.contact;
 
+import com.dev.NT_Badminton.dto.response.UserContactResponse;
 import com.dev.NT_Badminton.entities.contacts.Contact;
 import com.dev.NT_Badminton.entities.contacts.ContactType;
+import com.dev.NT_Badminton.entities.users.AppUser;
 import com.dev.NT_Badminton.repositories.contact.ContactRepository;
+import com.dev.NT_Badminton.services.user.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -38,6 +42,11 @@ public class ContactServiceImpl implements ContactService {
     @Override
     public Contact saveContact(Contact contact) {
         return contactRepository.save(contact);
+    }
+
+    @Override
+    public List<Contact> getUserContactsByUserId(int userId) {
+        return contactRepository.getContactsByUserId(userId);
     }
 
 }

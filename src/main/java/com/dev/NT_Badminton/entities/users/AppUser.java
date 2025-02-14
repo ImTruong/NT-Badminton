@@ -38,8 +38,7 @@ public class AppUser extends BaseEntity {
     @Column(name = "gender", columnDefinition = "int")
     Gender gender;
 
-    @ManyToOne(fetch = FetchType.EAGER) // Lấy role ngay khi load user
-    @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @Transient
     Role role;
 
     @Column(name = "avatar_id")
@@ -47,10 +46,6 @@ public class AppUser extends BaseEntity {
 
     @Column(name = "status", columnDefinition = "INT")
     ActiveStatus status;
-
-    @OneToOne
-    @JoinColumn(name = "avatar_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private UploadFile avatar;
 
     public String getRoleName() {
         return role != null ? role.getName() : "ROLE_USER"; // Tránh null, mặc định là ROLE_USER

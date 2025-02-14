@@ -59,4 +59,22 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/genders")
+    public ResponseEntity<?> getAllGenders() {
+        ApiResponse<?> response = new ApiResponse<>(true, "Genders Fetched Successfully", userService.getAllGenders());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/cities-districts")
+    public ResponseEntity<?> getAllCitiesAndDistricts() {
+        ApiResponse<?> response = new ApiResponse<>(true, "Cities and Districts Fetched Successfully", userService.getAllCitiesAndDistricts());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/contacts")
+    public ResponseEntity<?> getUserContacts() {
+        ApiResponse<?> response = new ApiResponse<>(true, "User Contacts Fetched Successfully", userService.getUserContacts());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

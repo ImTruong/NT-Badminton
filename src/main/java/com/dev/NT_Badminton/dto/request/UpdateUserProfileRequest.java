@@ -32,7 +32,11 @@ public class UpdateUserProfileRequest {
 
     private int gender;
 
-    private String address;
+    Integer city;
+
+    Integer district;
+
+    String streetAddress;
 
     private MultipartFile avatar;
 }

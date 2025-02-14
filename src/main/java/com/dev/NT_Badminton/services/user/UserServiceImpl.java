@@ -5,7 +5,9 @@ import com.dev.NT_Badminton.dto.request.LoginRequest;
 import com.dev.NT_Badminton.dto.request.RegisterRequest;
 import com.dev.NT_Badminton.dto.request.UpdateUserPasswordRequest;
 import com.dev.NT_Badminton.dto.request.UpdateUserProfileRequest;
+import com.dev.NT_Badminton.dto.response.UserContactResponse;
 import com.dev.NT_Badminton.dto.response.UserDetailResponse;
+import com.dev.NT_Badminton.entities.contacts.CityDistrictPair;
 import com.dev.NT_Badminton.entities.contacts.Contact;
 import com.dev.NT_Badminton.entities.contacts.ContactType;
 import com.dev.NT_Badminton.entities.role.Role;
@@ -37,9 +39,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -105,8 +106,6 @@ public class UserServiceImpl implements UserService {
         if (contactService.checkPhoneNumberExistence(registerRequest.getPhone()))
             throw new ResourceAlreadyExistsException("Phone number is already taken");
         String userPassword = passwordEncoder.encode(registerRequest.getPassword());
-        Role roleUser = new Role();
-        roleUser.setId(PermissionType.USER.getRoleId());
         UploadFile avatar = createAvatar(registerRequest.getAvatar());
         AppUser appUser = AppUser.builder()
                 .email(registerRequest.getEmail())
@@ -115,10 +114,10 @@ public class UserServiceImpl implements UserService {
                 .birthday(registerRequest.getBirthday())
                 .gender(Gender.fromValue(registerRequest.getGender()))
                 .status(ActiveStatus.ACTIVE)
-                .roleId(roleUser.getId())
+                .roleId(PermissionType.USER.getRoleId())
                 .avatarId(avatar != null ? avatar.getId() : null)
                 .build();
-        appUser.setCode("USER"+utils.randomString(8));
+        appUser.setCode("USER-"+utils.randomString(8));
         appUser = userRepository.save(appUser);
         Contact contact = modelMapper.map(registerRequest, Contact.class);
         contact.setUserId(appUser.getId());
@@ -150,10 +149,11 @@ public class UserServiceImpl implements UserService {
             if (!validImageTypes.contains(updateUserProfileRequest.getAvatar().getContentType())) {
                 throw new IllegalArgumentException("Please send a valid image file (png, jpg, jpeg)");
             }
-            if (user.getAvatar()!=null){
-                Map<String,String> newImage = cloudinaryService.updateFile(user.getAvatar().getPublicId(), updateUserProfileRequest.getAvatar());
+            Optional<UploadFile> oldAvatarFile = uploadFileService.getUserAvatar(user.getAvatarId());
+            if (oldAvatarFile.isPresent()){
+                UploadFile oldAvatar = oldAvatarFile.get();
+                Map<String,String> newImage = cloudinaryService.updateFile(oldAvatar.getPublicId(), updateUserProfileRequest.getAvatar());
                 Map details = cloudinaryService.getFileDetails(newImage.get("public_id"));
-                UploadFile oldAvatar = user.getAvatar();
                 oldAvatar.setOriginUrl(details.get("url").toString());
                 oldAvatar.setWidth((Integer) details.get("width"));
                 oldAvatar.setHeight((Integer) details.get("height"));
@@ -204,7 +204,46 @@ public class UserServiceImpl implements UserService {
         Contact contact = contactService.getUserMainContact(user.getId());
         UserDetailResponse userDetail = modelMapper.map(user, UserDetailResponse.class);
         modelMapper.map(contact, userDetail);
-        userDetail.setAvatarUrl(user.getAvatar() != null ? user.getAvatar().getOriginUrl() : null);
+        Optional<UploadFile> avatarFile = uploadFileService.getUserAvatar(user.getAvatarId());
+        userDetail.setAvatarUrl(avatarFile.isPresent() ? avatarFile.get().getOriginUrl() : null);
         return userDetail;
+    }
+
+    @Override
+    public List<Map<String, Object>> getAllGenders() {
+        return Arrays.stream(Gender.values())
+                .map(gender -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", gender.toValue());
+                    map.put("name", gender.name());
+                    return map;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Map<String, Object>> getAllCitiesAndDistricts() {
+        return Arrays.stream(CityDistrictPair.values())
+                .map(cityDistrictPair -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", cityDistrictPair.getId());
+                    map.put("name", cityDistrictPair.name());
+                    map.put("districts", cityDistrictPair.getDistricts());
+                    return map;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserContactResponse> getUserContacts() {
+        AppUser user = getUserFromSecurityContext();
+        List<Contact> contacts = contactService.getUserContactsByUserId(user.getId());
+        return contacts.stream()
+                .map(contact -> {
+                    UserContactResponse responseContact = modelMapper.map(contact, UserContactResponse.class);
+                    responseContact.setType(ContactType.fromTypeId(contact.getType()).name());
+                    return responseContact;
+                })
+                .collect(Collectors.toList());
     }
 }

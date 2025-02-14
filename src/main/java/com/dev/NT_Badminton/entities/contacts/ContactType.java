@@ -33,4 +33,14 @@ public enum ContactType implements BaseEnum<String> {
     public String toValue() {
         return name();
     }
+
+    public static ContactType fromTypeId(int typeId) {
+        for (ContactType type : values()) {
+            if (type.getTypeId() == typeId) {
+                return type;
+            }
+        }
+        return null;
+    }
+
 }

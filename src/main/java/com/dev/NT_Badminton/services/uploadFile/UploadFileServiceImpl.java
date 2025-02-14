@@ -5,6 +5,8 @@ import com.dev.NT_Badminton.repositories.uploadFile.UploadFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UploadFileServiceImpl implements UploadFileService {
 
@@ -15,5 +17,11 @@ public class UploadFileServiceImpl implements UploadFileService {
     public UploadFile insertFile(UploadFile uploadFile) {
         return uploadFileRepository.save(uploadFile);
     }
+
+    @Override
+    public Optional<UploadFile> getUserAvatar(int userAvatarId) {
+        return uploadFileRepository.getUserProfileImage(userAvatarId);
+    }
+
 
 }
