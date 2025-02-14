@@ -13,4 +13,6 @@ public interface ContactRepositoryCustom {
 
     Optional<Contact> findByUserIdAndType(int userId, int type);
 
+    Optional<Contact> findById(int id);
+
 }

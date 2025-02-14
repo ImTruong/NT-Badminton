@@ -12,7 +12,10 @@ public class UploadFileRepositoryImpl extends BaseRepository implements UploadFi
     public Optional<UploadFile> getUserProfileImage(int userAvatarId){
         QUploadFile qUploadFile = QUploadFile.uploadFile;
         return Optional.ofNullable(query().selectFrom(qUploadFile)
-                .where(qUploadFile.id.eq(userAvatarId))
+                .where(
+                        qUploadFile.id.eq(userAvatarId),
+                        qUploadFile.deleted.eq(false)
+                )
                 .fetchFirst());
     }
 

@@ -49,4 +49,13 @@ public class ContactServiceImpl implements ContactService {
         return contactRepository.getContactsByUserId(userId);
     }
 
+    @Override
+    public Contact getContactById(int id) {
+        Optional<Contact> optionalContact = contactRepository.findById(id);
+        if (optionalContact.isPresent())
+            return optionalContact.get();
+        else
+            throw new EntityNotFoundException("Contact not found with given id");
+    }
+
 }

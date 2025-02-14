@@ -1,12 +1,10 @@
 package com.dev.NT_Badminton.controller;
 
-import com.dev.NT_Badminton.dto.request.LoginRequest;
-import com.dev.NT_Badminton.dto.request.RegisterRequest;
-import com.dev.NT_Badminton.dto.request.UpdateUserPasswordRequest;
-import com.dev.NT_Badminton.dto.request.UpdateUserProfileRequest;
+import com.dev.NT_Badminton.dto.request.*;
 import com.dev.NT_Badminton.dto.response.ApiResponse;
 import com.dev.NT_Badminton.services.user.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,5 +74,27 @@ public class UserController {
         ApiResponse<?> response = new ApiResponse<>(true, "User Contacts Fetched Successfully", userService.getUserContacts());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @DeleteMapping("/contact")
+    public ResponseEntity<?> deleteContact(@RequestParam int contactId) {
+        userService.deleteContact(contactId);
+        ApiResponse<String> response = new ApiResponse<String>(true, "Contact Deleted Successfully");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/contact")
+    public ResponseEntity<?> addContact(@Valid @RequestBody UserContactRequest userContactRequest) {
+        userService.addContact(userContactRequest);
+        ApiResponse<?> response = new ApiResponse<>(true, "Contact Added Successfully");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/switch-main-contact")
+    public ResponseEntity<?> switchMainContact(@RequestParam @NotNull(message = "Contact Id is required") int contactId) {
+        userService.switchMainContact(contactId);
+        ApiResponse<String> response = new ApiResponse<String>(true, "Main Contact Switched Successfully");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 
 }

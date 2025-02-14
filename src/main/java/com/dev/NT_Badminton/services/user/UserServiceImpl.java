@@ -1,10 +1,7 @@
 package com.dev.NT_Badminton.services.user;
 
 import com.dev.NT_Badminton.dto.constant.ActiveStatus;
-import com.dev.NT_Badminton.dto.request.LoginRequest;
-import com.dev.NT_Badminton.dto.request.RegisterRequest;
-import com.dev.NT_Badminton.dto.request.UpdateUserPasswordRequest;
-import com.dev.NT_Badminton.dto.request.UpdateUserProfileRequest;
+import com.dev.NT_Badminton.dto.request.*;
 import com.dev.NT_Badminton.dto.response.UserContactResponse;
 import com.dev.NT_Badminton.dto.response.UserDetailResponse;
 import com.dev.NT_Badminton.entities.contacts.CityDistrictPair;
@@ -246,4 +243,50 @@ public class UserServiceImpl implements UserService {
                 })
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    @Override
+    public Contact addContact(UserContactRequest userContactRequest) {
+        AppUser user = getUserFromSecurityContext();
+        Contact contact = modelMapper.map(userContactRequest, Contact.class);
+        contact.setType(ContactType.SUB.getTypeId());
+        if(userContactRequest.getType().equals("MAIN")){
+            Contact mainContact = contactService.getUserMainContact(user.getId());
+            mainContact.setType(ContactType.SUB.getTypeId());
+            contactService.saveContact(mainContact);
+        }
+        else if(!userContactRequest.getType().equals("SUB"))
+            throw new IllegalArgumentException("Invalid contact type");
+        contact.setType(ContactType.fromValue(userContactRequest.getType()).getTypeId());
+        contact.setUserId(user.getId());
+        return contactService.createContact(contact);
+    }
+
+    @Transactional
+    @Override
+    public void deleteContact(int contactId) {
+        AppUser user = getUserFromSecurityContext();
+        Contact contact = contactService.getContactById(contactId);
+        if(contact.getUserId() != user.getId())
+            throw new IllegalArgumentException("You are not allowed to delete this contact");
+        if(contact.getType()==ContactType.MAIN.getTypeId())
+            throw new IllegalArgumentException("You need to switch main contact before deleting this contact");
+        contact.setDeleted(true);
+        contactService.saveContact(contact);
+    }
+
+    @Transactional
+    @Override
+    public void switchMainContact(int contactId) {
+        AppUser user = getUserFromSecurityContext();
+        Contact contact = contactService.getContactById(contactId);
+        if(contact.getUserId() != user.getId())
+            throw new IllegalArgumentException("You are not allowed to switch this contact");
+        Contact mainContact = contactService.getUserMainContact(user.getId());
+        mainContact.setType(ContactType.SUB.getTypeId());
+        contact.setType(ContactType.MAIN.getTypeId());
+        contactService.saveContact(mainContact);
+        contactService.saveContact(contact);
+    }
+
 }
