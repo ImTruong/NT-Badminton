@@ -12,11 +12,14 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 @Table(name = "carts")
 public class Cart extends BaseEntity {
+
     Integer productId;
 
     Integer userId;
 
     int quantity;
+
 }

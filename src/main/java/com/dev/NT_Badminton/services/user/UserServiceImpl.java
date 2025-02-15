@@ -203,8 +203,8 @@ public class UserServiceImpl implements UserService {
         Contact contact = contactService.getUserMainContact(user.getId());
         UserDetailResponse userDetail = modelMapper.map(user, UserDetailResponse.class);
         modelMapper.map(contact, userDetail);
-        Optional<UploadFile> avatarFile = uploadFileService.getUserAvatar(user.getAvatarId());
-        userDetail.setAvatarUrl(avatarFile.isPresent() ? avatarFile.get().getOriginUrl() : null);
+        Optional<UploadFile> avatarFile = user.getAvatarId() == null ? null : uploadFileService.getUserAvatar(user.getAvatarId());
+        userDetail.setAvatarUrl(avatarFile!=null&&avatarFile.isPresent() ? avatarFile.get().getOriginUrl() : null);
         return userDetail;
     }
 

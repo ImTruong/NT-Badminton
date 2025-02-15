@@ -16,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "product_option_values")
 public class ProductOptionValue extends BaseEntity {
     @Column(name = "product_option_id", columnDefinition = "int")
+
     Integer product_option_id;
 
     String value;
@@ -23,4 +24,6 @@ public class ProductOptionValue extends BaseEntity {
     Integer quantity;
 
     Integer additionalPrice;
+
+
 }
