@@ -1,6 +1,6 @@
 package com.dev.NT_Badminton.controller;
 
-import com.dev.NT_Badminton.dto.request.*;
+import com.dev.NT_Badminton.dto.request.user.*;
 import com.dev.NT_Badminton.dto.response.ApiResponse;
 import com.dev.NT_Badminton.services.user.UserService;
 import jakarta.validation.Valid;

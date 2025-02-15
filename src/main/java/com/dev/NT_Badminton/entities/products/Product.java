@@ -29,8 +29,6 @@ public class Product extends BaseEntity {
 
     String description;
 
-    int original_price;
-
     @Column(name = "status", columnDefinition = "tinyint")
     ActiveStatus status;
 

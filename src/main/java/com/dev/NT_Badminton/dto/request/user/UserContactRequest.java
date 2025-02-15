@@ -1,4 +1,4 @@
-package com.dev.NT_Badminton.dto.request;
+package com.dev.NT_Badminton.dto.request.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;

@@ -1,7 +1,6 @@
 package com.dev.NT_Badminton.entities.products;
 
 import com.dev.NT_Badminton.entities.BaseEntity;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.*;
@@ -13,13 +12,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "product_option_values")
-public class ProductOptionValue extends BaseEntity {
+@Table(name = "product_variant_option_values")
+public class ProductVariantOptionValues extends BaseEntity {
 
-    @Column(name = "product_option_id", columnDefinition = "int")
+    int productVariantId;
 
-    Integer product_option_id;
-
-    String value;
+    int productOptionValueId;
 
 }

@@ -1,4 +1,4 @@
-package com.dev.NT_Badminton.dto.request;
+package com.dev.NT_Badminton.dto.request.user;
 
 import jakarta.validation.constraints.*;
 import lombok.Getter;

@@ -8,12 +8,5 @@ import java.util.Optional;
 
 public class ProductRepositoryImpl extends BaseRepository implements ProductRepositoryCustom {
 
-    @Override
-    public Optional<Product> findProductById(int productId) {
-        return Optional.ofNullable(query()
-                .selectFrom(QProduct.product)
-                .where(QProduct.product.id.eq(productId))
-                .fetchOne());
-    }
 
 }

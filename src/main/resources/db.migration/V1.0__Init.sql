@@ -169,7 +169,6 @@ CREATE TABLE `products`
     `slug`              varchar(500) NOT NULL,
     `short_description` tinytext              DEFAULT NULL,
     `description`       text                  DEFAULT NULL,
-    `original_price`    int          NOT NULL DEFAULT 0,
     `brand`             text         NOT NULL,
     `status`            tinyint      NOT NULL,
     `category_id`       int unsigned      NOT NULL,
@@ -313,13 +312,33 @@ CREATE TABLE `product_option_values` (
     `id`                int unsigned NOT NULL AUTO_INCREMENT,
     `product_option_id` int unsigned NOT NULL, -- FK đến bảng product_options
     `value`             varchar(255) NOT NULL, -- Giá trị của thuộc tính (ví dụ: "36", "red")
-    `additional_price` 	int unsigned DEFAULT NULL, -- Giá trị gia tăng của option
-    `quantity`          int unsigned NOT NULL,
     `deleted`           bit(1)      NOT NULL DEFAULT 0,
     `created_at`        datetime NOT NULL,
     `updated_at`        datetime NOT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`product_option_id`) REFERENCES `product_options` (`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE `product_variants` (
+    `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `product_id` INT UNSIGNED NOT NULL,
+    `sku`        VARCHAR(100) NOT NULL UNIQUE, -- SKU riêng cho từng biến thể
+    `quantity`   INT UNSIGNED NOT NULL DEFAULT 0,
+    `price`      INT UNSIGNED NOT NULL DEFAULT 0, -- Giá riêng cho biến thể
+    `deleted`    BIT(1) NOT NULL DEFAULT 0,
+    `created_at` DATETIME NOT NULL,
+    `updated_at` DATETIME NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE `product_variant_option_values` (
+     `id`                    INT UNSIGNED NOT NULL AUTO_INCREMENT,
+     `product_variant_id`     INT UNSIGNED NOT NULL,
+     `product_option_value_id` INT UNSIGNED NOT NULL,
+     PRIMARY KEY (`id`),
+     FOREIGN KEY (`product_variant_id`) REFERENCES `product_variants` (`id`) ON DELETE CASCADE,
+     FOREIGN KEY (`product_option_value_id`) REFERENCES `product_option_values` (`id`) ON DELETE CASCADE
 );
 
 -- INSERT INTO `permissions` (`title`, `permission`, `parent_permission`, `is_view`, `is_write`, `is_approval`, `is_decision`, `type`, `status`, `deleted`, `created_at`, `updated_at`)

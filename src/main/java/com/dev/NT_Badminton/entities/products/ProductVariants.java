@@ -13,13 +13,16 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "product_option_values")
-public class ProductOptionValue extends BaseEntity {
+@Table(name = "product_variants")
+public class ProductVariants extends BaseEntity {
 
-    @Column(name = "product_option_id", columnDefinition = "int")
+    @Column(name = "product_id")
+    Integer productId;
 
-    Integer product_option_id;
+    String sku;
 
-    String value;
+    Integer quantity;
+
+    Double price;
 
 }
