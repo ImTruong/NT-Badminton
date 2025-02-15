@@ -21,43 +21,4 @@ public class ContactRepositoryImpl extends BaseRepository implements ContactRepo
                 .fetch();
     }
 
-    @Override
-    public boolean existsByPhoneAndType(String phoneNumber, int type) {
-        QContact qcontact = QContact.contact;
-        return query()
-                .selectOne()
-                .from(qcontact)
-                .where(
-                        qcontact.phone.eq(phoneNumber),
-                        qcontact.type.eq(type),
-                        qcontact.deleted.eq(false)
-                )
-                .fetchFirst() != null;
-    }
-
-    @Override
-    public Optional<Contact> findByUserIdAndType(int userId, int type) {
-        Contact contact = query()
-                .selectFrom(QContact.contact)
-                .where(
-                        QContact.contact.userId.eq(userId),
-                        QContact.contact.type.eq(type),
-                        QContact.contact.deleted.eq(false)
-                )
-                .fetchOne();
-        return Optional.ofNullable(contact);
-    }
-
-    @Override
-    public Optional<Contact> findById(int id) {
-        Contact contact = query()
-                .selectFrom(QContact.contact)
-                .where(
-                        QContact.contact.id.eq(id),
-                        QContact.contact.deleted.eq(false)
-                )
-                .fetchOne();
-        return Optional.ofNullable(contact);
-    }
-
 }

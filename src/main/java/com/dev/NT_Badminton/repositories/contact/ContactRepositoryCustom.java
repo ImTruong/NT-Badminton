@@ -9,10 +9,4 @@ public interface ContactRepositoryCustom {
 
     List<Contact> getContactsByUserId(int userId);
 
-    boolean existsByPhoneAndType(String phoneNumber,int type);
-
-    Optional<Contact> findByUserIdAndType(int userId, int type);
-
-    Optional<Contact> findById(int id);
-
 }

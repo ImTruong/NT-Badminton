@@ -9,4 +9,10 @@ import java.util.Optional;
 @Repository
 public interface ContactRepository extends JpaRepository<Contact, Long>, ContactRepositoryCustom {
 
+    boolean existsByPhoneAndType(String phoneNumber, int type);
+
+    Optional<Contact> findByUserIdAndType(int userId, int type);
+
+    Optional<Contact> findById(int id);
+
 }
