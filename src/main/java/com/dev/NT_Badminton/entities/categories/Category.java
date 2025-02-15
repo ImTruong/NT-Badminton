@@ -26,6 +26,8 @@ public class Category extends BaseEntity {
 
     String shortDescription;
 
+    Integer parentId;
+
     @Column(name = "status", columnDefinition = "tinyint")
     ActiveStatus status;
 
