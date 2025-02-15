@@ -20,5 +20,7 @@ public class ProductOptionValue extends BaseEntity {
 
     String value;
 
+    Integer quantity;
+
     Integer additionalPrice;
 }

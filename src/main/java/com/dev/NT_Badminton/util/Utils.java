@@ -20,9 +20,9 @@ public class Utils {
         String output = normalized.replaceAll("\\p{M}", "");
 
         // Chuyển về chữ thường, thay thế khoảng trắng và ký tự không hợp lệ
-        output = output.toLowerCase().replaceAll("[^a-z0-9\s]", "").replaceAll("\s+", "-");
+        output = output.toLowerCase().replaceAll("[^a-z0-9\s]", "").replaceAll("\s+", "&");
 
-        return output;
+        return output + "&";
     }
 
     public static String randomString(int count, String characters) {
