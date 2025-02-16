@@ -22,6 +22,8 @@ public interface ProductService {
 
     ProductVariants getProductVariantByProductOptionValueIds(List<Integer> productOptionValueIds);
 
+    ProductVariants getProductVariantById(int productVariantId);
+
     void ReduceQuantityOfProductVariant(ProductVariants productVariant, int quantity);
 
 }

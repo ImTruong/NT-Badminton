@@ -3,20 +3,17 @@ package com.dev.NT_Badminton.dto.request.cart;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AddToCartRequest {
+public class QuantityChangeRequest {
 
-    Integer productId;
-
-    List<Integer> productOptionalValueId;
+    @NotNull(message = "Product variant id is required")
+    private Integer productVariantId;
 
     @NotNull(message = "Quantity is required")
-    Integer quantity;
+    private Integer quantity;
 
 }

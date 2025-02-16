@@ -1,11 +1,14 @@
 package com.dev.NT_Badminton.services.cart;
 
-import com.dev.NT_Badminton.dto.request.cart.AddToCartRequest;
-
-import java.util.List;
+import com.dev.NT_Badminton.dto.request.cart.AddProductToCartRequest;
+import com.dev.NT_Badminton.dto.request.cart.QuantityChangeRequest;
 
 public interface CartService {
 
-    void addProductToCart(AddToCartRequest addToCartRequest);
+    void addProductToCart(AddProductToCartRequest addProductToCartRequest);
+
+    void changeProductQuantity(QuantityChangeRequest quantityChangeRequest);
+
+    void deleteProductFromCart(Integer productVariantId);
 
 }

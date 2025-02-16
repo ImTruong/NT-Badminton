@@ -68,6 +68,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public ProductVariants getProductVariantById(int productVariantId) {
+        Optional<ProductVariants> productVariants = productVariantsRepository.findById(productVariantId);
+        if(productVariants.isEmpty())
+            throw new EntityNotFoundException("Product variant with id " + productVariantId + " not found");
+        return productVariants.get();
+    }
+
+    @Override
     public void ReduceQuantityOfProductVariant(ProductVariants productVariant, int quantity) {
         productVariant.setQuantity(productVariant.getQuantity() - quantity);
         productVariantsRepository.save(productVariant);

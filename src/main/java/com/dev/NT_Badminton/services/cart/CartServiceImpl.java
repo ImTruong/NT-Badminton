@@ -1,6 +1,7 @@
 package com.dev.NT_Badminton.services.cart;
 
-import com.dev.NT_Badminton.dto.request.cart.AddToCartRequest;
+import com.dev.NT_Badminton.dto.request.cart.AddProductToCartRequest;
+import com.dev.NT_Badminton.dto.request.cart.QuantityChangeRequest;
 import com.dev.NT_Badminton.entities.carts.Cart;
 import com.dev.NT_Badminton.entities.products.ProductVariants;
 import com.dev.NT_Badminton.entities.users.AppUser;
@@ -11,6 +12,8 @@ import com.dev.NT_Badminton.services.user.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class CartServiceImpl implements CartService{
@@ -26,29 +29,65 @@ public class CartServiceImpl implements CartService{
 
     @Transactional
     @Override
-    public void addProductToCart(AddToCartRequest addToCartRequest) {
+    public void addProductToCart(AddProductToCartRequest addProductToCartRequest) {
         AppUser user = userService.getUserFromSecurityContext();
-        Integer productVariantId = null;
-        if (addToCartRequest.getQuantity() <= 0)
+        ProductVariants cartProduct = null;
+        if (addProductToCartRequest.getQuantity() <= 0)
             throw new IllegalArgumentException("Quantity must be greater than 0");
-        if (addToCartRequest.getProductId()==null && (addToCartRequest.getProductOptionalValueId() == null || addToCartRequest.getProductOptionalValueId().isEmpty()))
+        if (addProductToCartRequest.getProductId()==null && (addProductToCartRequest.getProductOptionalValueId() == null || addProductToCartRequest.getProductOptionalValueId().isEmpty()))
             throw new IllegalArgumentException("Product id or product option value ids is required");
-        if ((addToCartRequest.getProductOptionalValueId() == null || addToCartRequest.getProductOptionalValueId().isEmpty()) && productService.checkIfProductHasOption(addToCartRequest.getProductId()))
+        if ((addProductToCartRequest.getProductOptionalValueId() == null || addProductToCartRequest.getProductOptionalValueId().isEmpty()) && productService.checkIfProductHasOption(addProductToCartRequest.getProductId()))
             throw new IllegalArgumentException("Product option value id is required for this product");
-        if (addToCartRequest.getProductOptionalValueId() == null || addToCartRequest.getProductOptionalValueId().isEmpty()) {
-            ProductVariants productVariant = productService.getProductVariantOfNonOptionedProduct(addToCartRequest.getProductId());
-            if (productVariant.getQuantity() < addToCartRequest.getQuantity()) {
+        if (addProductToCartRequest.getProductOptionalValueId() == null || addProductToCartRequest.getProductOptionalValueId().isEmpty()) {
+            ProductVariants productVariant = productService.getProductVariantOfNonOptionedProduct(addProductToCartRequest.getProductId());
+            if (productVariant.getQuantity() < addProductToCartRequest.getQuantity()) {
                 throw new OutOfStockException("This combination of product is out of stock");
             }
-            productVariantId = productVariant.getId();
+            cartProduct = productVariant;
         } else {
-            ProductVariants productVariant = productService.getProductVariantByProductOptionValueIds(addToCartRequest.getProductOptionalValueId());
-            if (productVariant.getQuantity() < addToCartRequest.getQuantity()) {
+            ProductVariants productVariant = productService.getProductVariantByProductOptionValueIds(addProductToCartRequest.getProductOptionalValueId());
+            if (productVariant.getQuantity() < addProductToCartRequest.getQuantity()) {
                 throw new OutOfStockException("This combination of product is out of stock");
             }
-            productVariantId = productVariant.getId();
+            cartProduct = productVariant;
+        }
+        Optional<Cart> cart = cartRepository.findByUserIdAndProductVariantId(user.getId(), cartProduct.getId());
+        if(cart.isEmpty()){
+            cartRepository.save(new Cart(cartProduct.getId(), user.getId(), addProductToCartRequest.getQuantity()));
+        } else {
+            if (cart.get().getQuantity() + addProductToCartRequest.getQuantity() > cartProduct.getQuantity())
+                throw new OutOfStockException("This combination of product is out of stock");
+            cart.get().setQuantity(cart.get().getQuantity() + addProductToCartRequest.getQuantity());
+            cartRepository.save(cart.get());
         }
 
-        cartRepository.save(new Cart(productVariantId, user.getId(), addToCartRequest.getQuantity()));
+    }
+
+    @Override
+    public void changeProductQuantity(QuantityChangeRequest quantityChangeRequest) {
+        ProductVariants productVariant = productService.getProductVariantById(quantityChangeRequest.getProductVariantId());
+        if (productVariant.getQuantity() < quantityChangeRequest.getQuantity())
+            throw new OutOfStockException("This combination of product is out of stock");
+        if (quantityChangeRequest.getQuantity() <= 0)
+            throw new IllegalArgumentException("Quantity must be greater than 0");
+        AppUser user = userService.getUserFromSecurityContext();
+        Optional<Cart> cart = cartRepository.findByUserIdAndProductVariantId(user.getId(), quantityChangeRequest.getProductVariantId());
+        if(cart.isEmpty()){
+            throw new IllegalArgumentException("Product not found in cart");
+        } else {
+            cart.get().setQuantity(quantityChangeRequest.getQuantity());
+            cartRepository.save(cart.get());
+        }
+    }
+
+    @Override
+    public void deleteProductFromCart(Integer productVariantId) {
+        AppUser user = userService.getUserFromSecurityContext();
+        Optional<Cart> cart = cartRepository.findByUserIdAndProductVariantId(user.getId(), productVariantId);
+        if(cart.isEmpty()){
+            throw new IllegalArgumentException("Product not found in cart");
+        } else {
+            cartRepository.delete(cart.get());
+        }
     }
 }
