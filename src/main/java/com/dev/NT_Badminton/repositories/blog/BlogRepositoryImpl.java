@@ -56,6 +56,7 @@ public class BlogRepositoryImpl extends BaseRepository implements BlogRepository
                 .peek(blog -> {
                     getAuthorForBlog(blog);
                     getImageForBlog(blog);
+                    getCategoryForBlog(blog);
                 })
                 .collect(Collectors.toList());
     }
@@ -83,6 +84,7 @@ public class BlogRepositoryImpl extends BaseRepository implements BlogRepository
 
         getAuthorForBlog(blog);
         getImageForBlog(blog);
+        getCategoryForBlog(blog);
 
         return blog;
     }

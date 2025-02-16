@@ -1,26 +1,30 @@
 package com.dev.NT_Badminton.services.product;
 
-import com.dev.NT_Badminton.entities.products.Product;
-import com.dev.NT_Badminton.entities.products.ProductOption;
-import com.dev.NT_Badminton.entities.products.ProductOptionValue;
-import com.dev.NT_Badminton.entities.products.ProductVariants;
+import com.dev.NT_Badminton.dto.request.IdsRequest;
+import com.dev.NT_Badminton.dto.request.product.CreateProductRequest;
+import com.dev.NT_Badminton.dto.request.product.UpdateProductRequest;
+import com.dev.NT_Badminton.entities.products.*;
+import com.dev.NT_Badminton.entities.products.constant.ProductImageType;
 import com.dev.NT_Badminton.repositories.product.*;
+import com.dev.NT_Badminton.repositories.uploadFile.UploadFileRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 public class ProductServiceImpl implements ProductService {
-
+    private final ProductImageRepository productImageRepository;
     private final ProductRepository productRepository;
     private final ProductOptionRepository productOptionRepository;
     private final ProductOptionValueRepository productOptionValueRepository;
     private final ProductVariantRepository productVariantsRepository;
     private final ProductVariantOptionValuesRepository productVariantOptionValuesRepository;
+    private final UploadFileRepository uploadFileRepository;
 
     @Override
     public Product getProductById(int productId) {
@@ -73,5 +77,57 @@ public class ProductServiceImpl implements ProductService {
         productVariantsRepository.save(productVariant);
     }
 
+    @Override
+    public Product getProductDetail(String slug, boolean isForAdmin) {
+        return null;
+    }
+
+    @Override
+    public Product createProduct(CreateProductRequest req) {
+        return null;
+    }
+
+    @Override
+    public Product updatePoduct(UpdateProductRequest req) {
+        return null;
+    }
+
+    @Override
+    public IdsRequest deleteProducts(IdsRequest req) {
+        return null;
+    }
+
+    @Override
+    public IdsRequest restoreProducts(IdsRequest req) {
+        return null;
+    }
+
+    private void getImageForProduct(Product product) {
+        if( product != null){
+            List<ProductImage> productImageList = productImageRepository.findAllByProductIdAndDeleted(product.getId(), false);
+
+            if(productImageList != null) {
+                for(ProductImageType productImageType : ProductImageType.values()) {
+                    List<ProductImage> productImagesByType = productImageList.stream().filter(pi -> pi.getType().equals(productImageType.toValue())).toList();
+                    if(!productImagesByType.isEmpty()) {
+                        List<Integer> imageIds = new ArrayList<>();
+
+                        productImagesByType.forEach(productImageByType -> imageIds.add(productImageByType.getImageId()));
+
+                        if(!imageIds.isEmpty()) {
+                            switch (productImageType) {
+                                case MAIN ->
+                                    product.setMainImage(uploadFileRepository.findUploadFileByIdAndDeleted(imageIds.getFirst(),false));
+                                case COVER ->
+                                    product.setCoverImage(uploadFileRepository.findUploadFileByIdAndDeleted(imageIds.getFirst(),false));
+                                case OTHER ->
+                                    product.setImages(uploadFileRepository.findAllByIdInAndDeleted(imageIds, false));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 }
