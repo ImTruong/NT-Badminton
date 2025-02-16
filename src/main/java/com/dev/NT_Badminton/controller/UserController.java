@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@FieldDefaults(level = AccessLevel.PUBLIC)
+
 @RestController
 @RequestMapping("/user")
 public class UserController {

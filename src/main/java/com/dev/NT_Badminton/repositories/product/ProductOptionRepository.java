@@ -16,5 +16,5 @@ public interface ProductOptionRepository extends JpaRepository<ProductOption, In
 
     List<ProductOption> findAllByProductId(Integer productId);
 
-    boolean existsByProductIdAndOptionId(Integer productId, Integer optionId);
+//    boolean existsByProductIdAndOptionId(Integer productId, Integer optionId);
 }

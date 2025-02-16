@@ -10,11 +10,11 @@ import java.util.Optional;
 @Repository
 public interface ProductOptionValueRepository extends JpaRepository<ProductOptionValue, Integer> {
 
-    List<ProductOptionValue> findByProductOptionId(int productOptionId);
-
-    List<ProductOptionValue> findByProductOptionIdAndDeleted(int productOptionId, boolean deleted);
-
-    boolean existsByProductOptionIdAndDeleted(int productOptionId, boolean deleted);
+//    List<ProductOptionValue> findByProductOptionId(int productOptionId);
+//
+//    List<ProductOptionValue> findByProductOptionIdAndDeleted(int productOptionId, boolean deleted);
+//
+//    boolean existsByProductOptionIdAndDeleted(int productOptionId, boolean deleted);
 
     Optional<ProductOptionValue> findById(int ProductOptionValueId);
 

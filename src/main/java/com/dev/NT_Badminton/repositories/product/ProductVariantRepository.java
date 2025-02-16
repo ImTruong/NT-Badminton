@@ -4,7 +4,11 @@ import com.dev.NT_Badminton.entities.products.ProductVariants;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
-public interface ProductVariantRepository extends JpaRepository<ProductVariants, Integer> {
+public interface ProductVariantRepository extends JpaRepository<ProductVariants, Integer>,ProductVariantRepositoryCustom {
+
+    List<ProductVariants> findByProductIdAndDeleted(Integer productId, boolean deleted);
 
 }

@@ -147,7 +147,7 @@ public class UserServiceImpl implements UserService {
             if (!validImageTypes.contains(updateUserProfileRequest.getAvatar().getContentType())) {
                 throw new IllegalArgumentException("Please send a valid image file (png, jpg, jpeg)");
             }
-            Optional<UploadFile> oldAvatarFile = uploadFileService.getUserAvatar(user.getAvatarId());
+            Optional<UploadFile> oldAvatarFile = user.getAvatarId() == null ? Optional.empty() : uploadFileService.getUserAvatar(user.getAvatarId());
             if (oldAvatarFile.isPresent()){
                 UploadFile oldAvatar = oldAvatarFile.get();
                 Map<String,String> newImage = cloudinaryService.updateFile(oldAvatar.getPublicId(), updateUserProfileRequest.getAvatar());
