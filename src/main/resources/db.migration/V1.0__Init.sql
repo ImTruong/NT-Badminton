@@ -203,15 +203,15 @@ CREATE TABLE `product_variants` (
 );
 
 CREATE TABLE `product_variant_option_values` (
-`id`                    INT UNSIGNED NOT NULL AUTO_INCREMENT,
-`product_variant_id`     INT UNSIGNED NOT NULL,
-`product_option_value_id` INT UNSIGNED NOT NULL,
-`deleted`    BIT(1) NOT NULL DEFAULT 0,
-`created_at` DATETIME NOT NULL,
-`updated_at` DATETIME NOT NULL,
-PRIMARY KEY (`id`),
-FOREIGN KEY (`product_variant_id`) REFERENCES `product_variants` (`id`) ON DELETE CASCADE,
-FOREIGN KEY (`product_option_value_id`) REFERENCES `product_option_values` (`id`) ON DELETE CASCADE
+    `id`                    INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `product_variant_id`     INT UNSIGNED NOT NULL,
+    `product_option_value_id` INT UNSIGNED NOT NULL,
+    `deleted`    BIT(1) NOT NULL DEFAULT 0,
+    `created_at` DATETIME NOT NULL,
+    `updated_at` DATETIME NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`product_variant_id`) REFERENCES `product_variants` (`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`product_option_value_id`) REFERENCES `product_option_values` (`id`) ON DELETE CASCADE
 );
 
 CREATE TABLE `discounts`

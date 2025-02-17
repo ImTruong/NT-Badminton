@@ -12,4 +12,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, Prod
     Optional<Product> findProductById(int productId);
     Optional<Product> findBySlugAndDeleted(String slug, boolean deleted);
     List<Product> findAllByCategoryIdAndDeleted(int categoryId, boolean deleted);
+
+    Optional<Product> findBySlug(String slug);
 }

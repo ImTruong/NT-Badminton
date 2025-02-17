@@ -1,15 +1,21 @@
 package com.dev.NT_Badminton.services.product;
 
+import com.dev.NT_Badminton.dto.constant.ActiveStatus;
 import com.dev.NT_Badminton.dto.request.IdsRequest;
 import com.dev.NT_Badminton.dto.request.product.CreateProductRequest;
 import com.dev.NT_Badminton.dto.request.product.UpdateProductRequest;
+import com.dev.NT_Badminton.dto.response.ApiResponse;
+import com.dev.NT_Badminton.entities.categories.Category;
 import com.dev.NT_Badminton.entities.products.*;
 import com.dev.NT_Badminton.entities.products.constant.ProductImageType;
+import com.dev.NT_Badminton.repositories.category.CategoryRepository;
 import com.dev.NT_Badminton.repositories.product.*;
 import com.dev.NT_Badminton.repositories.uploadFile.UploadFileRepository;
+import com.dev.NT_Badminton.util.Utils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +31,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductVariantRepository productVariantsRepository;
     private final ProductVariantOptionValuesRepository productVariantOptionValuesRepository;
     private final UploadFileRepository uploadFileRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public Product getProductById(int productId) {
@@ -78,13 +85,99 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getProductDetail(String slug, boolean isForAdmin) {
-        return null;
+    public ApiResponse<List<Product>> getProducts(int page, String name, Integer categoryId ,Boolean deleted, ActiveStatus status, Integer startPriceRange, Integer endPriceRange) throws Exception {
+        List<Product> productList = productRepository.getProducts(page,name,categoryId,deleted,status,startPriceRange,endPriceRange,null);
+        long count = productRepository.countProducts(name,categoryId,deleted,status,startPriceRange,endPriceRange,null);
+        if (productList != null) {
+            throw new Exception("Product not found!");
+        }
+
+        productList.forEach(this::getImageForProduct);
+
+        return new ApiResponse<>(true,productList,count);
     }
 
     @Override
-    public Product createProduct(CreateProductRequest req) {
-        return null;
+    public ApiResponse<List<Product>> getRelatedProductList(int page, String slug) throws Exception {
+        Optional<Product> product = productRepository.findBySlugAndDeleted(slug, false);
+        if(product.isPresent()) {
+            List<Product> productList = productRepository.getProducts(page,null,product.get().getCategoryId(),false,ActiveStatus.ACTIVE,null,null,slug);
+            long count = productRepository.countProducts(null, product.get().getCategoryId(), false, ActiveStatus.ACTIVE,null,null,slug);
+
+            productList.forEach(this::getImageForProduct);
+            return new ApiResponse<>(true,productList,count);
+        }
+        return new ApiResponse<>(true,null,0);
+    }
+
+    @Override
+    public Product getProductDetail(String slug, boolean isForAdmin) throws Exception {
+        Product product = productRepository.findBySlug(slug)
+                .orElseThrow(() -> new Exception("Product not found!"));
+
+        if(!isForAdmin && (product.getStatus().equals(ActiveStatus.INACTIVE)) || product.isDeleted())
+            throw new Exception("Product not found!");
+
+        Optional<Category> category = categoryRepository.findByIdAndDeleted(product.getCategoryId(), false);
+        category.ifPresent(product::setCategory);
+
+        getImageForProduct(product);
+
+        product.setMinPriceOption(productVariantsRepository.getMinProductVariantsPriceByProductId(product.getId()));
+
+        return product;
+    }
+
+    @Transactional
+    @Override
+    public Product createProduct(CreateProductRequest req) throws Exception{
+        Product product = productRepository.save(Product.builder().name(req.getName().trim())
+                .shortDescription(req.getShortDescription().trim())
+                .description(req.getDescription().trim())
+                .status(req.getStatus())
+                .categoryId(req.getCategoryId())
+                .slug(Utils.removeCharacterVn(req.getName().trim() + Utils.randomString(8)))
+                .build());
+
+        List<ProductImage> productImageList = new ArrayList<>();
+        if(!uploadFileRepository.existsByIdAndDeleted(req.getMainImageId(), false)) {
+            throw new Exception("Main image not found!");
+        }
+        else {
+            ProductImage productImage = new ProductImage();
+            productImage.setProductId(product.getId());
+            productImage.setImageId(req.getMainImageId());
+            productImage.setType(ProductImageType.MAIN);
+            productImageList.add(productImage);
+        }
+
+        if(!uploadFileRepository.existsByIdAndDeleted(req.getCoverImageId(), false)) {
+            throw new Exception("Cover image not found!");
+        }
+        else {
+            ProductImage productImage = new ProductImage();
+            productImage.setProductId(product.getId());
+            productImage.setImageId(req.getCoverImageId());
+            productImage.setType(ProductImageType.COVER);
+            productImageList.add(productImage);
+        }
+
+        if(!req.getImageIds().isEmpty()) {
+            for( Integer imageId : req.getImageIds()) {
+                if(!uploadFileRepository.existsByIdAndDeleted(imageId, false)) {
+                    throw new Exception("Image not found!");
+                }
+
+                ProductImage productImage = new ProductImage();
+                productImage.setProductId(product.getId());
+                productImage.setImageId(imageId);
+                productImage.setType(ProductImageType.OTHER);
+                productImageList.add(productImage);
+            }
+        }
+
+        productImageRepository.saveAll(productImageList);
+        return product;
     }
 
     @Override
@@ -92,15 +185,47 @@ public class ProductServiceImpl implements ProductService {
         return null;
     }
 
+    @Transactional
     @Override
-    public IdsRequest deleteProducts(IdsRequest req) {
-        return null;
+    public IdsRequest deleteProducts(IdsRequest req) throws Exception {
+        return handleProduct(req, true);
     }
 
     @Override
-    public IdsRequest restoreProducts(IdsRequest req) {
-        return null;
+    public IdsRequest restoreProducts(IdsRequest req) throws Exception {
+        return handleProduct(req, false);
     }
+
+    private IdsRequest handleProduct(IdsRequest req, boolean isDeleted) throws Exception {
+        List<Product> productList = new ArrayList<>();
+
+        for (Integer id : req.getIds()) {
+            Product product = productRepository.findById(id).orElseThrow(() -> new Exception("Product not found!"));
+
+            productList.add(product);
+        }
+
+        if (!productList.isEmpty()) {
+            productList.forEach(product -> {
+                List<ProductImage> productImageList = productImageRepository.findAllByProductId(product.getId());
+
+                if (productImageList != null && !productImageList.isEmpty()) {
+                    productImageList.forEach(productImage -> {
+                        productImage.setDeleted(isDeleted);
+                    });
+
+                    productImageRepository.saveAll(productImageList);
+                }
+
+                product.setDeleted(isDeleted);
+            });
+
+            productRepository.saveAll(productList);
+        }
+
+        return req;
+    }
+
 
     private void getImageForProduct(Product product) {
         if( product != null){
@@ -129,5 +254,4 @@ public class ProductServiceImpl implements ProductService {
             }
         }
     }
-
 }

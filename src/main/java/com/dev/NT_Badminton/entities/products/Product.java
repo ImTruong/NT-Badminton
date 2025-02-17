@@ -2,6 +2,7 @@ package com.dev.NT_Badminton.entities.products;
 
 import com.dev.NT_Badminton.dto.constant.ActiveStatus;
 import com.dev.NT_Badminton.entities.BaseEntity;
+import com.dev.NT_Badminton.entities.categories.Category;
 import com.dev.NT_Badminton.entities.upload_file.UploadFile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@Builder
 @Table(name = "products")
 public class Product extends BaseEntity {
     String name;
@@ -44,4 +46,9 @@ public class Product extends BaseEntity {
     @Transient
     List<UploadFile> images;
 
+    @Transient
+    Category category;
+
+    @Transient
+    Integer minPriceOption;
 }

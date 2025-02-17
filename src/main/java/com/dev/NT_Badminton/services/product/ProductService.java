@@ -1,8 +1,11 @@
 package com.dev.NT_Badminton.services.product;
 
+import com.cloudinary.Api;
+import com.dev.NT_Badminton.dto.constant.ActiveStatus;
 import com.dev.NT_Badminton.dto.request.IdsRequest;
 import com.dev.NT_Badminton.dto.request.product.CreateProductRequest;
 import com.dev.NT_Badminton.dto.request.product.UpdateProductRequest;
+import com.dev.NT_Badminton.dto.response.ApiResponse;
 import com.dev.NT_Badminton.entities.products.Product;
 import com.dev.NT_Badminton.entities.products.ProductOption;
 import com.dev.NT_Badminton.entities.products.ProductOptionValue;
@@ -27,13 +30,17 @@ public interface ProductService {
 
     void ReduceQuantityOfProductVariant(ProductVariants productVariant, int quantity);
 
-    Product getProductDetail(String slug, boolean isForAdmin);
+    Product getProductDetail(String slug, boolean isForAdmin) throws Exception;
 
-    Product createProduct(CreateProductRequest req);
+    Product createProduct(CreateProductRequest req) throws Exception;
 
     Product updatePoduct(UpdateProductRequest req);
 
-    IdsRequest deleteProducts(IdsRequest req);
+    IdsRequest deleteProducts(IdsRequest req) throws Exception;
 
-    IdsRequest restoreProducts(IdsRequest req);
+    IdsRequest restoreProducts(IdsRequest req) throws Exception;
+
+    ApiResponse<List<Product>> getProducts(int page, String name, Integer categoryId , Boolean deleted, ActiveStatus status, Integer startPriceRange, Integer endPriceRange) throws Exception;
+
+    ApiResponse<List<Product>> getRelatedProductList(int page, String slug) throws Exception;
 }

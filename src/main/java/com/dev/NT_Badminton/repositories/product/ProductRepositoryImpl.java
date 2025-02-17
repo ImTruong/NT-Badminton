@@ -20,7 +20,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
         QProduct qProduct = QProduct.product;
 
         if(StringUtils.isNotEmpty(name)) {
-            builder.and(qProduct.name.eq(name));
+            builder.and(qProduct.name.containsIgnoreCase(name));
         }
 
         if(categoryId != null) {
@@ -69,24 +69,16 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
     }
 
     public BooleanBuilder getPriceForProduct(QProduct product, Integer startPriceRange, Integer endPriceRange) {
-        if (product == null) {
-            return new BooleanBuilder();
-        }
 
         QProductVariants qProductVariant = QProductVariants.productVariants;
         BooleanBuilder priceCondition = new BooleanBuilder();
 
         priceCondition.and(qProductVariant.productId.eq(product.id));
 
-        if (startPriceRange != null) {
-            priceCondition.and(qProductVariant.price.goe(startPriceRange)); // Giá >= startPriceRange
-        }
-        if (endPriceRange != null) {
-            priceCondition.and(qProductVariant.price.loe(endPriceRange)); // Giá <= endPriceRange
-        }
+        priceCondition.and(qProductVariant.price.goe(startPriceRange)); // Giá >= startPriceRange
+
+        priceCondition.and(qProductVariant.price.loe(endPriceRange)); // Giá <= endPriceRange
 
         return priceCondition;
     }
-
-
 }

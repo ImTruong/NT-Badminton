@@ -27,4 +27,17 @@ public class ProductVariantRepositoryImpl extends BaseRepository implements Prod
                 .fetchFirst());
     }
 
+    @Override
+    public Integer getMinProductVariantsPriceByProductId(Integer productId) {
+        QProductVariants qProductVariant = QProductVariants.productVariants;
+
+        Double minPrice = query()
+                .select(qProductVariant.price.min())
+                .from(qProductVariant)
+                .where(qProductVariant.productId.eq(productId))
+                .fetchOne();
+
+        return minPrice != null ? minPrice.intValue() : 0;
+    }
+
 }
