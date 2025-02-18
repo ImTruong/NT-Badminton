@@ -48,6 +48,6 @@ public class AppUser extends BaseEntity {
     ActiveStatus status;
 
     public String getRoleName() {
-        return role != null ? role.getName() : "ROLE_USER"; // Tránh null, mặc định là ROLE_USER
+        return role != null ? "ROLE_"+role.getName() : "ROLE_USER"; // Tránh null, mặc định là ROLE_USER
     }
 }

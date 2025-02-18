@@ -1,8 +1,8 @@
 package com.dev.NT_Badminton.services.user;
 
 import com.dev.NT_Badminton.dto.request.user.*;
-import com.dev.NT_Badminton.dto.response.UserContactResponse;
-import com.dev.NT_Badminton.dto.response.UserDetailResponse;
+import com.dev.NT_Badminton.dto.response.user.UserContactResponse;
+import com.dev.NT_Badminton.dto.response.user.UserDetailResponse;
 import com.dev.NT_Badminton.entities.contacts.Contact;
 import com.dev.NT_Badminton.entities.users.AppUser;
 

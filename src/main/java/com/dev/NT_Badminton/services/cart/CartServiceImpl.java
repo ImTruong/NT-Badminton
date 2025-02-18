@@ -2,6 +2,7 @@ package com.dev.NT_Badminton.services.cart;
 
 import com.dev.NT_Badminton.dto.request.cart.AddProductToCartRequest;
 import com.dev.NT_Badminton.dto.request.cart.QuantityChangeRequest;
+import com.dev.NT_Badminton.dto.response.cart.CartProductResponse;
 import com.dev.NT_Badminton.entities.carts.Cart;
 import com.dev.NT_Badminton.entities.products.ProductVariants;
 import com.dev.NT_Badminton.entities.users.AppUser;
@@ -11,8 +12,12 @@ import com.dev.NT_Badminton.services.product.ProductService;
 import com.dev.NT_Badminton.services.user.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -90,4 +95,18 @@ public class CartServiceImpl implements CartService{
             cartRepository.delete(cart.get());
         }
     }
+
+    @Override
+    public void deleteAllProductFromCart() {
+        AppUser user = userService.getUserFromSecurityContext();
+        cartRepository.deleteAllByUserId(user.getId());
+    }
+
+    @Override
+    public PageImpl<CartProductResponse> getUserCart(Pageable pageable) {
+        PageImpl<CartProductResponse> cartProductResponseByUserId = cartRepository.getCartProductResponseByUserId(userService.getUserFromSecurityContext().getId(), pageable);
+        return cartProductResponseByUserId;
+    }
+
+
 }

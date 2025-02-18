@@ -9,11 +9,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class BaseRepository {
+
     @Autowired
     private HttpServletRequest httpServletRequest;
 
     @PersistenceContext
     private EntityManager entityManager;
+
 
     protected void flush() {
         entityManager.flush();
@@ -30,4 +32,5 @@ public class BaseRepository {
     protected EntityManager getEntityManager() {
         return entityManager;
     }
+
 }

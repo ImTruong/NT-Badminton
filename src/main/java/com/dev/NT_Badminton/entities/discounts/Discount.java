@@ -16,6 +16,7 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "discounts")
 public class Discount extends BaseEntity {
+
     int discountPercentages;
 
     String description;
@@ -26,8 +27,6 @@ public class Discount extends BaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     Date timeEnded;
 
-    @Column(name = "status", columnDefinition = "tinyint")
-    ActiveStatus status;
-
     Integer productId;
+
 }

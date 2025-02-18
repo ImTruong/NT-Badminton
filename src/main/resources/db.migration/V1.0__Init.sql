@@ -221,7 +221,6 @@ CREATE TABLE `discounts`
     `description`   		text     DEFAULT NULL,
     `time_started`			date NOT NULL,
     `time_ended`			date NOT NULL,
-    `status`        		tinyint NOT NULL,
     `deleted`       		bit(1)   NOT NULL DEFAULT 0,
     `created_at`    		datetime NOT NULL,
     `updated_at`		    datetime NOT NULL,

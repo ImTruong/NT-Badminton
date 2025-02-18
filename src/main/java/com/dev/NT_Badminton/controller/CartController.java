@@ -3,12 +3,17 @@ package com.dev.NT_Badminton.controller;
 import com.dev.NT_Badminton.dto.request.cart.AddProductToCartRequest;
 import com.dev.NT_Badminton.dto.request.cart.QuantityChangeRequest;
 import com.dev.NT_Badminton.dto.response.ApiResponse;
+import com.dev.NT_Badminton.dto.response.cart.CartProductResponse;
 import com.dev.NT_Badminton.services.cart.CartService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/cart")
@@ -35,6 +40,20 @@ public class CartController {
     public ResponseEntity<?> deleteCart(@RequestParam Integer productVariantId) {
         cartService.deleteProductFromCart(productVariantId);
         ApiResponse<String> response = new ApiResponse<String>(true,"Delete From Cart Successful");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete-all")
+    public ResponseEntity<?> deleteAllCart() {
+        cartService.deleteAllProductFromCart();
+        ApiResponse<String> response = new ApiResponse<String>(true,"Delete All From Cart Successful");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/get-all")
+    public ResponseEntity<?> getAllCart(@RequestParam("page") int page, @RequestParam("size") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        ApiResponse<?> response = new ApiResponse<>(true, "Get All Cart Successful", cartService.getUserCart(pageable));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

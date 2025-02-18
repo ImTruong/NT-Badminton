@@ -1,28 +1,26 @@
-package com.dev.NT_Badminton.dto.response;
+package com.dev.NT_Badminton.dto.response.user;
+
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.Date;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
-public class UserContactResponse {
-
-    Integer id;
+@Builder
+public class UserDetailResponse {
 
     String firstName;
 
     String lastName;
 
-    String phone;
-
     String email;
+
+    String phone;
 
     Integer city;
 
@@ -30,6 +28,10 @@ public class UserContactResponse {
 
     String streetAddress;
 
-    String type;
+    String avatarUrl;
+
+    Integer gender;
+
+    Date birthday;
 
 }

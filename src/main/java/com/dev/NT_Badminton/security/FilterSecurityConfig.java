@@ -39,17 +39,17 @@ public class FilterSecurityConfig {
         httpSecurity
                 .cors(corsConfigurer -> corsConfigurer.disable())
                 .csrf(csrfConfigurer -> csrfConfigurer.disable())
-//                .authorizeHttpRequests(authorizeRequests -> {
-//                    securityPermitAllHttp.getPermitAllEndpoints().forEach((endpoint, methods) -> {
-//                        for (String method : methods) {
-//                            authorizeRequests
-//                                    .requestMatchers(new AntPathRequestMatcher(endpoint, method))
-//                                    .permitAll();
-//                        }
-//                    });
-//                    authorizeRequests.anyRequest().authenticated();
-//                })
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().permitAll())
+                .authorizeHttpRequests(authorizeRequests -> {
+                    SecurityPermitAllHttp.getPermitAllEndpoints().forEach((endpoint, methods) -> {
+                        for (String method : methods) {
+                            authorizeRequests
+                                    .requestMatchers(new AntPathRequestMatcher(endpoint, method))
+                                    .permitAll();
+                        }
+                    });
+                    authorizeRequests.requestMatchers(new AntPathRequestMatcher("/discount","POST")).hasRole("ADMIN");
+                    authorizeRequests.anyRequest().authenticated();
+                })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
