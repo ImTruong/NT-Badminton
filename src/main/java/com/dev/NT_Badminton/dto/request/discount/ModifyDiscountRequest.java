@@ -11,7 +11,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateDiscountRequest {
+public class ModifyDiscountRequest {
 
     @NotNull(message = "Discount percentage is required")
     int discountPercentages;
@@ -26,5 +26,9 @@ public class CreateDiscountRequest {
 
     @NotNull(message = "Status is required")
     Integer productId;
+
+    Integer discountId;
+
+    String type;
 
 }

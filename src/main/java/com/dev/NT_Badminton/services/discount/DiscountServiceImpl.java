@@ -1,13 +1,13 @@
 package com.dev.NT_Badminton.services.discount;
 
-import com.dev.NT_Badminton.dto.request.discount.CreateDiscountRequest;
+import com.dev.NT_Badminton.dto.request.discount.ModifyDiscountRequest;
 import com.dev.NT_Badminton.entities.discounts.Discount;
 import com.dev.NT_Badminton.entities.users.AppUser;
 import com.dev.NT_Badminton.repositories.discount.DiscountRepository;
 import com.dev.NT_Badminton.services.user.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -21,8 +21,14 @@ public class DiscountServiceImpl implements DiscountService {
     private final UserService userService;
 
     @Override
-    public Discount createDiscount(CreateDiscountRequest createDiscountRequest) {
-        Discount discount = modelMapper.map(createDiscountRequest, Discount.class);
+    public Discount changeOrAddDiscount(ModifyDiscountRequest modifyDiscountRequest) {
+        Discount discount = null;
+        if (modifyDiscountRequest.getType().equals("CREATE"))
+            discount = modelMapper.map(modifyDiscountRequest, Discount.class);
+        else{
+            discount = discountRepository.findById(modifyDiscountRequest.getDiscountId()).orElseThrow(() -> new EntityNotFoundException("Discount not found"));
+            modelMapper.map(modifyDiscountRequest, discount);
+        }
         return discountRepository.save(discount);
     }
 
@@ -30,5 +36,15 @@ public class DiscountServiceImpl implements DiscountService {
     public Optional<Discount> getHighestUnexpiredDiscountOfProduct(Integer productId) {
         return discountRepository.findHighestUnexpiredDiscountOfProduct(productId);
     }
+
+    @Override
+    public void deleteDiscount(Integer discountId) {
+        AppUser user = userService.getUserFromSecurityContext();
+        Discount discount = discountRepository.findById(discountId).orElseThrow(() -> new IllegalArgumentException("Discount not found"));
+        discount.setDeleted(true);
+        discountRepository.save(discount);
+    }
+
+
 
 }

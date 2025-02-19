@@ -39,7 +39,7 @@ public class CartRepositoryImpl extends BaseRepository implements CartRepository
                         qCart.quantity,
                         qProduct.name,
                         qUploadFile.originUrl,
-                        qProductVariants.price.add(qCart.quantity)
+                        qProductVariants.price
                 ))
                 .from(qCart)
                 .join(qProductVariants).on(qCart.productVariantId.eq(qProductVariants.id))
@@ -82,7 +82,12 @@ public class CartRepositoryImpl extends BaseRepository implements CartRepository
                     .orderBy(qDiscount.discountPercentages.desc())
                     .fetchFirst();
 
-            cartProductResponse.setSalePrice(discountPercentage != null ? cartProductResponse.getOriginalPrice() * (100 - discountPercentage) / 100 * cartProductResponse.getQuantity() : null);
+            cartProductResponse.setSalePrice(
+                    discountPercentage != null
+                            ? (cartProductResponse.getOriginalPrice() * (100 - discountPercentage) / 100) * cartProductResponse.getQuantity()
+                            : null
+            );
+            cartProductResponse.setOriginalPrice(cartProductResponse.getOriginalPrice() * cartProductResponse.getQuantity());
         });
 
         return new PageImpl<>(results.getResults(), pageable, results.getTotal());

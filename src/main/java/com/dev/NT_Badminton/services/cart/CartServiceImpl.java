@@ -96,6 +96,7 @@ public class CartServiceImpl implements CartService{
         }
     }
 
+    @Transactional
     @Override
     public void deleteAllProductFromCart() {
         AppUser user = userService.getUserFromSecurityContext();
