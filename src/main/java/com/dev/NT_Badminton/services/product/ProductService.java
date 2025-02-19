@@ -34,7 +34,7 @@ public interface ProductService {
 
     Product createProduct(CreateProductRequest req) throws Exception;
 
-    Product updatePoduct(UpdateProductRequest req);
+    Product updatePoduct(UpdateProductRequest req) throws Exception;
 
     IdsRequest deleteProducts(IdsRequest req) throws Exception;
 

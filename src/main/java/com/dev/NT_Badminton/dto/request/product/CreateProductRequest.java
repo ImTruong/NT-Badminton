@@ -23,12 +23,7 @@ public class CreateProductRequest {
     String shortDescription;
 
     @NotNull
-    Integer quantity;
-
-    @NotNull
     ActiveStatus status;
-
-    int originalPrice;
 
     int categoryId;
 
@@ -39,4 +34,6 @@ public class CreateProductRequest {
     @NotNull
     @Size(min = 1)
     List<Integer> imageIds;
+
+    List<ProductOptionRequest> optionRequests;
 }

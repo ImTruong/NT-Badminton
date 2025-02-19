@@ -3,6 +3,7 @@ package com.dev.NT_Badminton.services.product;
 import com.dev.NT_Badminton.dto.constant.ActiveStatus;
 import com.dev.NT_Badminton.dto.request.IdsRequest;
 import com.dev.NT_Badminton.dto.request.product.CreateProductRequest;
+import com.dev.NT_Badminton.dto.request.product.ProductOptionRequest;
 import com.dev.NT_Badminton.dto.request.product.UpdateProductRequest;
 import com.dev.NT_Badminton.dto.response.ApiResponse;
 import com.dev.NT_Badminton.entities.categories.Category;
@@ -175,14 +176,105 @@ public class ProductServiceImpl implements ProductService {
                 productImageList.add(productImage);
             }
         }
-
         productImageRepository.saveAll(productImageList);
+
+        for(ProductOptionRequest optionRequest : req.getOptionRequests()){
+            ProductOption option = new ProductOption();
+            option.setProductId(product.getId());
+            option.setDescription(optionRequest.getDescription().trim());
+            option.setName(optionRequest.getName().trim());
+            for(String value : optionRequest.getValues()) {
+                ProductOptionValue optionValue = new ProductOptionValue();
+                optionValue.setValue(value);
+                optionValue.setProduct_option_id(option.getId());
+                productOptionValueRepository.save(optionValue);
+            }
+        }
         return product;
     }
-
+    @Transactional
     @Override
-    public Product updatePoduct(UpdateProductRequest req) {
-        return null;
+    public Product updatePoduct(UpdateProductRequest req) throws Exception {
+        Product product = productRepository.findById(req.getId())
+                .orElseThrow(() -> new Exception("product not found!"));
+        List<ProductImage> productImageList = productImageRepository.findAllByProductIdAndDeleted(product.getId(), false);
+        product.setName(req.getName());
+        product.setDescription(req.getDescription());
+        product.setShortDescription(req.getShortDescription());
+        product.setStatus(req.getStatus());
+        product.setCategoryId(req.getCategoryId());
+
+        if (productImageList != null && !productImageList.isEmpty()) {
+            productImageList.forEach(pI -> {
+                try {
+                    switch (pI.getType()) {
+                        case MAIN -> {
+                            if (pI.getImageId() != req.getMainImageId()) {
+                                if (!uploadFileRepository.existsByIdAndDeleted(req.getMainImageId(), false)) {
+                                    throw new Exception("Main image not found!");
+                                } else {
+                                    ProductImage productImage = new ProductImage();
+                                    productImage.setProductId(product.getId());
+                                    productImage.setImageId(req.getMainImageId());
+                                    productImage.setType(ProductImageType.MAIN);
+
+                                    productImageRepository.save(productImage);
+                                }
+
+                                productImageRepository.delete(pI);
+                            }
+                        }
+                        case COVER -> {
+                            if (pI.getImageId() != req.getCoverImageId()) {
+                                if (!uploadFileRepository.existsByIdAndDeleted(req.getCoverImageId(), false)) {
+                                    throw new Exception("Main image not found!");
+                                } else {
+                                    ProductImage productImage = new ProductImage();
+                                    productImage.setProductId(product.getId());
+                                    productImage.setImageId(req.getMainImageId());
+                                    productImage.setType(ProductImageType.COVER);
+
+                                    productImageRepository.save(productImage);
+                                }
+
+                                productImageRepository.delete(pI);
+                            }
+                        }
+                        case OTHER -> {
+                            if (req.getImageIds() != null && !req.getImageIds().isEmpty()) {
+                                if (!req.getImageIds().contains(pI.getImageId())) {
+                                    productImageRepository.delete(pI);
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+
+        if (req.getImageIds() != null && !req.getImageIds().isEmpty()) {
+            List<ProductImage> productImageNewList = new ArrayList<>();
+
+            for (Integer imageId : req.getImageIds()) {
+                if (!uploadFileRepository.existsByIdAndDeleted(imageId, false)) {
+                    throw new Exception("Image not found!");
+                } else if (!productImageRepository.existsByProductIdAndImageId(product.getId(), imageId)) {
+                    ProductImage productImage = new ProductImage();
+                    productImage.setProductId(product.getId());
+                    productImage.setImageId(imageId);
+                    productImage.setType(ProductImageType.OTHER);
+                    productImageNewList.add(productImage);
+                }
+            }
+
+            if (!productImageNewList.isEmpty()) {
+                productImageRepository.saveAll(productImageNewList);
+            }
+        }
+
+        return product;
     }
 
     @Transactional
