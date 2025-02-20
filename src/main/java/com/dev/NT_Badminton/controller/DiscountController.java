@@ -38,6 +38,18 @@ public class DiscountController {
         ApiResponse<String> response = new ApiResponse<String>(true, "Delete Discount Successful");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllDiscounts() {
+        ApiResponse<?> response = new ApiResponse<>(true, "Get All Discounts Successful", discountService.getAllDiscounts());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/unexpired")
+    public ResponseEntity<?> getAllUnexpiredDiscounts() {
+        ApiResponse<?> response = new ApiResponse<>(true, "Get All Unexpired Discounts Successful", discountService.getAllUnexpiredDiscounts());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
 
 }

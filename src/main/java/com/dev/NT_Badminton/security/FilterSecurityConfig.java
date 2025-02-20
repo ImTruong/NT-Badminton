@@ -47,7 +47,7 @@ public class FilterSecurityConfig {
                                     .permitAll();
                         }
                     });
-                    authorizeRequests.requestMatchers(new AntPathRequestMatcher("/discount","POST")).hasRole("ADMIN");
+                    authorizeRequests.requestMatchers(new AntPathRequestMatcher("/discount/**")).hasRole("ADMIN");
                     authorizeRequests.anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

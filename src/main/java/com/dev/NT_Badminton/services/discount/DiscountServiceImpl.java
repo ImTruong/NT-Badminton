@@ -1,6 +1,7 @@
 package com.dev.NT_Badminton.services.discount;
 
 import com.dev.NT_Badminton.dto.request.discount.ModifyDiscountRequest;
+import com.dev.NT_Badminton.dto.response.discount.DiscountResponse;
 import com.dev.NT_Badminton.entities.discounts.Discount;
 import com.dev.NT_Badminton.entities.users.AppUser;
 import com.dev.NT_Badminton.repositories.discount.DiscountRepository;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -45,6 +47,15 @@ public class DiscountServiceImpl implements DiscountService {
         discountRepository.save(discount);
     }
 
+    @Override
+    public List<DiscountResponse> getAllUnexpiredDiscounts() {
+        return discountRepository.findAllUnexpiredDiscounts();
+    }
+
+    @Override
+    public List<DiscountResponse> getAllDiscounts() {
+        return discountRepository.findAllDiscounts();
+    }
 
 
 }

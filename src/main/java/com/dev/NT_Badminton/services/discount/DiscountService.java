@@ -1,8 +1,10 @@
 package com.dev.NT_Badminton.services.discount;
 
 import com.dev.NT_Badminton.dto.request.discount.ModifyDiscountRequest;
+import com.dev.NT_Badminton.dto.response.discount.DiscountResponse;
 import com.dev.NT_Badminton.entities.discounts.Discount;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface DiscountService {
@@ -12,5 +14,9 @@ public interface DiscountService {
     Optional<Discount> getHighestUnexpiredDiscountOfProduct(Integer productId);
 
     void deleteDiscount(Integer discountId);
+
+    List<DiscountResponse> getAllUnexpiredDiscounts();
+
+    List<DiscountResponse> getAllDiscounts();
 
 }
