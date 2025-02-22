@@ -16,7 +16,10 @@ public class AddProductToCartRequest {
 
     private List<Integer> productOptionalValueId;
 
+    private Integer productVariantId;
+
     @NotNull(message = "Quantity is required")
     private Integer quantity;
+
 
 }

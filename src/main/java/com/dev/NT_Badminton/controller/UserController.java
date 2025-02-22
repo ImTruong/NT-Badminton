@@ -1,12 +1,11 @@
 package com.dev.NT_Badminton.controller;
 
+import com.dev.NT_Badminton.dto.request.contact.UserContactRequest;
 import com.dev.NT_Badminton.dto.request.user.*;
 import com.dev.NT_Badminton.dto.response.ApiResponse;
 import com.dev.NT_Badminton.services.user.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -93,6 +92,13 @@ public class UserController {
     public ResponseEntity<?> switchMainContact(@RequestParam @NotNull(message = "Contact Id is required") int contactId) {
         userService.switchMainContact(contactId);
         ApiResponse<String> response = new ApiResponse<String>(true, "Main Contact Switched Successfully");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PutMapping("/contact")
+    public ResponseEntity<?> updateContact(@Valid @RequestBody UserContactRequest modifyContactRequest) {
+        userService.updateContact(modifyContactRequest);
+        ApiResponse<String> response = new ApiResponse<String>(true, "Contact Updated Successfully");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

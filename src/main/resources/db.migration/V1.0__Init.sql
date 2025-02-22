@@ -284,17 +284,6 @@ CREATE TABLE `carts`
     FOREIGN KEY (`product_variant_id`) REFERENCES `product_variants` (`id`)  ON DELETE CASCADE
 );
 
-CREATE TABLE `payments`
-(
-    `id`                int unsigned NOT NULL AUTO_INCREMENT,
-    `payment_method`    tinyint NOT NULL COMMENT '0 - COD;  1 - VNPAY',
-    `status`            bit(1) NOT NULL DEFAULT 0 COMMENT '0 - Chưa thanh toán; 1 - Đã thanh toán',
-    `deleted`           bit(1)   NOT NULL DEFAULT 0,
-    `created_at`        datetime NOT NULL,
-    `updated_at`        datetime NOT NULL,
-    PRIMARY KEY (`id`)
-);
-
 CREATE TABLE `contacts`
 (
     `id`            int unsigned NOT NULL AUTO_INCREMENT,
@@ -319,9 +308,10 @@ CREATE TABLE `orders`
 (
     `id`            int unsigned NOT NULL AUTO_INCREMENT,
     `user_id`       int unsigned NOT NULL,
-    `payment_id`    int unsigned NOT NULL,
-    `contact_id`	int unsigned NOT NULL,
-    `status`        tinyint NOT NULL COMMENT '0 - Chờ vận chuyển, 1 - Đã vận chuyển , 2 - Đã giao hàng , 3 - Đã hủy',
+    `contact_id`	int unsigned DEFAULT NULL,
+    `payment_method` tinyint DEFAULT NULL COMMENT '0 - Thanh toán khi nhận hàng, 1 - Thanh toán qua thẻ',
+    `payment_status` tinyint NOT NULL COMMENT '0 - Chưa thanh toán, 1 - Đã thanh toán',
+    `delivery_status`        tinyint NOT NULL COMMENT '0 - Chờ vận chuyển, 1 - Đang vận chuyển , 2 - Đã giao hàng , 3 - Đã hủy',
     `deleted`       bit(1)   NOT NULL DEFAULT 0,
     `created_at`    datetime NOT NULL,
     `updated_at`    datetime NOT NULL,

@@ -1,8 +1,8 @@
 package com.dev.NT_Badminton.entities.payments;
 
 import com.dev.NT_Badminton.entities.BaseEntity;
-import com.dev.NT_Badminton.entities.payments.constant.PaymentMethod;
-import com.dev.NT_Badminton.entities.payments.constant.PaymentStatus;
+import com.dev.NT_Badminton.entities.orders.constant.PaymentMethod;
+import com.dev.NT_Badminton.entities.orders.constant.PaymentStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.*;

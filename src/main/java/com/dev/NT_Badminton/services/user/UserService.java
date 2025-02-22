@@ -1,5 +1,6 @@
 package com.dev.NT_Badminton.services.user;
 
+import com.dev.NT_Badminton.dto.request.contact.UserContactRequest;
 import com.dev.NT_Badminton.dto.request.user.*;
 import com.dev.NT_Badminton.dto.response.user.UserContactResponse;
 import com.dev.NT_Badminton.dto.response.user.UserDetailResponse;
@@ -34,5 +35,7 @@ public interface UserService {
     void deleteContact(int contactId);
 
     void switchMainContact(int contactId);
+
+    void updateContact(UserContactRequest userContactRequest);
 
 }

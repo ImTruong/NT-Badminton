@@ -13,12 +13,16 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 @Table(name = "order_items")
 public class OrderItems extends BaseEntity {
+
+    @Column(name = "order_id")
     Integer orderId;
 
     @Column(name = "product_variant_id")
     Integer productVariantId;
 
-    int quantity;
+    Integer quantity;
+
 }

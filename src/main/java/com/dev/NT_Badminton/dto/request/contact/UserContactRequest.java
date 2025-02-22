@@ -1,4 +1,4 @@
-package com.dev.NT_Badminton.dto.request.user;
+package com.dev.NT_Badminton.dto.request.contact;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
@@ -43,5 +43,7 @@ public class UserContactRequest {
 
     @NotBlank(message = "Type is required")
     String type;
+
+    Integer contactId;
 
 }

@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface ContactService {
 
-    Contact createContact(Contact contact);
-
     boolean checkPhoneNumberExistence(String phoneNumber);
 
     Contact getUserMainContact(int userId);

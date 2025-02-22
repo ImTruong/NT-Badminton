@@ -109,5 +109,10 @@ public class CartServiceImpl implements CartService{
         return cartProductResponseByUserId;
     }
 
+    @Override
+    public Cart checkProductExistenceInUserCart(Integer productVariantId, Integer userId) {
+        return cartRepository.findByUserIdAndProductVariantId(userId, productVariantId).orElse(null);
+    }
+
 
 }

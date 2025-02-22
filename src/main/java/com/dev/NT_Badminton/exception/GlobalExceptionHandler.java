@@ -72,6 +72,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiResponse<String>> handleUnauthorizedException(UnauthorizedException ex) {
+        ApiResponse<String> response = new ApiResponse<>(false, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(NotInPendingException.class)
+    public ResponseEntity<ApiResponse<String>> handleNotInPendingException(NotInPendingException ex) {
+        ApiResponse<String> response = new ApiResponse<>(false, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(PasswordMismatchException.class)
     public ResponseEntity<ApiResponse<String>> handlePasswordMismatchException(PasswordMismatchException ex) {
         ApiResponse<String> response = new ApiResponse<>(false, ex.getMessage());

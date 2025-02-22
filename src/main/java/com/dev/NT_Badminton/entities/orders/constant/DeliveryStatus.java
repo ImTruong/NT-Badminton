@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum DeliveryStatus {
     PENDING,
+    DELIVERING,
     SHIPPED,
-    DELIVERED,
     CANCELLED;
 
     @JsonCreator

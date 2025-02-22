@@ -1,4 +1,4 @@
-package com.dev.NT_Badminton.entities.payments.constant;
+package com.dev.NT_Badminton.entities.orders.constant;
 
 import com.dev.NT_Badminton.dto.constant.BaseEnum;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum PaymentStatus implements BaseEnum<Integer> {
     PAID,
-    UNPAID;
+    UNPAID,
+    PENDING;
 
     @JsonCreator
     public static PaymentStatus fromValue(Integer value) {

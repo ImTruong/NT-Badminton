@@ -1,6 +1,7 @@
 package com.dev.NT_Badminton.services.user;
 
 import com.dev.NT_Badminton.dto.constant.ActiveStatus;
+import com.dev.NT_Badminton.dto.request.contact.UserContactRequest;
 import com.dev.NT_Badminton.dto.request.user.*;
 import com.dev.NT_Badminton.dto.response.user.UserContactResponse;
 import com.dev.NT_Badminton.dto.response.user.UserDetailResponse;
@@ -120,7 +121,7 @@ public class UserServiceImpl implements UserService {
         Contact contact = modelMapper.map(registerRequest, Contact.class);
         contact.setUserId(appUser.getId());
         contact.setType(ContactType.MAIN.getTypeId());
-        contactService.createContact(contact);
+        contactService.saveContact(contact);
         return appUser;
     }
 
@@ -260,7 +261,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Invalid contact type");
         contact.setType(ContactType.fromValue(userContactRequest.getType()).getTypeId());
         contact.setUserId(user.getId());
-        return contactService.createContact(contact);
+        return contactService.saveContact(contact);
     }
 
     @Transactional
@@ -287,6 +288,16 @@ public class UserServiceImpl implements UserService {
         mainContact.setType(ContactType.SUB.getTypeId());
         contact.setType(ContactType.MAIN.getTypeId());
         contactService.saveContact(mainContact);
+        contactService.saveContact(contact);
+    }
+
+    @Override
+    public void updateContact(UserContactRequest modifyContactRequest) {
+        AppUser user = getUserFromSecurityContext();
+        Contact contact = contactService.getContactById(modifyContactRequest.getContactId());
+        if(contact.getUserId() != user.getId())
+            throw new IllegalArgumentException("You are not allowed to update this contact");
+        modelMapper.map(modifyContactRequest, contact);
         contactService.saveContact(contact);
     }
 
