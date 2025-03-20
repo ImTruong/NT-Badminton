@@ -8,8 +8,11 @@ import com.dev.NT_Badminton.entities.products.*;
 import com.dev.NT_Badminton.entities.products.constant.ProductImageType;
 import com.dev.NT_Badminton.entities.upload_file.QUploadFile;
 import com.dev.NT_Badminton.repositories.BaseRepository;
+import com.dev.NT_Badminton.repositories.discount.DiscountRepository;
+import com.dev.NT_Badminton.repositories.product.ProductOptionValueRepository;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Projections;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +22,11 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 public class CartRepositoryImpl extends BaseRepository implements CartRepositoryCustom {
+
+    ProductOptionValueRepository productOptionValueRepository;
+    DiscountRepository discountRepository;
 
     @Override
     public PageImpl<CartProductResponse> getCartProductResponseByUserId(Integer userId, Pageable pageable) {
@@ -55,38 +62,10 @@ public class CartRepositoryImpl extends BaseRepository implements CartRepository
                 .fetchResults();
 
         results.getResults().forEach(cartProductResponse -> {
-            Map<String, String> productOptionalValue = query()
-                    .select(qProductOption.name, qProductOptionValue.value)
-                    .from(qProductVariantOptionValues)
-                    .join(qProductOptionValue).on(qProductVariantOptionValues.productOptionValueId.eq(qProductOptionValue.id))
-                    .join(qProductOption).on(qProductOptionValue.product_option_id.eq(qProductOption.id))
-                    .where(qProductVariantOptionValues.productVariantId.eq(cartProductResponse.getProductVariantId()))
-                    .fetch()
-                    .stream()
-                    .filter(entry -> entry.get(qProductOption.name) != null && entry.get(qProductOptionValue.value) != null)
-                    .collect(Collectors.toMap(
-                            entry -> entry.get(qProductOption.name),
-                            entry -> entry.get(qProductOptionValue.value),
-                            (existing, replacement) -> replacement
-                    ));
-            cartProductResponse.setProductOptionalValue(productOptionalValue);
+            cartProductResponse.setProductOptionalValue(productOptionValueRepository.getProductVariantOptionValuesByProductVariantId(cartProductResponse.getProductVariantId()));
+            Integer discountPercentage = discountRepository.getNewestUnexpiredDiscountWithHighestPercentage(cartProductResponse.getProductVariantId());
 
-            Integer discountPercentage = query()
-                    .select(qDiscount.discountPercentages)
-                    .from(qDiscount)
-                    .where(qDiscount.productId.eq(cartProductResponse.getProductVariantId())
-                            .and(qDiscount.timeEnded.after(Timestamp.valueOf(LocalDateTime.now())))
-                            .and(qDiscount.deleted.eq(false))
-                            .and(qDiscount.timeStarted.before(Timestamp.valueOf(LocalDateTime.now())))
-                    )
-                    .orderBy(qDiscount.discountPercentages.desc())
-                    .fetchFirst();
-
-            cartProductResponse.setSalePrice(
-                    discountPercentage != null
-                            ? (cartProductResponse.getOriginalPrice() * (100 - discountPercentage) / 100) * cartProductResponse.getQuantity()
-                            : null
-            );
+            cartProductResponse.setSalePrice(cartProductResponse.getOriginalPrice() * (100 - discountPercentage) / 100 * cartProductResponse.getQuantity());
             cartProductResponse.setOriginalPrice(cartProductResponse.getOriginalPrice() * cartProductResponse.getQuantity());
         });
 

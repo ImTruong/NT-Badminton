@@ -96,6 +96,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(PaymentException.class)
+    public ResponseEntity<ApiResponse<String>> handlePaymentException(PaymentException ex) {
+        ApiResponse<String> response = new ApiResponse<>(false, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OrderCycleException.class)
+    public ResponseEntity<ApiResponse<String>> handleOrderCycleException(OrderCycleException ex) {
+        ApiResponse<String> response = new ApiResponse<>(false, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<String>> handleRuntimeException(RuntimeException ex) {
         ApiResponse<String> response = new ApiResponse<>(false, "A runtime error occurred: " + ex.getMessage());

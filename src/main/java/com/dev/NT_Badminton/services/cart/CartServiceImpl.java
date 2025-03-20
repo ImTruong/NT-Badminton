@@ -34,7 +34,7 @@ public class CartServiceImpl implements CartService{
 
     @Transactional
     @Override
-    public void addProductToCart(AddProductToCartRequest addProductToCartRequest) {
+    public Cart addProductToCart(AddProductToCartRequest addProductToCartRequest) {
         AppUser user = userService.getUserFromSecurityContext();
         ProductVariants cartProduct = null;
         if (addProductToCartRequest.getQuantity() <= 0)
@@ -58,18 +58,18 @@ public class CartServiceImpl implements CartService{
         }
         Optional<Cart> cart = cartRepository.findByUserIdAndProductVariantId(user.getId(), cartProduct.getId());
         if(cart.isEmpty()){
-            cartRepository.save(new Cart(cartProduct.getId(), user.getId(), addProductToCartRequest.getQuantity()));
+            return cartRepository.save(new Cart(cartProduct.getId(), user.getId(), addProductToCartRequest.getQuantity()));
         } else {
             if (cart.get().getQuantity() + addProductToCartRequest.getQuantity() > cartProduct.getQuantity())
                 throw new OutOfStockException("This combination of product is out of stock");
             cart.get().setQuantity(cart.get().getQuantity() + addProductToCartRequest.getQuantity());
-            cartRepository.save(cart.get());
+            return cartRepository.save(cart.get());
         }
 
     }
 
     @Override
-    public void changeProductQuantity(QuantityChangeRequest quantityChangeRequest) {
+    public Cart changeProductQuantity(QuantityChangeRequest quantityChangeRequest) {
         ProductVariants productVariant = productService.getProductVariantById(quantityChangeRequest.getProductVariantId());
         if (productVariant.getQuantity() < quantityChangeRequest.getQuantity())
             throw new OutOfStockException("This combination of product is out of stock");
@@ -81,7 +81,7 @@ public class CartServiceImpl implements CartService{
             throw new IllegalArgumentException("Product not found in cart");
         } else {
             cart.get().setQuantity(quantityChangeRequest.getQuantity());
-            cartRepository.save(cart.get());
+            return cartRepository.save(cart.get());
         }
     }
 

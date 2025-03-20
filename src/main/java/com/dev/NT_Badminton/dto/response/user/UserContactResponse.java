@@ -32,4 +32,14 @@ public class UserContactResponse {
 
     String type;
 
+    public UserContactResponse(Integer id, String firstName, String lastName, String phone, String email, Integer city, Integer district, String streetAddress) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.email = email;
+        this.city = city;
+        this.district = district;
+        this.streetAddress = streetAddress;
+    }
 }

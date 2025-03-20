@@ -14,4 +14,6 @@ public interface DiscountRepositoryCustom {
 
     List<DiscountResponse> findAllDiscounts();
 
+    Integer getNewestUnexpiredDiscountWithHighestPercentage(Integer productId);
+
 }

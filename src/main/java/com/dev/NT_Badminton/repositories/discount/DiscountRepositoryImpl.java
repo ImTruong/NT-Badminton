@@ -89,4 +89,20 @@ public class DiscountRepositoryImpl extends BaseRepository implements DiscountRe
                 )
                 .fetch();
     }
+
+    @Override
+    public Integer getNewestUnexpiredDiscountWithHighestPercentage(Integer productVariantId) {
+        QDiscount qDiscount = QDiscount.discount;
+        Integer discountPercentage = query()
+                .select(qDiscount.discountPercentages)
+                .from(qDiscount)
+                .where(qDiscount.productId.eq(productVariantId)
+                        .and(qDiscount.timeEnded.after(Timestamp.valueOf(LocalDateTime.now())))
+                        .and(qDiscount.deleted.eq(false))
+                        .and(qDiscount.timeStarted.before(Timestamp.valueOf(LocalDateTime.now())))
+                )
+                .orderBy(qDiscount.discountPercentages.desc())
+                .fetchFirst();
+        return discountPercentage == null ? 0 : discountPercentage;
+    }
 }

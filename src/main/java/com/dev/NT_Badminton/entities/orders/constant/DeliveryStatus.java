@@ -2,6 +2,7 @@ package com.dev.NT_Badminton.entities.orders.constant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import jakarta.persistence.EntityNotFoundException;
 
 public enum DeliveryStatus {
     PENDING,
@@ -15,7 +16,7 @@ public enum DeliveryStatus {
             if(status.toValue().equals(value))
                 return status;
         }
-        return null;
+        throw new EntityNotFoundException("Delivery status not found with value: " + value);
     }
 
     @JsonValue

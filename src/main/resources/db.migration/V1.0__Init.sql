@@ -116,7 +116,6 @@ CREATE TABLE `categories`
     `short_description` tinytext              DEFAULT NULL,
     `parent_id`         int unsigned DEFAULT NULL,
     `status`            tinyint      NOT NULL,
-    `type`              tinyint      NOT NULL,
     `image_id`          int unsigned         DEFAULT NULL,
     `deleted`           bit(1)       NOT NULL DEFAULT 0,
     `created_at`        datetime     NOT NULL,
@@ -125,28 +124,6 @@ CREATE TABLE `categories`
     UNIQUE KEY (`slug`),
     FOREIGN KEY (`image_id`) REFERENCES `upload_files` (`id`)
 );
-
-CREATE TABLE `blogs`
-(
-    `id`                int unsigned NOT NULL AUTO_INCREMENT,
-    `title`             varchar(255) NOT NULL,
-    `slug`              varchar(500) NOT NULL,
-    `short_description` tinytext     NOT NULL,
-    `description`       text         NOT NULL,
-    `image_id`          int unsigned       NOT NULL,
-    `category_id`       int unsigned       NOT NULL,
-    `user_id`           int unsigned       NOT NULL,
-    `status`            tinyint      NOT NULL,
-    `deleted`           bit(1)       NOT NULL DEFAULT 0,
-    `publish_date`      datetime              DEFAULT NULL,
-    `created_at`        datetime     NOT NULL,
-    `updated_at`        datetime     NOT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY (`slug`),
-    FOREIGN KEY (`image_id`) REFERENCES `upload_files` (`id`),
-    FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
-    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ;
 
 CREATE TABLE `products`
 (
@@ -258,19 +235,6 @@ CREATE TABLE `rating`
     FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 );
 
-CREATE TABLE `rating_response`
-(
-    `id`            int unsigned NOT NULL AUTO_INCREMENT,
-    `rating_id`    	int unsigned NOT NULL,
-    `staff_id`      int unsigned NOT NULL,
-    `description`   text     DEFAULT NULL,
-    `deleted`       bit(1)   NOT NULL DEFAULT 0,
-    `created_at`    datetime NOT NULL,
-    `updated_at`    datetime NOT NULL,
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (`rating_id`) REFERENCES `rating` (`id`) ON DELETE CASCADE ,
-    FOREIGN KEY (`staff_id`) REFERENCES `staffs` (`id`) ON DELETE CASCADE
-);
 CREATE TABLE `carts`
 (
     `id`            int unsigned NOT NULL AUTO_INCREMENT,
@@ -317,7 +281,6 @@ CREATE TABLE `orders`
     `updated_at`    datetime NOT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-    FOREIGN KEY (`payment_id`) REFERENCES `payments` (`id`),
     FOREIGN KEY (`contact_id`) REFERENCES `contacts` (`id`)
 );
 

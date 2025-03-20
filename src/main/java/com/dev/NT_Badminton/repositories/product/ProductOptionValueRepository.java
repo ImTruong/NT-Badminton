@@ -5,10 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public interface ProductOptionValueRepository extends JpaRepository<ProductOptionValue, Integer> {
+public interface ProductOptionValueRepository extends JpaRepository<ProductOptionValue, Integer>, ProductOptionValueRepositoryCustom {
 
 //    List<ProductOptionValue> findByProductOptionId(int productOptionId);
 //
@@ -19,5 +20,7 @@ public interface ProductOptionValueRepository extends JpaRepository<ProductOptio
     Optional<ProductOptionValue> findById(int ProductOptionValueId);
 
     ProductOptionValue findByIdAndDeleted(int id, boolean deleted);
+
+
 
 }
