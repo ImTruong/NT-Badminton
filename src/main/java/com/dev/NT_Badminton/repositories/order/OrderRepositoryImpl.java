@@ -98,4 +98,20 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
         return result;
     }
 
+    @Override
+    public Boolean existsByProductIdAndUserId(Integer productId, Integer userId) {
+        QOrderItems qOrderItems = QOrderItems.orderItems;
+        QProductVariants qProductVariants = QProductVariants.productVariants;
+        QOrder qOrder = QOrder.order;
+        return query().select(qOrderItems.id)
+                .from(qOrderItems)
+                .join(qProductVariants).on(qOrderItems.productVariantId.eq(qProductVariants.id))
+                .join(qOrder).on(qOrderItems.orderId.eq(qOrder.id))
+                .where(qProductVariants.productId.eq(productId)
+                        .and(qOrder.userId.eq(userId))
+                        .and(qOrder.deleted.isFalse())
+                        .and(qOrder.deleted.isFalse()))
+                .fetchFirst() != null;
+    }
+
 }

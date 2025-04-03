@@ -1,6 +1,5 @@
 package com.dev.NT_Badminton.dto.request.product;
 
-import com.dev.NT_Badminton.dto.constant.ActiveStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -12,31 +11,29 @@ import java.util.List;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateProductRequest {
-    @NotBlank
+public class ModifyProductRequest {
+
+    Integer id;
+
+    @NotBlank(message = "Product name is required")
     String name;
 
-    @NotBlank
+    @NotBlank(message = "Product description is required")
     String description;
 
-    @NotBlank
     String shortDescription;
 
-    @NotNull
-    Integer quantity;
+    @NotBlank(message = "Product brand is required")
+    String brand;
 
-    @NotNull
-    ActiveStatus status;
+    @NotNull(message = "Category id is required")
+    Integer categoryId;
 
-    int originalPrice;
+    Integer mainImageId;
 
-    int categoryId;
+    Integer coverImageId;
 
-    int mainImageId;
-
-    int coverImageId;
-
-    @NotNull
-    @Size(min = 1)
     List<Integer> imageIds;
+
+    String type;
 }

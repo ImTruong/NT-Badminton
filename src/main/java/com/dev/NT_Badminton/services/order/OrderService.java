@@ -34,5 +34,7 @@ public interface OrderService {
 
     void finishCodOrder(int orderId);
 
+    boolean checkOrderExistByProductIdAndUserId(Integer productId, Integer userId);
+
 
 }

@@ -1,5 +1,8 @@
 package com.dev.NT_Badminton.services.product;
 
+import com.dev.NT_Badminton.dto.request.product.*;
+import com.dev.NT_Badminton.dto.response.product.ProductDetailResponse;
+import com.dev.NT_Badminton.dto.response.product.SearchProductReponse;
 import com.dev.NT_Badminton.entities.products.Product;
 import com.dev.NT_Badminton.entities.products.ProductOption;
 import com.dev.NT_Badminton.entities.products.ProductOptionValue;
@@ -24,6 +27,25 @@ public interface ProductService {
 
     ProductVariants getProductVariantById(int productVariantId);
 
-    void ReduceQuantityOfProductVariant(ProductVariants productVariant, int quantity);
+    void changeQuantityOfProductDueToOrderAct(Integer orderId, String orderType);
 
+    void addOrUpdateProduct(ModifyProductRequest modifyProductRequest);
+
+    void addOrUpdateProductOption(ModifyProductOptionRequest modifyProductOptionRequest);
+
+    void addOrUpdateProductOptionValue(ModifyProductOptionValueRequest modifyProductOptionValueRequest);
+
+    void addOrUpdateProductVariant(ModifyProductVariantRequest modifyProductVariantRequest);
+
+    void deleteProduct(int productId);
+
+    void deleteProductOption(int productOptionId);
+
+    void deleteProductOptionValue(int productOptionValueId);
+
+    void deleteProductVariant(int productVariantId);
+
+    List<SearchProductReponse> searchProducts(SearchProductRequest searchProductRequest);
+
+    ProductDetailResponse getProductDetail(int productId);
 }

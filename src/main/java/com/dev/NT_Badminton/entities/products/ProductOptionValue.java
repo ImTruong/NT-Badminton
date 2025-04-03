@@ -17,8 +17,7 @@ import lombok.experimental.FieldDefaults;
 public class ProductOptionValue extends BaseEntity {
 
     @Column(name = "product_option_id", columnDefinition = "int")
-
-    Integer product_option_id;
+    Integer productOptionId;
 
     String value;
 

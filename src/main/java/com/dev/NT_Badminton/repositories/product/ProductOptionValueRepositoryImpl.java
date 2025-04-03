@@ -18,7 +18,7 @@ public class ProductOptionValueRepositoryImpl extends BaseRepository  implements
                 .select(qProductOption.name, qProductOptionValue.value)
                 .from(qProductVariantOptionValues)
                 .join(qProductOptionValue).on(qProductVariantOptionValues.productOptionValueId.eq(qProductOptionValue.id))
-                .join(qProductOption).on(qProductOptionValue.product_option_id.eq(qProductOption.id))
+                .join(qProductOption).on(qProductOptionValue.productOptionId.eq(qProductOption.id))
                 .where(qProductVariantOptionValues.productVariantId.eq(productVariantId))
                 .fetch()
                 .stream()

@@ -130,14 +130,14 @@ public class OrderServiceImpl implements OrderService {
             request.setAttribute("amount", orderRepository.getOrderTotalPrice(orderId));
             return paymentService.createVnPayPayment(request);
         }else if(Objects.equals(payMethod, PaymentMethod.COD.toValue())){
-            order.setDeliveryStatus(DeliveryStatus.DELIVERING);
-            orderRepository.save(order);
+            updateDeliveryStatus(orderId, DeliveryStatus.DELIVERING.toValue());
         }
         else
             throw new PaymentException("Invalid payment method");
         return null;
     }
 
+    @Transactional
     @Override
     public boolean finishOnlinePayment(HttpServletRequest request) {
         Integer orderId = Integer.parseInt(request.getParameter("vnp_OrderInfo"));
@@ -145,7 +145,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found"));
         if(statusCode.equals("00")) {
             order.setPaymentStatus(PaymentStatus.PAID);
-            order.setDeliveryStatus(DeliveryStatus.DELIVERING);
+            updateDeliveryStatus(orderId, DeliveryStatus.DELIVERING.toValue());
             orderRepository.save(order);
             return true;
         }
@@ -167,6 +167,7 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setDeleted(true);
             orderItemRepository.save(orderItem);
         });
+        productService.changeQuantityOfProductDueToOrderAct(orderId, "cancel");
         orderRepository.save(order);
     }
 
@@ -175,6 +176,7 @@ public class OrderServiceImpl implements OrderService {
     public void updateDeliveryStatus(int orderId, int status) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found"));
         order.setDeliveryStatus(DeliveryStatus.fromValue(status));
+        productService.changeQuantityOfProductDueToOrderAct(orderId, "order");
         orderRepository.save(order);
     }
 
@@ -222,6 +224,11 @@ public class OrderServiceImpl implements OrderService {
         order.setPaymentStatus(PaymentStatus.PAID);
         order.setDeliveryStatus(DeliveryStatus.SHIPPED);
         orderRepository.save(order);
+    }
+
+    @Override
+    public boolean checkOrderExistByProductIdAndUserId(Integer productId, Integer userId) {
+        return orderRepository.existsByProductIdAndUserId(productId, userId);
     }
 
 

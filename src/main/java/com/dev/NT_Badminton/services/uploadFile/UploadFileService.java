@@ -10,4 +10,6 @@ public interface UploadFileService {
 
     Optional<UploadFile> getUserAvatar(int userAvatarId);
 
+    boolean checkExistenceOfUploadFile(long uploadFileId);
+
 }

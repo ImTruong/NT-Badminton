@@ -24,24 +24,14 @@ public class Product extends BaseEntity {
 
     String slug;
 
+    String brand;
+
     @Column(name = "short_description")
     String shortDescription;
 
     String description;
 
-    @Column(name = "status", columnDefinition = "tinyint")
-    ActiveStatus status;
-
     @Column(name = "category_id", columnDefinition = "int")
     Integer categoryId;
-
-    @Transient
-    UploadFile coverImage;
-
-    @Transient
-    UploadFile mainImage;
-
-    @Transient
-    List<UploadFile> images;
 
 }

@@ -23,5 +23,10 @@ public class UploadFileServiceImpl implements UploadFileService {
         return uploadFileRepository.getUserProfileImage(userAvatarId);
     }
 
+    @Override
+    public boolean checkExistenceOfUploadFile(long uploadFileId) {
+        return uploadFileRepository.existsById(uploadFileId);
+    }
+
 
 }

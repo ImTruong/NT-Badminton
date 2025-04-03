@@ -1,12 +1,17 @@
 package com.dev.NT_Badminton.services.product;
 
-import com.dev.NT_Badminton.entities.products.Product;
-import com.dev.NT_Badminton.entities.products.ProductOption;
-import com.dev.NT_Badminton.entities.products.ProductOptionValue;
-import com.dev.NT_Badminton.entities.products.ProductVariants;
+import com.dev.NT_Badminton.dto.request.product.*;
+import com.dev.NT_Badminton.dto.response.product.ProductDetailResponse;
+import com.dev.NT_Badminton.dto.response.product.SearchProductReponse;
+import com.dev.NT_Badminton.entities.products.*;
+import com.dev.NT_Badminton.entities.products.constant.ProductImageType;
 import com.dev.NT_Badminton.repositories.product.*;
+import com.dev.NT_Badminton.services.uploadFile.UploadFileService;
+import com.dev.NT_Badminton.util.Utils;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +26,9 @@ public class ProductServiceImpl implements ProductService {
     private final ProductOptionValueRepository productOptionValueRepository;
     private final ProductVariantRepository productVariantsRepository;
     private final ProductVariantOptionValuesRepository productVariantOptionValuesRepository;
+    private final ModelMapper modelMapper;
+    private final ProductImageRepository productImageRepository;
+    private final UploadFileService uploadFileService;
 
     @Override
     public Product getProductById(int productId) {
@@ -76,9 +84,144 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void ReduceQuantityOfProductVariant(ProductVariants productVariant, int quantity) {
-        productVariant.setQuantity(productVariant.getQuantity() - quantity);
-        productVariantsRepository.save(productVariant);
+    public void changeQuantityOfProductDueToOrderAct(Integer orderId, String orderType) {
+        if (orderType.equals("cancel"))
+            productVariantsRepository.increaseProductVariantQuantityFromCanceledOrder(orderId);
+        else
+            productVariantsRepository.decreaseProductVariantQuantityFromOrder(orderId);
+    }
+
+    @Transactional
+    @Override
+    public void addOrUpdateProduct(ModifyProductRequest modifyProductRequest) {
+        Product product = "CREATE".equals(modifyProductRequest.getType())
+                ? modelMapper.map(modifyProductRequest, Product.class)
+                : productRepository.findById(modifyProductRequest.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+        if("UPDATE".equals(modifyProductRequest.getType()))
+            modelMapper.map(modifyProductRequest, product);
+        product.setSlug(Utils.removeCharacterVn(modifyProductRequest.getName()));
+        productRepository.save(product);
+
+        List<Integer> imageIds = modifyProductRequest.getImageIds();
+        if (modifyProductRequest.getCoverImageId() != null && !imageIds.contains(modifyProductRequest.getCoverImageId())) {
+            imageIds.add(modifyProductRequest.getCoverImageId());
+        }
+        if (modifyProductRequest.getMainImageId() != null && !imageIds.contains(modifyProductRequest.getMainImageId())) {
+            imageIds.add(modifyProductRequest.getMainImageId());
+        }
+
+        if (imageIds!=null)
+            imageIds.forEach(imageId -> {
+                if (!uploadFileService.checkExistenceOfUploadFile(imageId)) {
+                    throw new EntityNotFoundException("Image with id " + imageId + " not found");
+                }
+                ProductImageType imageType = ProductImageType.OTHER;
+                if (modifyProductRequest.getCoverImageId() != null && modifyProductRequest.getCoverImageId().equals(imageId)) {
+                    imageType = ProductImageType.COVER;
+                } else if (modifyProductRequest.getMainImageId() != null && modifyProductRequest.getMainImageId().equals(imageId)) {
+                    imageType = ProductImageType.MAIN;
+                }
+                productImageRepository.save(ProductImage.builder()
+                        .productId(product.getId())
+                        .imageId(imageId)
+                        .type(imageType)
+                        .build());
+            });
+    }
+
+    @Override
+    public void addOrUpdateProductOption(ModifyProductOptionRequest modifyProductOptionRequest) {
+        ProductOption productOption = "CREATE".equals(modifyProductOptionRequest.getType())
+                ? modelMapper.map(modifyProductOptionRequest, ProductOption.class)
+                : productOptionRepository.findById(modifyProductOptionRequest.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Product option not found"));
+        if("UPDATE".equals(modifyProductOptionRequest.getType()))
+            modelMapper.map(modifyProductOptionRequest, productOption);
+        productOptionRepository.save(productOption);
+    }
+
+    @Override
+    public void addOrUpdateProductOptionValue(ModifyProductOptionValueRequest modifyProductOptionValueRequest) {
+        ProductOptionValue productOptionValue = "CREATE".equals(modifyProductOptionValueRequest.getType())
+                ? modelMapper.map(modifyProductOptionValueRequest, ProductOptionValue.class)
+                : productOptionValueRepository.findById(modifyProductOptionValueRequest.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Product option value not found"));
+        if("UPDATE".equals(modifyProductOptionValueRequest.getType()))
+            modelMapper.map(modifyProductOptionValueRequest, productOptionValue);
+        productOptionValueRepository.save(productOptionValue);
+    }
+
+    @Transactional
+    @Override
+    public void addOrUpdateProductVariant(ModifyProductVariantRequest modifyProductVariantRequest) {
+        ProductVariants productVariants = "CREATE".equals(modifyProductVariantRequest.getType())
+                ? modelMapper.map(modifyProductVariantRequest, ProductVariants.class)
+                : productVariantsRepository.findById(modifyProductVariantRequest.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Product variant not found"));
+        if("UPDATE".equals(modifyProductVariantRequest.getType()))
+            modelMapper.map(modifyProductVariantRequest, productVariants);
+        productVariantsRepository.save(productVariants);
+        List<Integer> productIds = productRepository.findProductIdsByOptionValueIds(modifyProductVariantRequest.getProductOptionValueIds(), modifyProductVariantRequest.getProductId());
+        if (productIds.size()!=1)
+            throw new EntityNotFoundException("Product variant with option values " + modifyProductVariantRequest.getProductOptionValueIds() + " not found");
+        else
+            productVariantOptionValuesRepository.deleteAllByProductVariantId(productVariants.getId());
+        modifyProductVariantRequest.getProductOptionValueIds().forEach(
+                productOptionValueId -> {
+                    productVariantOptionValuesRepository.save(ProductVariantOptionValues.builder()
+                            .productVariantId(productVariants.getId())
+                            .productOptionValueId(productOptionValueId)
+                            .build());
+                }
+        );
+    }
+
+    @Transactional
+    @Override
+    public void deleteProduct(int productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+        product.setDeleted(true);
+        productRepository.save(product);
+    }
+
+    @Transactional
+    @Override
+    public void deleteProductOption(int productOptionId) {
+        ProductOption productOption = productOptionRepository.findById(productOptionId)
+                .orElseThrow(() -> new EntityNotFoundException("Product option not found"));
+        productOption.setDeleted(true);
+        productOptionRepository.save(productOption);
+    }
+
+    @Transactional
+    @Override
+    public void deleteProductOptionValue(int productOptionValueId) {
+        ProductOptionValue productOptionValue = productOptionValueRepository.findById(productOptionValueId)
+                .orElseThrow(() -> new EntityNotFoundException("Product option value not found"));
+        productOptionValue.setDeleted(true);
+        productOptionValueRepository.save(productOptionValue);
+    }
+
+    @Transactional
+    @Override
+    public void deleteProductVariant(int productVariantId) {
+        ProductVariants productVariants = productVariantsRepository.findById(productVariantId)
+                .orElseThrow(() -> new EntityNotFoundException("Product variant not found"));
+        productVariants.setDeleted(true);
+        productVariantsRepository.save(productVariants);
+    }
+
+    @Override
+    public List<SearchProductReponse> searchProducts(SearchProductRequest searchProductRequest) {
+        List<SearchProductReponse> result = productRepository.findProducts(searchProductRequest);
+        return result;
+    }
+
+    @Override
+    public ProductDetailResponse getProductDetail(int productId) {
+        return productRepository.findProductDetailById(productId);
     }
 
 

@@ -27,9 +27,6 @@ public class Category extends BaseEntity {
 
     Integer parentId;
 
-    @Column(name = "status", columnDefinition = "tinyint")
-    ActiveStatus status;
-
     Integer imageId;
 
     @Transient

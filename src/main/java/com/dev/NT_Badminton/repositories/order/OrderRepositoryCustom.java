@@ -10,4 +10,6 @@ public interface OrderRepositoryCustom {
 
     List<OrderResponse> getUserOrder(Integer userId , String orderType);
 
+    Boolean existsByProductIdAndUserId(Integer productId, Integer userId);
+
 }

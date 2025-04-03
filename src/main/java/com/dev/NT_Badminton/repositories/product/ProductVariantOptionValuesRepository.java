@@ -12,4 +12,6 @@ public interface ProductVariantOptionValuesRepository extends JpaRepository<Prod
 
     List<ProductVariantOptionValues> findByProductVariantId(int productVariantId);
 
+    void deleteAllByProductVariantId(int productVariantId);
+
 }

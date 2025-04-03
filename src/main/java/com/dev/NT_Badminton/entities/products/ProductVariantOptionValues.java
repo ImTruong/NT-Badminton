@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "product_variant_option_values")
 public class ProductVariantOptionValues extends BaseEntity {

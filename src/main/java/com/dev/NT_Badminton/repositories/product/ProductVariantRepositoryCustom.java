@@ -10,4 +10,8 @@ public interface ProductVariantRepositoryCustom {
 
     Optional<ProductVariants> findProductVariantByProductVariantOptionValuesIds(List<Integer> productVariantOptionValuesIds);
 
+    void increaseProductVariantQuantityFromCanceledOrder(int orderId);
+
+    void decreaseProductVariantQuantityFromOrder(int orderId);
+
 }
