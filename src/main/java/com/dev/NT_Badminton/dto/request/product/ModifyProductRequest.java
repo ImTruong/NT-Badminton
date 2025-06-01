@@ -29,11 +29,5 @@ public class ModifyProductRequest {
     @NotNull(message = "Category id is required")
     Integer categoryId;
 
-    Integer mainImageId;
-
-    Integer coverImageId;
-
-    List<Integer> imageIds;
-
     String type;
 }

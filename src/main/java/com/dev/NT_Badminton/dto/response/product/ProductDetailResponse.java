@@ -24,11 +24,7 @@ public class ProductDetailResponse {
 
     Integer categoryId;
 
-    String mainImageUrl;
-
-    String coverImageUrl;
-
-    List<String> imageUrls;
+    List<ProductImageResponse> images;
 
     List<RatingResponse> ratings;
 

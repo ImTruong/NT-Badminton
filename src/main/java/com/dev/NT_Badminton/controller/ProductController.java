@@ -2,6 +2,7 @@ package com.dev.NT_Badminton.controller;
 
 import com.dev.NT_Badminton.dto.request.product.*;
 import com.dev.NT_Badminton.dto.response.ApiResponse;
+import com.dev.NT_Badminton.entities.products.constant.ProductImageType;
 import com.dev.NT_Badminton.entities.upload_file.UploadFile;
 import com.dev.NT_Badminton.services.product.ProductService;
 import com.dev.NT_Badminton.services.uploadFile.UploadFileService;
@@ -125,15 +126,17 @@ public class ProductController {
     }
 
     @PostMapping("/image")
-    public ResponseEntity<?> uploadProductImage(@RequestParam("file") MultipartFile file) throws Exception {
-        UploadFile uploadFile = uploadFileService.uploadFile(file, "products");
-        ApiResponse<?> response = new ApiResponse<>(true,"Product image uploaded successfully", uploadFile.getId());
+    public ResponseEntity<?> uploadProductImage(@RequestPart("file") MultipartFile file,
+                                                @RequestParam("productId") int productId,
+                                                @RequestParam("type") ProductImageType type) throws Exception {
+        productService.addProductImage(productId, file, type);
+        ApiResponse<?> response = new ApiResponse<>(true,"Product image uploaded successfully");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/image")
-    public ResponseEntity<?> deleteProductImage(@RequestParam int imageId, @RequestParam int uploadFileId) throws Exception {
-        productService.deleteProductImage(imageId, uploadFileId);
+    public ResponseEntity<?> deleteProductImage(@RequestParam int imageId) throws Exception {
+        productService.deleteProductImage(imageId);
         ApiResponse<String> response = new ApiResponse<>(true,"Product image deleted successfully");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

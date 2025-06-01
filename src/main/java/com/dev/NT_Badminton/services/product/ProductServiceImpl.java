@@ -5,14 +5,18 @@ import com.dev.NT_Badminton.dto.response.product.ProductDetailResponse;
 import com.dev.NT_Badminton.dto.response.product.SearchProductReponse;
 import com.dev.NT_Badminton.entities.products.*;
 import com.dev.NT_Badminton.entities.products.constant.ProductImageType;
+import com.dev.NT_Badminton.entities.upload_file.UploadFile;
+import com.dev.NT_Badminton.entities.users.AppUser;
 import com.dev.NT_Badminton.repositories.product.*;
 import com.dev.NT_Badminton.services.uploadFile.UploadFileService;
+import com.dev.NT_Badminton.services.user.UserService;
 import com.dev.NT_Badminton.util.Utils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -102,32 +106,6 @@ public class ProductServiceImpl implements ProductService {
             modelMapper.map(modifyProductRequest, product);
         product.setSlug(Utils.removeCharacterVn(modifyProductRequest.getName()));
         productRepository.save(product);
-
-        List<Integer> imageIds = modifyProductRequest.getImageIds();
-        if (modifyProductRequest.getCoverImageId() != null && !imageIds.contains(modifyProductRequest.getCoverImageId())) {
-            imageIds.add(modifyProductRequest.getCoverImageId());
-        }
-        if (modifyProductRequest.getMainImageId() != null && !imageIds.contains(modifyProductRequest.getMainImageId())) {
-            imageIds.add(modifyProductRequest.getMainImageId());
-        }
-
-        if (imageIds!=null)
-            imageIds.forEach(imageId -> {
-                if (!uploadFileService.checkExistenceOfUploadFile(imageId)) {
-                    throw new EntityNotFoundException("Image with id " + imageId + " not found");
-                }
-                ProductImageType imageType = ProductImageType.OTHER;
-                if (modifyProductRequest.getCoverImageId() != null && modifyProductRequest.getCoverImageId().equals(imageId)) {
-                    imageType = ProductImageType.COVER;
-                } else if (modifyProductRequest.getMainImageId() != null && modifyProductRequest.getMainImageId().equals(imageId)) {
-                    imageType = ProductImageType.MAIN;
-                }
-                productImageRepository.save(ProductImage.builder()
-                        .productId(product.getId())
-                        .imageId(imageId)
-                        .type(imageType)
-                        .build());
-            });
     }
 
     @Override
@@ -226,11 +204,26 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
-    public void deleteProductImage(int productId, int uploadFileId) throws Exception {
-        ProductImage productImage = productImageRepository.findByProductIdAndImageId(productId, uploadFileId)
+    public boolean addProductImage(int productId, MultipartFile image, ProductImageType imageType) throws Exception {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+        UploadFile uploadFile = uploadFileService.uploadFile(image, "products");
+        ProductImage newImage = ProductImage.builder()
+                .productId(productId)
+                .imageId(uploadFile.getId())
+                .type(imageType)
+                .build();
+        productImageRepository.save(newImage);
+        return true;
+    }
+
+    @Transactional
+    @Override
+    public void deleteProductImage(int imageId) throws Exception {
+        ProductImage productImage = productImageRepository.findById(imageId)
                 .orElseThrow(() -> new EntityNotFoundException("Product image not found"));
         productImageRepository.delete(productImage);
-        uploadFileService.deleteFile(uploadFileService.getUploadFileById(uploadFileId)
+        uploadFileService.deleteFile(uploadFileService.getUploadFileById(imageId)
                 .orElseThrow(() -> new EntityNotFoundException("Upload file not found")));
     }
 

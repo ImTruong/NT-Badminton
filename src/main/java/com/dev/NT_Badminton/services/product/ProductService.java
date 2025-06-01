@@ -7,6 +7,8 @@ import com.dev.NT_Badminton.entities.products.Product;
 import com.dev.NT_Badminton.entities.products.ProductOption;
 import com.dev.NT_Badminton.entities.products.ProductOptionValue;
 import com.dev.NT_Badminton.entities.products.ProductVariants;
+import com.dev.NT_Badminton.entities.products.constant.ProductImageType;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -49,5 +51,7 @@ public interface ProductService {
 
     ProductDetailResponse getProductDetail(int productId);
 
-    void deleteProductImage(int productId, int uploadFileId) throws Exception;
+    boolean addProductImage(int productId, MultipartFile image, ProductImageType imageType) throws Exception;
+
+    void deleteProductImage(int imageId) throws Exception;
 }

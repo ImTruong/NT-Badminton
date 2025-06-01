@@ -1,10 +1,7 @@
 package com.dev.NT_Badminton.repositories.product;
 
 import com.dev.NT_Badminton.dto.request.product.SearchProductRequest;
-import com.dev.NT_Badminton.dto.response.product.ProductDetailResponse;
-import com.dev.NT_Badminton.dto.response.product.ProductOptionResponse;
-import com.dev.NT_Badminton.dto.response.product.ProductVariantResponse;
-import com.dev.NT_Badminton.dto.response.product.SearchProductReponse;
+import com.dev.NT_Badminton.dto.response.product.*;
 import com.dev.NT_Badminton.dto.response.rating.RatingResponse;
 import com.dev.NT_Badminton.entities.discounts.QDiscount;
 import com.dev.NT_Badminton.entities.products.*;
@@ -157,8 +154,13 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                 )
                 .fetchOne();
         if (productDetailResponse != null) {
-            List<String> imageUrls = query()
-                    .select(qUploadFile.originUrl)
+            List<ProductImageResponse> images = query()
+                    .select(Projections.constructor(
+                            ProductImageResponse.class,
+                            qProductImage.id,
+                            qUploadFile.originUrl,
+                            qProductImage.type
+                    ))
                     .from(qProductImage)
                     .join(qUploadFile).on(qProductImage.imageId.eq(qUploadFile.id))
                     .where(qProductImage.productId.eq(productId)
@@ -247,27 +249,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                     .groupBy(qProductVariants.id, qProductVariants.sku, qProductVariants.price, qProductVariants.quantity,
                             qProductOptionValue.productOptionId, qProductOptionValue.id)
                     .fetch();
-            productDetailResponse.setImageUrls(imageUrls);
-            productDetailResponse.setCoverImageUrl(query()
-                .select(qUploadFile.originUrl)
-                .from(qProductImage)
-                .join(qUploadFile).on(qProductImage.imageId.eq(qUploadFile.id))
-                .where(qProductImage.productId.eq(productId)
-                        .and(qProductImage.type.eq(ProductImageType.COVER))
-                        .and(qProductImage.deleted.eq(false))
-                        .and(qUploadFile.deleted.eq(false))
-                )
-                .fetchFirst());
-            productDetailResponse.setMainImageUrl(query()
-                .select(qUploadFile.originUrl)
-                .from(qProductImage)
-                .join(qUploadFile).on(qProductImage.imageId.eq(qUploadFile.id))
-                .where(qProductImage.productId.eq(productId)
-                        .and(qProductImage.type.eq(ProductImageType.MAIN))
-                        .and(qProductImage.deleted.eq(false))
-                        .and(qUploadFile.deleted.eq(false))
-                )
-                .fetchFirst());
+            productDetailResponse.setImages(images);
             productDetailResponse.setRatings(ratings);
             productDetailResponse.setOptions(options);
             productDetailResponse.setVariants(variants);
