@@ -42,7 +42,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     }
 
     // Xóa ảnh với public ID
-    public String deleteImage(String publicId) throws IOException {
+    public String deleteFile(String publicId) throws IOException {
         Map deleteResult = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
         return deleteResult.get("result").toString();
     }

@@ -224,5 +224,15 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findProductDetailById(productId);
     }
 
+    @Transactional
+    @Override
+    public void deleteProductImage(int productId, int uploadFileId) throws Exception {
+        ProductImage productImage = productImageRepository.findByProductIdAndImageId(productId, uploadFileId)
+                .orElseThrow(() -> new EntityNotFoundException("Product image not found"));
+        productImageRepository.delete(productImage);
+        uploadFileService.deleteFile(uploadFileService.getUploadFileById(uploadFileId)
+                .orElseThrow(() -> new EntityNotFoundException("Upload file not found")));
+    }
+
 
 }

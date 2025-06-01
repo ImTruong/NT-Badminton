@@ -48,4 +48,6 @@ public interface ProductService {
     List<SearchProductReponse> searchProducts(SearchProductRequest searchProductRequest);
 
     ProductDetailResponse getProductDetail(int productId);
+
+    void deleteProductImage(int productId, int uploadFileId) throws Exception;
 }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductImageRepository extends JpaRepository<ProductImage, Integer> {
@@ -13,4 +14,6 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, Inte
     List<ProductImage> findAllByProductId(int productId);
 
     boolean existsByProductIdAndImageId(int productId, int imageId);
+
+    Optional<ProductImage> findByProductIdAndImageId(Integer productId, Integer imageId);
 }

@@ -115,13 +115,11 @@ CREATE TABLE `categories`
     `slug`              varchar(500) NOT NULL,
     `short_description` tinytext              DEFAULT NULL,
     `parent_id`         int unsigned DEFAULT NULL,
-    `image_id`          int unsigned         DEFAULT NULL,
     `deleted`           bit(1)       NOT NULL DEFAULT 0,
     `created_at`        datetime     NOT NULL,
     `updated_at`        datetime     NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY (`slug`),
-    FOREIGN KEY (`image_id`) REFERENCES `upload_files` (`id`)
 );
 
 CREATE TABLE `products`

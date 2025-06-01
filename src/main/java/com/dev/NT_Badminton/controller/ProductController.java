@@ -2,12 +2,15 @@ package com.dev.NT_Badminton.controller;
 
 import com.dev.NT_Badminton.dto.request.product.*;
 import com.dev.NT_Badminton.dto.response.ApiResponse;
+import com.dev.NT_Badminton.entities.upload_file.UploadFile;
 import com.dev.NT_Badminton.services.product.ProductService;
+import com.dev.NT_Badminton.services.uploadFile.UploadFileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/product")
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductService productService;
+    private final UploadFileService uploadFileService;
 
     @PostMapping
     public ResponseEntity<?> createProduct(@RequestBody @Valid ModifyProductRequest modifyProductRequest) {
@@ -117,6 +121,20 @@ public class ProductController {
     public ResponseEntity<?> deleteProductVariant(@PathVariable int variantId) {
         productService.deleteProductVariant(variantId);
         ApiResponse<String> response = new ApiResponse<>(true,"Product variant deleted successfully");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/image")
+    public ResponseEntity<?> uploadProductImage(@RequestParam("file") MultipartFile file) throws Exception {
+        UploadFile uploadFile = uploadFileService.uploadFile(file, "products");
+        ApiResponse<?> response = new ApiResponse<>(true,"Product image uploaded successfully", uploadFile.getId());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/image")
+    public ResponseEntity<?> deleteProductImage(@RequestParam int imageId, @RequestParam int uploadFileId) throws Exception {
+        productService.deleteProductImage(imageId, uploadFileId);
+        ApiResponse<String> response = new ApiResponse<>(true,"Product image deleted successfully");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

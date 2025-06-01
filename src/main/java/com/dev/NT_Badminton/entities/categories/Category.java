@@ -27,8 +27,4 @@ public class Category extends BaseEntity {
 
     Integer parentId;
 
-    Integer imageId;
-
-    @Transient
-    UploadFile image;
 }
