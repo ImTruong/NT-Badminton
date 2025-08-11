@@ -25,13 +25,10 @@ public class CategoryResponse {
 
     List<CategoryResponse> children;
 
-    String imageUrl;
-
-    public CategoryResponse(Integer categoryId, String name, String slug, String shortDescription, String imageUrl) {
+    public CategoryResponse(Integer categoryId, String name, String slug, String shortDescription) {
         this.categoryId = categoryId;
         this.name = name;
         this.slug = slug;
         this.shortDescription = shortDescription;
-        this.imageUrl = imageUrl;
     }
 }

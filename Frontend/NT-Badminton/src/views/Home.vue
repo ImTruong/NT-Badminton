@@ -1,6 +1,7 @@
 <script setup>
   import Header from "@/components/Header.vue";
   import { ref, onMounted, onUnmounted } from "vue";
+  import ChoiceSlider from "@/components/ChoiceSlider.vue";
 
   const sliderIdPrefix = 'slider-image-';
   const sliderImages = ref([
@@ -11,21 +12,6 @@
   const sliderIndex = ref(0);
   let sliderInterval = null;
 
-
-  const categoryList = ref(null);
-  const atLeftEdge = ref(true);
-  const atRightEdge = ref(false);
-  function checkCategoryScroll() {
-    if (categoryList.value) {
-      // Check if at left edge (scrollLeft === 0)
-      atLeftEdge.value = categoryList.value.scrollLeft <= 0;
-      // Check if at right edge (scrolled to the max possible)
-      atRightEdge.value = Math.ceil(categoryList.value.scrollLeft + categoryList.value.clientWidth) >=
-          categoryList.value.scrollWidth;
-    }
-  }
-
-  const activeCategory = ref(0);
   const categories = [
     { id: 0, name: 'Tất Cả Sản Phẩm' },
     { id: 1, name: 'Vợt Cầu Lông' },
@@ -35,6 +21,7 @@
     { id: 5, name: 'Ao Cầu Lông' },
     { id: 6, name: 'Khác' }
   ];
+  const activeCategory = ref(categories[0].id);
   const changeCategory = (categoryId) => {
     activeCategory.value = categoryId;
   }
@@ -69,15 +56,6 @@
           slider.scrollLeft = 0;
       }
     }, 4000);
-
-
-    // Check initial scroll position
-    checkCategoryScroll();
-
-    // Add event listener for scrolling
-    if (categoryList.value) {
-      categoryList.value.addEventListener('scroll', checkCategoryScroll);
-    }
   })
   onUnmounted(() => {
     clearInterval(sliderInterval);
@@ -134,18 +112,11 @@
       <h2>Sale Off</h2>
     </div>
     <div class="sale-off-product">
-      <div class="categories" :class="{ 'hide-left-fade': atLeftEdge, 'hide-right-fade': atRightEdge }">
-        <ul class="category-list" ref="categoryList">
-          <li v-for="(category, index) in categories"
-              :key="category.id" class="category-item"
-              :class="{ active: activeCategory === category.id }"
-              @click="changeCategory(category.id)"
-          >
-            <a href="#" @click.prevent>{{ category.name }}</a>
-          </li>
-        </ul>
-
-      </div>
+      <ChoiceSlider 
+        :categories="categories"
+        :activeCategory="activeCategory"
+        @changeCategory="changeCategory"
+      />
       <div class="products">
         <div class="product-scroll">
           <div class="prev-scroll scroll-btn" @click="scrollProductSaleOff('left')">
@@ -285,97 +256,6 @@
   }
   .sale-off-product{
     width: 100%;
-  }
-  .categories{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid #eaeaea;
-    border-radius: 10px;
-    width: 100%;
-    position: relative; /* Add this for absolute positioning of pseudo-elements */
-    overflow: hidden;
-  }
-  .categories::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 20px;
-    height: 100%;
-    background: linear-gradient(to right, rgba(255,255,255,0.95), rgba(255,255,255,0));
-    z-index: 2;
-    pointer-events: none; /* Allow clicks to pass through to elements behind it */
-  }
-
-  /* Right fade */
-  .categories::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 40px;
-    height: 100%;
-    background: linear-gradient(to left, rgba(255,255,255,0.95), rgba(255,255,255,0));
-    z-index: 2;
-    pointer-events: none;
-  }
-  .categories.hide-right-fade::after {
-    opacity: 0;
-  }
-  .categories.hide-left-fade::before {
-    opacity: 0;
-  }
-  /* Add smooth transitions */
-  .categories::before, .categories::after {
-    transition: opacity 0.3s ease;
-  }
-  .category-list{
-    list-style: none;
-    display: flex;
-    flex-direction: row;
-    padding: 0;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    background: #fbfbfb;
-  }
-  .category-item{
-    flex: 0 0 220px;
-    font-size: 1.2rem;
-    text-align: center;
-    text-decoration: none;
-    padding: 5px;
-    border-right: #eaeaea 1px solid;
-    margin: 10px 0 10px 0;
-  }
-  .category-item.active {
-    background-color: var(--main-color);
-  }
-  .category-item.active a {
-    color: #ffffff;
-  }
-  .category-item a {
-    text-decoration: none;
-    color: #545454;
-    font-weight: bold;
-    height: 100%;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .category-list::-webkit-scrollbar {
-    display: none;
-  }
-  .category-item a {
-    text-decoration: none;
-    color: #545454;
-    font-weight: bold;
-    height: 100%;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
   .products{
     margin-bottom: 60px;

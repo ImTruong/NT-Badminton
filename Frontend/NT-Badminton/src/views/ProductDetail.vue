@@ -248,6 +248,20 @@
     };
   }
 
+  const getFirstLetter = (name) => {
+    if (!name || name.length === 0) return '';
+    return name.charAt(0).toUpperCase();
+  };
+
+  const hoverRating = ref(0)          // Số sao đang hover
+  const selectedRating = ref(0)       // Số sao đã click
+
+  // Trả về icon: nếu đang hover thì ưu tiên hover, còn không thì hiển thị theo selectedRating
+  const getStarIcon = (i) => {
+    const active = hoverRating.value ? hoverRating.value : selectedRating.value
+    return i <= active ? ['fas', 'star'] : ['far', 'star']
+  }
+
   onMounted(() => {
     // Khi resize thì giữ đúng ảnh hiện tại
     window.addEventListener('resize', () => {
@@ -405,7 +419,6 @@
             {{ product.description }}
           </p>
         </div>
-
         <div
             role="tabpanel"
             id="reviews-panel"
@@ -476,18 +489,60 @@
           </div>
           <div class="rating-list">
             <div class="rating-item" v-for="(rating, index) in product.ratings" :key="index">
-              <div class="rating-user">{{ rating.userId }}</div>
-              <div class="rating-stars star-icon">
+              <div class="left-rating-wrap">
+                <div class="rating-user-avatar">
+                  <span class="user-avatar">{{ getFirstLetter(rating.name) }}</span>
+                </div>
+              </div>
+              <div class="right-rating-wrap">
+                <div class="upper-rating-box">
+                  <div class="rating-user bold-text">{{ rating.name }}</div>
+                  <div class="rating-stars star-icon">
+                    <font-awesome-icon
+                        v-for="i in 5"
+                        :key="i"
+                        :icon="i <= rating.rating ? ['fas', 'star'] : ['far', 'star']"
+                        class="star-icon"
+                        size="sm"
+                    />
+                  </div>
+                </div>
+                <div class="rating-comment">{{ rating.comment }}</div>
+                <div class="time-comments">
+                  <span class="time bold-text">{{ new Date(rating.timeCreated).toLocaleDateString() }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="write-review-box">
+            <form @submit.prevent class="form-review">
+              <h2 class="title">Đánh giá sản phẩm</h2>
+              <span class="sub-title">Hãy chia sẻ những điều bạn nghĩ về sản phẩm này với những người mua khác nhé.</span>
+              <div class="rating-stars">
+                <span class="bold-text">Đánh giá của bạn:</span>
                 <font-awesome-icon
                     v-for="i in 5"
                     :key="i"
-                    :icon="i <= rating.rating ? ['fas', 'star'] : ['far', 'star']"
-                    class="star-icon"
-                    size="sm"
+                    :icon="getStarIcon(i)"
+                    class="star-icon choosable-star"
+                    size="lg"
+                    @mouseover="hoverRating = i"
+                    @mouseleave="hoverRating = 0"
+                    @click="selectedRating = i"
                 />
               </div>
-              <div class="rating-comment">{{ rating.comment }}</div>
-            </div>
+              <div class="desc-box">
+                <textarea
+                    class="review-textarea"
+                    placeholder="Nhập đánh giá của bạn tại đây..."
+                    rows="4"
+                    required
+                ></textarea>
+              </div>
+              <div class="btn-review">
+                <button type="submit" class="btn">Gửi đánh giá</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -652,9 +707,6 @@
   .cart-btn {
     width: 200px;
     padding: 10px;
-    background-color: var(--main-color);
-    border: none;
-    color: #ffffff;
     border-radius: 10px;
   }
 
@@ -668,6 +720,9 @@
     font-weight: bold;
   }
   .btn{
+    background-color: var(--main-color);
+    border: none;
+    color: #ffffff;
     transition: background-color .2s, color .2s, border-color .2s;
   }
   .option:not(:last-child){
@@ -758,4 +813,86 @@
     gap: 20px;
     margin: 10px 0;
   }
+  .rating-list{
+    font-size: 15px;
+  }
+  .upper-rating-box{
+    display: flex;
+    gap: 5px;
+    font-size: 18px;
+  }
+  .rating-item{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 10px 0;
+    padding: 20px;
+    border-bottom: 1px solid #dbdbdb;
+  }
+  .rating-user-avatar{
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #8d8c8c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #000000;
+    margin-right: 20px;
+  }
+  .right-rating-wrap{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .bold-text{
+    font-weight: bold;
+  }
+  .time{
+    font-size: 13px;
+  }
+  .form-review{
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .title{
+    font-size: 25px;
+    font-weight: bold;
+    color: #f66315;
+  }
+  .sub-title{
+    font-size: 15px;
+    color: #8d8c8c;
+  }
+  .review-textarea{
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    resize: vertical;
+  }
+  .btn-review{
+    display: flex;
+    justify-content: flex-end;
+  }
+  .btn-review button{
+    padding: 10px 40px;
+    border-radius: 10px;
+  }
+  .rating-stars{
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    font-size: 15px;
+  }
+  .choosable-star{
+    cursor: pointer;
+    transition: color .2s;
+  }
+
+
 </style>

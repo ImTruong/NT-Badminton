@@ -1,3 +1,34 @@
+<script setup>
+  import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+  import {getCategories} from "@/api/category.js";
+  import { ref, onMounted } from 'vue';
+  import HeaderCartItem from "@/components/HeaderCartItem.vue";
+
+  const cartItems = ref([
+    {
+      id: 1,
+      name: "Racket Yonex Voltric Z Force II",
+      img: "https://cdn.shopvnb.com/img/64x64/uploads/san_pham/vot-cau-long-vnb-v200i-hong-3.webp",
+      price: 100000,
+      quantity: 1
+    }
+  ]);
+
+  const categories = ref(null);
+
+  onMounted(() => {
+    (async () => {
+      try {
+        const fetchedCategories = await getCategories();
+        categories.value = fetchedCategories;
+        console.log("Categories fetched successfully:", categories.value);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    })();
+  });
+</script>
+
 <template>
   <div class="container">
     <div class="header-top">
@@ -40,28 +71,10 @@
             <div class="cart-dropdown dropdown">
               <div class="cart-title">Giỏ hàng</div>
               <div class="cart-items">
-                <div class="cart-item">
-                  <img class="item-image" src="@/assets/icons/cartItem.jpg" alt="Product Image"
-                       style ="width: 64px; height: 64px; "
-                  />
-                  <div class="cart-item-details">
-                    <div class="cart-item-name">
-                      <a class="item-name" href="">
-                        Racket Yonex Voltric Z Force II
-                      </a>
-                      <font-awesome-icon class="cart-item-details-icon" :icon="['fas', 'trash']" />
-                    </div>
-                    <div class="cart-item-control">
-                      <div class="item-quantity-choice">
-                        <button class="reduce-quantity">-</button>
-                        <input type="number" class="item-quantity" value="1" min="1" />
-                        <button class="increase-quantity">+</button>
-                      </div>
-                      <span class="cart-item-price">Giá: 100.000đ</span>
-                    </div>
-
-                  </div>
-                </div>
+                <HeaderCartItem
+                  v-for="item in cartItems" :key="item.id"
+                  :item="item"
+                />
               </div>
               <div class="cart-end">
                 <div class="total">
@@ -94,91 +107,19 @@
           Sản phẩm <font-awesome-icon class="product-icon" :icon="['fas', 'down-long']" />
         </a>
         <ul class="product-category">
-          <li class="category-item">
-            <a href="#">Racket</a>
+          <li
+              v-for="category in categories" :key="category.id"
+              class="category-item">
+            <a href="">{{category.name}}</a>
             <ul class="subcategory-list">
-              <li class="subcategory-item">
-                <a href="#">Racket Yonex</a>
-              </li>
-              <li class="subcategory-item">
-                <a href="#">Racket Victor</a>
-              </li>
-              <li class="subcategory-item">
-                <a href="#">Racket Lining</a>
+              <li
+                  v-for="subCategory in category.children"
+                  class="subcategory-item">
+                <a href="#">{{subCategory.name}}</a>
               </li>
             </ul>
           </li>
-          <li class="category-item">
-            <a href="#">Racket</a>
-            <ul class="subcategory-list">
-              <li class="subcategory-item">
-                <a href="#">Racket Yonex</a>
-              </li>
-              <li class="subcategory-item">
-                <a href="#">Racket Victor</a>
-              </li>
-              <li class="subcategory-item">
-                <a href="#">Racket Lining</a>
-              </li>
-            </ul>
-          </li>
-          <li class="category-item">
-            <a href="#">Racket</a>
-            <ul class="subcategory-list">
-              <li class="subcategory-item">
-                <a href="#">Racket Yonex</a>
-              </li>
-              <li class="subcategory-item">
-                <a href="#">Racket Victor</a>
-              </li>
-              <li class="subcategory-item">
-                <a href="#">Racket Lining</a>
-              </li>
-            </ul>
-          </li>
-          <li class="category-item">
-            <a href="#">Racket</a>
-            <ul class="subcategory-list">
-              <li class="subcategory-item">
-                <a href="#">Racket Yonex</a>
-              </li>
-              <li class="subcategory-item">
-                <a href="#">Racket Victor</a>
-              </li>
-              <li class="subcategory-item">
-                <a href="#">Racket Lining</a>
-              </li>
-            </ul>
-          </li>
-          <li class="category-item">
-            <a href="#">Giày</a>
-            <ul class="subcategory-list">
-              <li class="subcategory-item">
-                <a href="#">Giày Yonex</a>
-              </li>
-              <li class="subcategory-item">
-                <a href="#">Giày Victor</a>
-              </li>
-              <li class="subcategory-item">
-                <a href="#">Giày Lining</a>
-              </li>
-            </ul>
-          </li>
-          <li class="category-item">
-            <a href="#">Quần áo</a>
-            <ul class="subcategory-list">
-              <li class="subcategory-item">
-                <a href="#">Áo Yonex</a>
-              </li>
-              <li class="subcategory-item">
-                <a href="#">Áo Victor</a>
-              </li>
-              <li class="subcategory-item">
-                <a href="#">Áo Lining</a>
-              </li>
-            </ul>
-          </li>
-          </ul>
+        </ul>
       </li>
     </ul>
   </div>
@@ -354,39 +295,6 @@
     text-align: center;
   }
 
-  .cart-item {
-    min-width: 320px;
-    display: flex;
-    align-items: center;
-    background-color: #ffffff;
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-  }
-
-  .cart-item-details {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .cart-item-name {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    margin-bottom: 10px;
-  }
-
-  .cart-item-control {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-  }
-
-  .item-quantity-choice {
-    display: flex;
-    gap: 3px;
-  }
-
   .item-quantity-choice input {
     width: 50px;
     text-align: center;
@@ -401,13 +309,6 @@
     color: #ffffff;
     cursor: pointer;
     border-radius: 20px;
-  }
-
-
-  .cart-item-price {
-    margin-left: auto;
-    font-weight: bold;
-    color: var(--main-color);
   }
 
   .cart-end {
@@ -444,16 +345,6 @@
     color: var(--main-color);
     cursor: pointer;
     border: 1px solid var(--main-color);
-  }
-
-  .item-name:hover {
-    color: var(--main-color);
-    background-color: #ffffff;
-  }
-  a.item-name{
-    &:hover{
-      background-color: transparent;
-    }
   }
   .product-category{
     display: none;
@@ -546,10 +437,4 @@
     -webkit-appearance: none;
     appearance: none;
   }
-
-
-
-
 </style>
-<script setup lang="ts">
-</script>

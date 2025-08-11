@@ -14,17 +14,14 @@ public class CategoryRepositoryImpl extends BaseRepository implements CategoryRe
     @Override
     public List<CategoryResponse> getAllCategories() {
         QCategory qCategory = QCategory.category;
-        QUploadFile qUploadFile = QUploadFile.uploadFile;
         List<CategoryResponse> categories = query()
                 .select(Projections.constructor(CategoryResponse.class,
                         qCategory.id,
                         qCategory.name,
                         qCategory.slug,
-                        qCategory.shortDescription,
-                        qUploadFile.originUrl
+                        qCategory.shortDescription
                 ))
                 .from(qCategory)
-                .leftJoin(qUploadFile).on(qCategory.imageId.eq(qUploadFile.id))
                 .where(qCategory.deleted.eq(false)
                         .and(qCategory.parentId.isNull()))
                 .fetch();
@@ -35,11 +32,9 @@ public class CategoryRepositoryImpl extends BaseRepository implements CategoryRe
                             qCategory.id,
                             qCategory.name,
                             qCategory.slug,
-                            qCategory.shortDescription,
-                            qUploadFile.originUrl
+                            qCategory.shortDescription
                     ))
                     .from(qCategory)
-                    .leftJoin(qUploadFile).on(qCategory.imageId.eq(qUploadFile.id))
                     .where(qCategory.deleted.eq(false)
                             .and(qCategory.parentId.eq(category.getCategoryId())))
                     .fetch();
