@@ -1,5 +1,25 @@
 <script setup>
+  import { useRouter } from 'vue-router';
+  import { login } from '@/api/user';
+  import { ref } from 'vue';
 
+  const router = useRouter();
+
+  const form = ref({
+    username: '',
+    password: ''
+  });
+
+  const handleSubmit = async () => {
+    try{
+      const token = await login(form.value);
+      localStorage.setItem('token', token);
+      router.push('/');
+    } catch (error) {
+      console.error("Login error:", error);
+      alert(error);
+    }
+  };
 </script>
 
 <template>
@@ -10,9 +30,9 @@
         <h1>Đăng nhập</h1>
       </div>
       <div class="form-container">
-        <form class="form-register" @submit.prevent>
-          <input type="email" name="email" id="email" placeholder="Email" required>
-          <input type="password" name="password" id="password" placeholder="Mật khẩu" required>
+        <form class="form-register" id="form-register" @submit.prevent="handleSubmit">
+          <input type="email" name="email" id="email" placeholder="Email" v-model="form.username" required>
+          <input type="password" name="password" id="password" placeholder="Mật khẩu" v-model="form.password" required>
         </form>
       </div>
       <div class="submit-container">

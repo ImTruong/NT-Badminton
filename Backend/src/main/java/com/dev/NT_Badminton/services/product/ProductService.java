@@ -8,6 +8,7 @@ import com.dev.NT_Badminton.entities.products.ProductOption;
 import com.dev.NT_Badminton.entities.products.ProductOptionValue;
 import com.dev.NT_Badminton.entities.products.ProductVariants;
 import com.dev.NT_Badminton.entities.products.constant.ProductImageType;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -47,7 +48,7 @@ public interface ProductService {
 
     void deleteProductVariant(int productVariantId);
 
-    List<SearchProductReponse> searchProducts(SearchProductRequest searchProductRequest);
+    List<SearchProductReponse> searchProducts(SearchProductRequest searchProductRequest, Pageable pageable);
 
     ProductDetailResponse getProductDetail(int productId);
 

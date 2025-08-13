@@ -110,7 +110,6 @@ public class UserServiceImpl implements UserService {
                 .email(registerRequest.getEmail())
                 .password(userPassword)
                 .name(registerRequest.getFirstName() + " " + registerRequest.getLastName())
-                .birthday(registerRequest.getBirthday())
                 .gender(Gender.fromValue(registerRequest.getGender()))
                 .status(ActiveStatus.ACTIVE)
                 .roleId(PermissionType.USER.getRoleId())

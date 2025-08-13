@@ -19,7 +19,7 @@ public interface CartService {
 
     void deleteAllProductFromCart();
 
-    public PageImpl<CartProductResponse> getUserCart(Pageable pageable);
+    PageImpl<CartProductResponse> getUserCart(Pageable pageable);
 
     Cart checkProductExistenceInUserCart(Integer productVariantId, Integer userId);
 

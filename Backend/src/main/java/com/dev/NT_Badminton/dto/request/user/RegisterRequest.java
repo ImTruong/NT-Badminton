@@ -29,8 +29,6 @@ public class RegisterRequest {
     @Pattern(regexp = "^[0-9]*$", message = "Phone number must not contain special characters")
     private String phone;
 
-    private Date birthday;
-
     @NotNull(message = "Gender is required")
     private int gender;
 

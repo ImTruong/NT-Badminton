@@ -15,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -192,7 +193,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<SearchProductReponse> searchProducts(SearchProductRequest searchProductRequest) {
+    public List<SearchProductReponse> searchProducts(SearchProductRequest searchProductRequest, Pageable pageable) {
         List<SearchProductReponse> result = productRepository.findProducts(searchProductRequest);
         return result;
     }

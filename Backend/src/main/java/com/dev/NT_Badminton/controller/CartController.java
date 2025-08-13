@@ -50,9 +50,8 @@ public class CartController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/get-all")
-    public ResponseEntity<?> getAllCart(@RequestParam("page") int page, @RequestParam("size") int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    @GetMapping
+    public ResponseEntity<?> getAllCart(Pageable pageable) {
         ApiResponse<?> response = new ApiResponse<>(true, "Get All Cart Successful", cartService.getUserCart(pageable));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

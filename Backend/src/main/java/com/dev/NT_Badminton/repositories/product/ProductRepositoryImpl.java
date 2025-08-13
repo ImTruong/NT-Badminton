@@ -117,13 +117,11 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                                 .and((qProductImage.deleted.eq(false)).or(qProductImage.isNull()))
                                 .and(qUploadFile.deleted.eq(false).or(qUploadFile.isNull()))
                                 .and(predicate)
-
                 )
                 .groupBy(qProduct.id, qUploadFile.originUrl);
 
         Optional.ofNullable(searchProductRequest.getRating())
                 .ifPresent(minRating -> query.having(avgRating.goe(minRating)));
-
         return query.fetch();
     }
 

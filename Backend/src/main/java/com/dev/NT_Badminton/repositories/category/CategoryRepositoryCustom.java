@@ -8,4 +8,7 @@ public interface CategoryRepositoryCustom {
 
     List<CategoryResponse> getAllCategories();
 
+    List<CategoryResponse> getRootCategories();
+
+
 }

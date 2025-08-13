@@ -8,10 +8,13 @@ import com.dev.NT_Badminton.services.product.ProductService;
 import com.dev.NT_Badminton.services.uploadFile.UploadFileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/product")
@@ -85,9 +88,20 @@ public class ProductController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping()
-    public ResponseEntity<?> searchProducts(@RequestBody @Valid SearchProductRequest searchProductRequest) {
-        ApiResponse<?> response = new ApiResponse<>(true,"Search result fetch successfully" ,productService.searchProducts(searchProductRequest));
+    @GetMapping
+    public ResponseEntity<?> searchProducts(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) List<Integer> categoryIds,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Integer rating,
+            Pageable pageable
+    ) {
+        SearchProductRequest searchRequest = new SearchProductRequest(
+                name, brand, categoryIds, minPrice, maxPrice, rating
+        );
+        ApiResponse<?> response = new ApiResponse<>(true, "Products fetched successfully", productService.searchProducts(searchRequest, pageable));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

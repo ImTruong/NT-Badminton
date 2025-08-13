@@ -44,4 +44,11 @@ public class CategoryController {
         ApiResponse<?> response = new ApiResponse<>(true, "Get All Categories Successful", categoryService.getAllCategories());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @GetMapping("/root")
+    public ResponseEntity<?> getRootCategories() {
+        ApiResponse<?> response = new ApiResponse<>(true, "Get Root Categories Successful", categoryService.getRootCategories());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

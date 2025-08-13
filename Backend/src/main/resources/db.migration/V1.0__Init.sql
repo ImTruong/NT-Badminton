@@ -81,7 +81,6 @@ CREATE TABLE `users`
     `email`      varchar(255)         DEFAULT NULL,
     `name`       varchar(255)         DEFAULT NULL,
     `password`   varchar(255)         DEFAULT NULL COMMENT 'Mật khẩu của người dùng',
-    `birthday`   date                 DEFAULT NULL,
     `gender`     tinyint              DEFAULT NULL,
     `role_id`    int unsigned          DEFAULT NULL COMMENT 'Khóa ngoại tham chiếu đến vai trò của người dùng',
     `avatar_id`  int unsigned          DEFAULT NULL COMMENT 'Khóa ngoại tham chiếu đến hình đại diện của người dùng',
@@ -119,7 +118,7 @@ CREATE TABLE `categories`
     `created_at`        datetime     NOT NULL,
     `updated_at`        datetime     NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY (`slug`),
+    UNIQUE KEY (`slug`)
 );
 
 CREATE TABLE `products`
@@ -140,51 +139,51 @@ CREATE TABLE `products`
 );
 
 CREATE TABLE `product_options` (
-   `id`            int unsigned NOT NULL AUTO_INCREMENT,
-   `name`          varchar(255) NOT NULL, -- Tên của thuộc tính (ví dụ: size, color)
-   `description`   text DEFAULT NULL,     -- Mô tả tùy chọn (nếu cần)
-   `product_id`    int unsigned NOT NULL,
-   `deleted`       bit(1)       NOT NULL DEFAULT 0,
-   `created_at`    datetime NOT NULL,
-   `updated_at`    datetime NOT NULL,
-   PRIMARY KEY (`id`),
-   FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
+                                   `id`            int unsigned NOT NULL AUTO_INCREMENT,
+                                   `name`          varchar(255) NOT NULL, -- Tên của thuộc tính (ví dụ: size, color)
+                                   `description`   text DEFAULT NULL,     -- Mô tả tùy chọn (nếu cần)
+                                   `product_id`    int unsigned NOT NULL,
+                                   `deleted`       bit(1)       NOT NULL DEFAULT 0,
+                                   `created_at`    datetime NOT NULL,
+                                   `updated_at`    datetime NOT NULL,
+                                   PRIMARY KEY (`id`),
+                                   FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
 );
 
 CREATE TABLE `product_option_values` (
-    `id`                int unsigned NOT NULL AUTO_INCREMENT,
-    `product_option_id` int unsigned NOT NULL, -- FK đến bảng product_options
-    `value`             varchar(255) NOT NULL, -- Giá trị của thuộc tính (ví dụ: "36", "red")
-    `deleted`           bit(1)      NOT NULL DEFAULT 0,
-    `created_at`        datetime NOT NULL,
-    `updated_at`        datetime NOT NULL,
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (`product_option_id`) REFERENCES `product_options` (`id`) ON DELETE CASCADE
+                                         `id`                int unsigned NOT NULL AUTO_INCREMENT,
+                                         `product_option_id` int unsigned NOT NULL, -- FK đến bảng product_options
+                                         `value`             varchar(255) NOT NULL, -- Giá trị của thuộc tính (ví dụ: "36", "red")
+                                         `deleted`           bit(1)      NOT NULL DEFAULT 0,
+                                         `created_at`        datetime NOT NULL,
+                                         `updated_at`        datetime NOT NULL,
+                                         PRIMARY KEY (`id`),
+                                         FOREIGN KEY (`product_option_id`) REFERENCES `product_options` (`id`) ON DELETE CASCADE
 );
 
 CREATE TABLE `product_variants` (
-    `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `product_id` INT UNSIGNED NOT NULL,
-    `sku`        VARCHAR(100) NOT NULL UNIQUE, -- SKU riêng cho từng biến thể
-    `quantity`   INT UNSIGNED NOT NULL DEFAULT 0,
-    `price`      INT UNSIGNED NOT NULL DEFAULT 0, -- Giá riêng cho biến thể
-    `deleted`    BIT(1) NOT NULL DEFAULT 0,
-    `created_at` DATETIME NOT NULL,
-    `updated_at` DATETIME NOT NULL,
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
+                                    `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                                    `product_id` INT UNSIGNED NOT NULL,
+                                    `sku`        VARCHAR(100) NOT NULL UNIQUE, -- SKU riêng cho từng biến thể
+                                    `quantity`   INT UNSIGNED NOT NULL DEFAULT 0,
+                                    `price`      INT UNSIGNED NOT NULL DEFAULT 0, -- Giá riêng cho biến thể
+                                    `deleted`    BIT(1) NOT NULL DEFAULT 0,
+                                    `created_at` DATETIME NOT NULL,
+                                    `updated_at` DATETIME NOT NULL,
+                                    PRIMARY KEY (`id`),
+                                    FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
 );
 
 CREATE TABLE `product_variant_option_values` (
-    `id`                    INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `product_variant_id`     INT UNSIGNED NOT NULL,
-    `product_option_value_id` INT UNSIGNED NOT NULL,
-    `deleted`    BIT(1) NOT NULL DEFAULT 0,
-    `created_at` DATETIME NOT NULL,
-    `updated_at` DATETIME NOT NULL,
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (`product_variant_id`) REFERENCES `product_variants` (`id`) ON DELETE CASCADE,
-    FOREIGN KEY (`product_option_value_id`) REFERENCES `product_option_values` (`id`) ON DELETE CASCADE
+                                                 `id`                    INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                                                 `product_variant_id`     INT UNSIGNED NOT NULL,
+                                                 `product_option_value_id` INT UNSIGNED NOT NULL,
+                                                 `deleted`    BIT(1) NOT NULL DEFAULT 0,
+                                                 `created_at` DATETIME NOT NULL,
+                                                 `updated_at` DATETIME NOT NULL,
+                                                 PRIMARY KEY (`id`),
+                                                 FOREIGN KEY (`product_variant_id`) REFERENCES `product_variants` (`id`) ON DELETE CASCADE,
+                                                 FOREIGN KEY (`product_option_value_id`) REFERENCES `product_option_values` (`id`) ON DELETE CASCADE
 );
 
 CREATE TABLE `discounts`
@@ -253,7 +252,7 @@ CREATE TABLE `contacts`
     `email`         varchar(255) NOT NULL,
     `city`              int unsigned DEFAULT NULL,
     `district`          int unsigned DEFAULT NULL,
-    `street_address`    varchar(255) NOT NULL,
+    `street_address`    varchar(255) DEFAULT NULL,
     `note`          text                  DEFAULT NULL,
     `type`          tinyint      NOT NULL, -- 0 - Contact chính của user, 1 - Contact phụ của user
     `deleted`       bit(1)       NOT NULL DEFAULT 0,
@@ -322,32 +321,32 @@ CREATE TABLE `order_items`
 --     ('https://example.com/image1.jpg', 'https://example.com/thumb1.jpg', 'img_12345', 0, 800, 600, 204800, 0, NOW(), NOW()),
 --     ('https://example.com/image2.jpg', 'https://example.com/thumb2.jpg', 'img_67890', 0, 1280, 720, 409600, 0, NOW(), NOW());
 --
--- INSERT INTO categories (id, name, slug, short_description, parent_id, status, type, image_id, deleted, created_at, updated_at)
--- VALUES
 -- -- Danh mục chính
--- (1, 'Công nghệ', 'cong-nghe', 'Chuyên mục về công nghệ', NULL, 1, 0, NULL, 0, NOW(), NOW()),
--- (2, 'Thể thao', 'the-thao', 'Chuyên mục về thể thao', NULL, 1, 0, NULL, 0, NOW(), NOW()),
---
--- (3, 'Giày Cầu Lông', 'giay-cau-long', 'Các loại giày chuyên dụng cho cầu lông', 2, 1, 1, NULL, 0, NOW(), NOW()),
--- (4, 'Vợt Cầu Lông', 'vot-cau-long', 'Các loại vợt phù hợp cho mọi trình độ', 2, 1, 1, NULL, 0, NOW(), NOW()),
--- (5, 'Quần Áo Cầu Lông', 'quan-ao-cau-long', 'Trang phục thể thao cầu lông', 2, 1, 1, NULL, 0, NOW(), NOW()),
--- (6, 'Phụ Kiện Cầu Lông', 'phu-kien-cau-long', 'Các loại phụ kiện như túi đựng, băng cổ tay', 2, 1, 1, NULL, 0, NOW(), NOW()),
---
--- -- Danh mục con
--- (7, 'Giày Yonex', 'giay-yonex', 'Giày cầu lông Yonex chính hãng', 3, 1, 1, NULL, 0, NOW(), NOW()),
--- (8, 'Giày Lining', 'giay-lining', 'Giày cầu lông Lining chính hãng', 3, 1, 1, NULL, 0, NOW(), NOW()),
--- (9, 'Vợt Yonex', 'vot-yonex', 'Vợt cầu lông Yonex chính hãng', 4, 1, 1, NULL, 0, NOW(), NOW()),
--- (10, 'Vợt Lining', 'vot-lining', 'Vợt cầu lông Lining chính hãng', 4, 1, 1, NULL, 0, NOW(), NOW());
---
---
---
--- INSERT INTO products (name, slug, short_description, description, brand, status, category_id, deleted, created_at, updated_at)
+-- INSERT INTO categories(id, name, slug, short_description, parent_id, deleted, created_at, updated_at)
 -- VALUES
---     ('Giày Cầu Lông Yonex 65Z3', 'giay-yonex-65z3', 'Giày cầu lông cao cấp', 'Công nghệ chống lật cổ chân, bám sân tốt', 'Yonex', 1, 7, 0, NOW(), NOW()),
---     ('Giày Cầu Lông Lining AYAS006', 'giay-lining-ayas006', 'Giày cầu lông chuyên nghiệp', 'Thiết kế thoáng khí, đế cao su chống trơn', 'Lining', 1, 8, 0, NOW(), NOW()),
---     ('Vợt Cầu Lông Yonex Astrox 88D Pro', 'vot-yonex-astrox-88d', 'Vợt tấn công mạnh mẽ', 'Trọng lượng nhẹ, trợ lực cao', 'Yonex', 1, 9, 0, NOW(), NOW()),
---     ('Vợt Cầu Lông Lining Aeronaut 9000C', 'vot-lining-aeronaut-9000c', 'Vợt điều khiển linh hoạt', 'Khung carbon bền, trợ lực tốt', 'Lining', 1, 10, 0, NOW(), NOW()),
---     ('Quần Áo Cầu Lông Yonex 2024', 'quan-ao-yonex-2024', 'Bộ quần áo thể thao', 'Chất liệu thấm hút mồ hôi tốt', 'Yonex', 1, 5, 0, NOW(), NOW());
+-- -- Cha
+-- (1, 'Giày', 'giay', 'Các loại giày thể thao cầu lông', NULL, b'0', NOW(), NOW()),
+-- (2, 'Vợt Cầu Lông', 'vot-cau-long', 'Các loại vợt phù hợp cho mọi trình độ', NULL, b'0', NOW(), NOW()),
+-- (3, 'Quần Áo Cầu Lông', 'quan-ao-cau-long', 'Trang phục thể thao cầu lông', NULL, b'0', NOW(), NOW()),
+-- (4, 'Phụ Kiện Cầu Lông', 'phu-kien-cau-long', 'Các loại phụ kiện như túi đựng, băng cổ tay', NULL, b'0', NOW(), NOW()),
+--
+-- -- Con của Giày
+-- (5, 'Giày Yonex', 'giay-yonex', 'Giày cầu lông Yonex chính hãng', 1, b'0', NOW(), NOW()),
+-- (6, 'Giày Lining', 'giay-lining', 'Giày cầu lông Lining chính hãng', 1, b'0', NOW(), NOW()),
+--
+-- -- Con của Vợt Cầu Lông
+-- (7, 'Vợt Yonex', 'vot-yonex', 'Vợt cầu lông Yonex chính hãng', 2, b'0', NOW(), NOW()),
+-- (8, 'Vợt Lining', 'vot-lining', 'Vợt cầu lông Lining chính hãng', 2, b'0', NOW(), NOW());
+--
+-- -- Sản phẩm gán vào category con
+-- INSERT INTO products (name, slug, short_description, description, brand, category_id, deleted, created_at, updated_at)
+-- VALUES
+--     ('Giày Cầu Lông Yonex 65Z3', 'giay-yonex-65z3', 'Giày cầu lông cao cấp', 'Công nghệ chống lật cổ chân, bám sân tốt', 'Yonex', 5, 0, NOW(), NOW()),
+--     ('Giày Cầu Lông Lining AYAS006', 'giay-lining-ayas006', 'Giày cầu lông chuyên nghiệp', 'Thiết kế thoáng khí, đế cao su chống trơn', 'Lining', 6, 0, NOW(), NOW()),
+--     ('Vợt Cầu Lông Yonex Astrox 88D Pro', 'vot-yonex-astrox-88d', 'Vợt tấn công mạnh mẽ', 'Trọng lượng nhẹ, trợ lực cao', 'Yonex', 7, 0, NOW(), NOW()),
+--     ('Vợt Cầu Lông Lining Aeronaut 9000C', 'vot-lining-aeronaut-9000c', 'Vợt điều khiển linh hoạt', 'Khung carbon bền, trợ lực tốt', 'Lining', 8, 0, NOW(), NOW()),
+--     ('Quần Áo Cầu Lông Yonex 2024', 'quan-ao-yonex-2024', 'Bộ quần áo thể thao', 'Chất liệu thấm hút mồ hôi tốt', 'Yonex', 3, 0, NOW(), NOW());
+--
 --
 -- INSERT INTO product_options (name, description, product_id, deleted, created_at, updated_at)
 -- VALUES

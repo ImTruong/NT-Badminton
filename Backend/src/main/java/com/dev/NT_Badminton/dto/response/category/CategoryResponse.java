@@ -15,7 +15,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CategoryResponse {
 
-    Integer categoryId;
+    Integer id;
 
     String name;
 
@@ -25,8 +25,8 @@ public class CategoryResponse {
 
     List<CategoryResponse> children;
 
-    public CategoryResponse(Integer categoryId, String name, String slug, String shortDescription) {
-        this.categoryId = categoryId;
+    public CategoryResponse(Integer id, String name, String slug, String shortDescription) {
+        this.id = id;
         this.name = name;
         this.slug = slug;
         this.shortDescription = shortDescription;

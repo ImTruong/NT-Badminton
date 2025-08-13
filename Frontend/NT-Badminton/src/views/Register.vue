@@ -1,5 +1,34 @@
 <script setup>
+  import { register } from '@/api/user';
+  import { ref } from 'vue';
+  import { useRouter } from 'vue-router';
 
+  const router = useRouter();
+
+  const form = ref({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    phone: '',
+    gender: ''
+  });
+
+  const submitForm = async () => {
+    try {
+      await register(form.value);
+      alert("Đăng ký thành công!");
+      router.push('/login'); 
+
+    } catch (error) {
+      console.error("Error:", error);
+      alert(error);
+    }
+  };
+
+  const handleSubmit = () => {
+    submitForm();
+  }
 </script>
 
 <template>
@@ -10,29 +39,21 @@
         <h1>Đăng ký</h1>
       </div>
       <div class="form-container">
-        <form class="form-register" @submit.prevent>
-          <input type="text" name="firstName" id="first-name" placeholder="Họ" required>
-          <input type="text" name="lastName" id="last-name" placeholder="Tên" required>
-          <input type="email" name="email" id="email" placeholder="Email" required>
-          <input type="password" name="password" id="password" placeholder="Mật khẩu" required>
-          <input type="number" name="phone" id="phone" placeholder="Số điện thoại" required>
-          <div class="birthday input-div">
-            <span>
-              Ngày sinh:
-            </span>
-            <input type="date" name="birthday" id="date">
-          </div>
+        <form id="form-register" class="form-register" @submit.prevent="handleSubmit">
+          <input type="text" v-model="form.firstName" placeholder="Họ" required>
+          <input type="text" v-model="form.lastName" placeholder="Tên" required>
+          <input type="email" v-model="form.email" placeholder="Email" required>
+          <input type="password" v-model="form.password" placeholder="Mật khẩu" required>
+          <input type="number" v-model="form.phone" placeholder="Số điện thoại" required>
           <div class="gender-choice input-div">
-            <span>
-              Giới tính:
-            </span>
+            <span>Giới tính:</span>
             <div class="gender-wrap">
               <label for="gender-male">Nam</label>
-              <input type="radio" name="gender" id="gender-male" value="Nam" required>
+              <input type="radio" id="gender-male" value="0" v-model="form.gender" required>
             </div>
             <div class="gender-wrap">
               <label for="gender-female">Nữ</label>
-              <input type="radio" name="gender" id="gender-female" value="Nữ" required>
+              <input type="radio" id="gender-female" value="1" v-model="form.gender" required>
             </div>
           </div>
         </form>
@@ -137,14 +158,5 @@
   .submit-container span{
     margin: 20px 20px 0 0;
     align-self: flex-end;
-  }
-  #date{
-    width: 71%;
-    padding: 5px
-  }
-  .birthday{
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 </style>

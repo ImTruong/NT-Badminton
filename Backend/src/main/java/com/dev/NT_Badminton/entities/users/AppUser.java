@@ -30,8 +30,6 @@ public class AppUser extends BaseEntity {
 
     String password;
 
-    Date birthday;
-
     @Column(name = "role_id")
     private Integer roleId;
 

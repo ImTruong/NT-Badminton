@@ -36,11 +36,29 @@ public class CategoryRepositoryImpl extends BaseRepository implements CategoryRe
                     ))
                     .from(qCategory)
                     .where(qCategory.deleted.eq(false)
-                            .and(qCategory.parentId.eq(category.getCategoryId())))
+                            .and(qCategory.parentId.eq(category.getId())))
                     .fetch();
 
             category.setChildren(children);
         });
+        return categories;
+    }
+
+    @Override
+    public List<CategoryResponse> getRootCategories() {
+        QCategory qCategory = QCategory.category;
+        List<CategoryResponse> categories = query()
+                .select(Projections.constructor(CategoryResponse.class,
+                        qCategory.id,
+                        qCategory.name,
+                        qCategory.slug,
+                        qCategory.shortDescription
+                ))
+                .from(qCategory)
+                .where(qCategory.deleted.eq(false)
+                        .and(qCategory.parentId.isNull()))
+                .fetch();
+
         return categories;
     }
 

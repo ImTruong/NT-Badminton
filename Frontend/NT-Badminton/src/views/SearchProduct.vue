@@ -1,17 +1,10 @@
 <script setup>
   import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-  import { ref, computed } from "vue";
-  const categories = [
-    { id: "shoes", label: "Giày", value: "shoes" },
-    { id: "clothing", label: "Quần áo", value: "clothing" },
-    { id: "accessories", label: "Phụ kiện", value: "accessories" },
-    { id: "equipment", label: "Thiết bị", value: "equipment" },
-    { id: "bags", label: "Túi xách", value: "bags" },
-    { id: "rackets", label: "Vợt cầu lông", value: "rackets" },
-    { id: "shuttlecocks", label: "Quả cầu lông", value: "shuttlecocks" },
-    { id: "strings", label: "Dây vợt", value: "strings" },
-    { id: "grips", label: "Grip vợt", value: "grips" },
-  ];
+  import { ref, computed, onMounted, watch, reactive } from "vue";
+  import { getRootCategories } from "@/api/category";
+  import { searchProducts } from "@/api/product";
+
+  const categories = ref(null);
 
   const brands = [
     { id: "nike", label: "Nike", value: "nike" },
@@ -21,7 +14,36 @@
 
   const ratings = [5, 4, 3, 2, 1];
 
-  const searchQuery = ref("t");
+  const searchQuery = ref(null);
+
+  const filters = reactive({
+    name: null,
+    categoryIds: [],
+    brands: [], 
+    minPrice: null,
+    maxPrice: null,
+    rating: null
+  })
+
+  const pageSize = ref(20);
+  const currentPage = ref(0);
+  const totalPages = ref(8);
+
+  watch(
+    () => ({
+      ...filters, // destructure reactive object để Vue track từng field
+      currentPage: currentPage.value,
+      pageSize: pageSize.value
+    }),
+    () => {
+      fetchProducts()
+    },
+    { deep: true }
+  )
+
+  const fetchProducts = async () => {
+    const response = await searchProducts({ ...filters, page: currentPage.value, size: pageSize.value })
+  }
 
   const sortOptions = [
     {value: "Mặc định"},
@@ -57,10 +79,6 @@
     {id: 24, name: "Vợt cầu lông Yonex Nanoflare 800", price: 1700000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
   ]
 
-  const pageSize = 20;
-  const currentPage = ref(0); // Trang backend bắt đầu từ 0
-  const totalPages = ref(8);
-
   function goToPage(page) {
     if (page >= 0 && page < totalPages.value) {
       currentPage.value = page;
@@ -75,6 +93,15 @@
       pages.push(i);
     }
     return pages;
+  });
+
+  onMounted(async () => {
+    try {
+      const fetchedCategories = await getRootCategories();
+      categories.value = fetchedCategories;
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
   });
 
 </script>
@@ -94,19 +121,21 @@
           </h3>
           <ul class="options scroll-limit">
             <li class="option-item" v-for="cat in categories" :key="cat.id">
-              <input type="checkbox" :id="cat.id" name="category" :value="cat.value" />
-              <label :for="cat.id">{{ cat.label }}</label>
+              <input type="checkbox" 
+                :id="cat.id" name="category" 
+                :value="cat.id" 
+                v-model="filters.categoryIds" />
+              <label :for="cat.id">{{ cat.name }}</label>
             </li>
           </ul>
         </div>
         <div class="filter-option price-filter">
           <label for="price-range">Khoảng giá:</label>
           <div class="price-input-container">
-            <input type="text" class="bottom-price" name="price-range-bottom" id="price-range-bottom" autocomplete="off" placeholder="đ&#x0332 Từ">
+            <input type="text" class="bottom-price" name="price-range-bottom" id="price-range-bottom" autocomplete="off" placeholder="đ&#x0332 Từ" v-model="filters.minPrice">
             <span>-</span>
-            <input type="text" class="top-price" name="price-range-top" id="price-range-top" autocomplete="off" placeholder="đ&#x0332 Đến">
+            <input type="text" class="top-price" name="price-range-top" id="price-range-top" autocomplete="off" placeholder="đ&#x0332 Đến" v-model="filters.maxPrice">
           </div>
-
         </div>
         <div class="filter-option">
           <h3 class="header-option">
@@ -114,7 +143,7 @@
           </h3>
           <ul class="options scroll-limit">
             <li class="option-item" v-for="brand in brands" :key="brand.id">
-              <input type="checkbox" :id="brand.id" name="brand" :value="brand.value" />
+              <input type="checkbox" :id="brand.id" name="brand" :value="brand.value" v-model="filters.brands" />
               <label :for="brand.id">{{ brand.label }}</label>
             </li>
           </ul>
@@ -125,7 +154,7 @@
           </h3>
           <ul class="options">
             <li class="option-item" v-for="star in ratings" :key="star">
-              <input class="hidden" type="radio" :id="'rating-' + star" name="rating" :value="star" />
+              <input class="hidden" type="radio" :id="'rating-' + star" name="rating" :value="star" v-model="filters.rating" />
               <label :for="'rating-' + star" class="star-label">
                 <span class="stars">
                   <font-awesome-icon

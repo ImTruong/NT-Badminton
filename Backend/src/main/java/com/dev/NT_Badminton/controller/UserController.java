@@ -27,10 +27,8 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/register", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE })
-    public ResponseEntity<?> register(@Valid @RequestPart("registerRequest") RegisterRequest registerRequest,
-                                      @RequestPart(value = "avatar", required = false) MultipartFile avatar) throws Exception {
-        if (avatar != null && !avatar.isEmpty()) registerRequest.setAvatar(avatar);
+    @PostMapping(value = "/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) throws Exception {
         userService.register(registerRequest);
         ApiResponse<String> response = new ApiResponse<String>(true, "Registration Successful");
         return new ResponseEntity<>(response, HttpStatus.CREATED);

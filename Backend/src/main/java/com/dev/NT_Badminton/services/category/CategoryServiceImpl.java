@@ -45,4 +45,9 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryResponse> getAllCategories() {
         return categoryRepository.getAllCategories();
     }
+
+    @Override
+    public List<CategoryResponse> getRootCategories() {
+        return categoryRepository.getRootCategories();
+    }
 }

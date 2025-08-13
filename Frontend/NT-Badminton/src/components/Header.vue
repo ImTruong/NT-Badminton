@@ -3,16 +3,13 @@
   import {getCategories} from "@/api/category.js";
   import { ref, onMounted } from 'vue';
   import HeaderCartItem from "@/components/HeaderCartItem.vue";
+  import { getCart } from "@/api/cart.js";
 
-  const cartItems = ref([
-    {
-      id: 1,
-      name: "Racket Yonex Voltric Z Force II",
-      img: "https://cdn.shopvnb.com/img/64x64/uploads/san_pham/vot-cau-long-vnb-v200i-hong-3.webp",
-      price: 100000,
-      quantity: 1
-    }
-  ]);
+  const token = localStorage.getItem("token");
+
+  const cartItems = ref(null);
+  const pageCart = ref(1);
+  const itemsPerPage = ref(5);
 
   const categories = ref(null);
 
@@ -21,9 +18,19 @@
       try {
         const fetchedCategories = await getCategories();
         categories.value = fetchedCategories;
-        console.log("Categories fetched successfully:", categories.value);
       } catch (error) {
         console.error("Error fetching categories:", error);
+      }
+      if (token) {
+        try {
+          const fetchedCartItems = await getCart(token, pageCart.value, itemsPerPage.value);
+          cartItems.value = fetchedCartItems.content;
+          console.log(fetchedCartItems)
+        } catch (error) {
+          console.error("Error fetching cart items:", error);
+        }
+      } else {
+        cartItems.value = [];
       }
     })();
   });
