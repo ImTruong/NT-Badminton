@@ -15,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -193,8 +194,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<SearchProductReponse> searchProducts(SearchProductRequest searchProductRequest, Pageable pageable) {
-        List<SearchProductReponse> result = productRepository.findProducts(searchProductRequest);
+    public PageImpl<SearchProductReponse> searchProducts(SearchProductRequest searchProductRequest, Pageable pageable) {
+        PageImpl<SearchProductReponse> result = productRepository.findProducts(searchProductRequest,pageable);
         return result;
     }
 
@@ -226,6 +227,11 @@ public class ProductServiceImpl implements ProductService {
         productImageRepository.delete(productImage);
         uploadFileService.deleteFile(uploadFileService.getUploadFileById(imageId)
                 .orElseThrow(() -> new EntityNotFoundException("Upload file not found")));
+    }
+
+    @Override
+    public List<String> getAllProductBrands() {
+        return productRepository.getAllProductBrands();
     }
 
 

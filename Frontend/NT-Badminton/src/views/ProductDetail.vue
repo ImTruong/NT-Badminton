@@ -1,139 +1,12 @@
 <script setup>
   import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-  import {ref, onMounted, nextTick, reactive} from 'vue';
+  import {ref, onMounted, nextTick, reactive, onBeforeMount} from 'vue';
+  import { useRoute } from "vue-router";
+  import { getProductDetail } from "@/api/product";
 
-// BE product response
-// {
-//   "success": true,
-//     "message": "Product detail fetch successfully",
-//     "data": {
-//   "id": 2,
-//       "name": "Giày Cầu Lông Lining AYAS006",
-//       "brand": "Lining",
-//       "shortDescription": "Giày cầu lông chuyên nghiệp",
-//       "description": "Thiết kế thoáng khí, đế cao su chống trơn",
-//       "categoryId": 8,
-//       "images": [],
-//       "ratings": [],
-//       "options": [
-//     {
-//       "id": 2,
-//       "name": "Size Giày",
-//       "values": {
-//         "41": 3,
-//         "42": 4
-//       }
-//     },
-//     {
-//       "id": 4,
-//       "name": "Màu Giày",
-//       "values": {
-//         "Xám/Bạc": 8,
-//         "Xanh Lá": 7
-//       }
-//     }
-//   ],
-//       "variants": [
-//     {
-//       "id": 2,
-//       "sku": "LINING-AYAS006-41-XANH-LA",
-//       "price": 1800000.0,
-//       "priceAfterDiscount": 1800000.0,
-//       "stock": 5,
-//       "optionId": 2,
-//       "optionValueId": 3
-//     },
-//     {
-//       "id": 2,
-//       "sku": "LINING-AYAS006-41-XANH-LA",
-//       "price": 1800000.0,
-//       "priceAfterDiscount": 1800000.0,
-//       "stock": 5,
-//       "optionId": 4,
-//       "optionValueId": 7
-//     }
-//   ]
-// }
-// }
-  const product = reactive({
-    id: 1,
-    name: 'Vợt cầu lông VNB Carbon Training 150g',
-    brand: 'VNB',
-    stock: true,
-    images: [
-      '/uploads/san_pham/vot-cau-long-vnb-carbon-training-150g-5.webp',
-      '/uploads/san_pham/vot-cau-long-vnb-carbon-training-150g-3.webp',
-      '/uploads/san_pham/vot-cau-long-vnb-carbon-training-150g-2.webp'
-    ],
-    shortDescription: 'Vợt cầu lông VNB Carbon Training 150g là lựa chọn hoàn hảo cho người mới bắt đầu, với thiết kế nhẹ nhàng và độ bền cao.',
-    description: 'Vợt cầu lông VNB Carbon Training 150g được làm từ chất liệu carbon cao cấp, mang lại cảm giác cầm nắm thoải mái và độ bền vượt trội. Với trọng lượng chỉ 150g, vợt này rất phù hợp cho người mới tập chơi cầu lông. Thiết kế tinh tế, màu sắc trẻ trung, giúp bạn tự tin hơn trong mỗi trận đấu.',
-    categoryId: 1,
-    ratings: [
-      { userId: 1, rating: 5, comment: 'Vợt rất nhẹ và dễ sử dụng, phù hợp cho người mới bắt đầu.',timeCreated: '2023-10-01T12:00:00Z', name:'An' },
-      { userId: 2, rating: 4, comment: 'Chất lượng tốt, nhưng giá hơi cao so với mặt bằng chung.', timeCreated: '2023-10-02T14:30:00Z', name: 'Bao'},
-      { userId: 3, rating: 5, comment: 'Rất hài lòng với sản phẩm này, sẽ mua thêm cho bạn bè.', timeCreated: '2023-10-03T09:15:00Z', name:'Nguyen' },
-      { userId: 4, rating: 3, comment: 'Vợt ổn nhưng cần cải thiện độ bền.', timeCreated: '2023-10-04T16:45:00Z',name:'Truong' },
-    ],
-    options:[
-      { id: 1, name: 'Trọng lượng',
-        values: [
-          { "150g": 1},
-          { "160g": 2 }
-        ] },
-      { id: 2, name: 'Màu sắc',
-        values: [
-          { "Đen": 1 },
-          { "Xanh": 2 }
-        ] }
-    ],
-    variants: [
-      {
-        id: 1,
-        sku: 'VNB-CARBON-150G',
-        price: 350000,
-        priceAfterDiscount: 350000,
-        stock: 10,
-        optionId: 1,
-        optionValueId: 1
-      },
-      {
-        id: 2,
-        sku: 'VNB-CARBON-160G',
-        price: 400000,
-        priceAfterDiscount: 400000,
-        stock: 5,
-        optionId: 1,
-        optionValueId: 2
-      },
-      {
-        id: 1,
-        sku: 'VNB-CARBON-150G',
-        price: 350000,
-        priceAfterDiscount: 350000,
-        stock: 10,
-        optionId: 2,
-        optionValueId: 1
-      },
-      {
-        id: 2,
-        sku: 'VNB-CARBON-160G',
-        price: 400000,
-        priceAfterDiscount: 400000,
-        stock: 5,
-        optionId: 2,
-        optionValueId: 2
-      },
-      {
-        id: 1,
-        sku: 'VNB-CARBON-150G',
-        price: 350000,
-        priceAfterDiscount: 350000,
-        stock: 10,
-        optionId: 2,
-        optionValueId: 2
-      },
-    ],
-  })
+  const route = useRoute();
+
+  const product = ref(null);
 
   const tmpHeadImg = 'https://cdn.shopvnb.com';
   const tmpMiddleImgLink = '/img/300x300';
@@ -253,31 +126,47 @@
     return name.charAt(0).toUpperCase();
   };
 
-  const hoverRating = ref(0)          // Số sao đang hover
-  const selectedRating = ref(0)       // Số sao đã click
+  const hoverRating = ref(0)          
+  const selectedRating = ref(0)   
 
-  // Trả về icon: nếu đang hover thì ưu tiên hover, còn không thì hiển thị theo selectedRating
   const getStarIcon = (i) => {
     const active = hoverRating.value ? hoverRating.value : selectedRating.value
     return i <= active ? ['fas', 'star'] : ['far', 'star']
   }
 
+  const getPriceForSelectedOption = () => {
+    const selectedOption = choosenOptions.value.find(o => o.optionId === product.options[0].id);
+    if (selectedOption) {
+      const option = product.options.find(o => o.id === selectedOption.optionId);
+      if (option) {
+        const value = option.values.find(v => v.id === selectedOption.valueId);
+        if (value) {
+          return value.price;
+        }
+      }
+    }
+    return product.priceAfterDiscount;
+  };
+
   onMounted(() => {
-    // Khi resize thì giữ đúng ảnh hiện tại
     window.addEventListener('resize', () => {
       snapToIndex(currentIndex.value);
     });
 
-    // Đồng bộ nếu người dùng scroll bằng thanh cuộn
     mainList.value.addEventListener('scroll', () => {
-      // cập nhật chỉ số (debounce nhẹ nếu muốn)
       updateCurrentIndexFromScroll();
-      // sau khi dừng scroll thì snap
       if (snapTimeout) clearTimeout(snapTimeout);
       snapTimeout = setTimeout(() => {
         snapToIndex(currentIndex.value);
       }, 100);
     });
+
+  });
+
+  onBeforeMount(async () => {
+    const productId = route.params.id;
+    product.value = await getProductDetail(productId);
+    console.log(product.value);
   });
 </script>
 
@@ -338,8 +227,8 @@
           <span class="stock">Tình trạng: <span class="stock highlight-text">Còn hàng</span></span>
         </div>
         <div class="price-container">
-          <h2 class="highlight-text price">350.000<span class="underline price">đ</span> </h2>
-          <span class="original-price"><del>Giá gốc: 400.000<span class="underline">đ</span></del></span>
+          <h2 class="highlight-text price">{{product.priceAfterDiscount}}<span class="underline price">đ</span> </h2>
+          <span class="original-price"><del>Giá gốc: {{product.price}}<span class="underline">đ</span></del></span>
         </div>
         <div class="options">
           <div class="option" v-for="option in product.options" :key="option.id">
@@ -347,19 +236,21 @@
               <b class="option-name">{{ option.name }}:</b>
             </div>
             <div class="option-values">
-              <div
-                  v-for="(valObj, idx) in option.values"
-                  :key="idx"
+              <div class="option-values">
+                <div
+                  v-for="(val, key) in option.values"
+                  :key="key"
                   class="option-value-box"
-                  :class="{ selected: isSelected(option.id, Object.values(valObj)[0]) }"
-                  @click="chooseOption(option.id, Object.values(valObj)[0])"
-              >
-                {{ Object.keys(valObj)[0] }}
+                  :class="{ selected: isSelected(option.id, val) }"
+                  @click="chooseOption(option.id, val)"
+                >
+                  {{ key }}
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="quantity-wrap">
+        <!-- <div class="quantity-wrap">
           <span>
             Số lượng:
           </span>
@@ -414,7 +305,6 @@
             class="panel"
             :hidden="tabMode != 'description'"
         >
-          <!-- Nội dung mô tả -->
           <p>
             {{ product.description }}
           </p>
@@ -544,7 +434,7 @@
               </div>
             </form>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>

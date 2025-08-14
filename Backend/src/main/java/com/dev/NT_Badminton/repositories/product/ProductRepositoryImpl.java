@@ -3,6 +3,7 @@ package com.dev.NT_Badminton.repositories.product;
 import com.dev.NT_Badminton.dto.request.product.SearchProductRequest;
 import com.dev.NT_Badminton.dto.response.product.*;
 import com.dev.NT_Badminton.dto.response.rating.RatingResponse;
+import com.dev.NT_Badminton.entities.categories.QCategory;
 import com.dev.NT_Badminton.entities.discounts.QDiscount;
 import com.dev.NT_Badminton.entities.products.*;
 import com.dev.NT_Badminton.entities.products.constant.ProductImageType;
@@ -12,9 +13,14 @@ import com.dev.NT_Badminton.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -51,7 +57,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
     }
 
     @Override
-    public List<SearchProductReponse> findProducts(SearchProductRequest searchProductRequest) {
+    public PageImpl<SearchProductReponse> findProducts(SearchProductRequest searchProductRequest, Pageable pageable) {
         QProduct qProduct = QProduct.product;
         QUploadFile qUploadFile = QUploadFile.uploadFile;
         QProductImage qProductImage = QProductImage.productImage;
@@ -62,16 +68,16 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
         BooleanBuilder predicate = new BooleanBuilder();
 
         Optional.ofNullable(searchProductRequest.getName())
-                .filter(name -> !name.isEmpty())
+                .filter(name -> !name.isBlank())
                 .ifPresent(name -> predicate.and(qProduct.name.containsIgnoreCase(name)));
 
-        Optional.ofNullable(searchProductRequest.getBrand())
-                .filter(brand -> !brand.isEmpty())
-                .ifPresent(brand -> predicate.and(qProduct.brand.containsIgnoreCase(brand)));
+        Optional.ofNullable(searchProductRequest.getBrands())
+                .filter(brands -> !brands.isEmpty())
+                .ifPresent(brands -> predicate.and(qProduct.brand.in(brands)));
 
         Optional.ofNullable(searchProductRequest.getCategoryIds())
                 .filter(categoryIds -> !categoryIds.isEmpty())
-                .ifPresent(categoryIds -> predicate.and(qProduct.categoryId.in(categoryIds)));
+                .ifPresent(categoryIds -> predicate.and((findProductRootCategoryId(qProduct.id)).in(categoryIds)));
 
         Optional.ofNullable(searchProductRequest.getMinPrice())
                 .ifPresent(minPrice -> predicate.and(qProductVariants.price.goe(minPrice)));
@@ -122,7 +128,38 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
 
         Optional.ofNullable(searchProductRequest.getRating())
                 .ifPresent(minRating -> query.having(avgRating.goe(minRating)));
-        return query.fetch();
+        JPAQuery<Long> countQuery = query()
+                .select(qProduct.countDistinct())
+                .from(qProduct)
+                .join(qProductVariants).on(qProduct.id.eq(qProductVariants.productId))
+                .where(predicate);
+
+        List<SearchProductReponse> results = query
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        long total = countQuery.fetchOne();
+
+        return new PageImpl<>(results, pageable, total);
+    }
+
+    private JPQLQuery<Integer> findProductRootCategoryId(NumberExpression<Integer> productIdExpr) {
+        QProduct qProductSub = new QProduct("p");
+        QCategory qChildrenCategory = new QCategory("childCategory");
+        QCategory qRootCategory = new QCategory("rootCategory");
+
+        return JPAExpressions
+                .select(
+                        new CaseBuilder()
+                                .when(qChildrenCategory.parentId.isNotNull())
+                                .then(qRootCategory.id)
+                                .otherwise(qChildrenCategory.id)
+                )
+                .from(qProductSub)
+                .join(qChildrenCategory).on(qProductSub.categoryId.eq(qChildrenCategory.id))
+                .leftJoin(qRootCategory).on(qChildrenCategory.parentId.eq(qRootCategory.id))
+                .where(qProductSub.id.eq(productIdExpr));
     }
 
     @Override
@@ -254,6 +291,17 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
             return productDetailResponse;
         }
         return null;
+    }
+
+    @Override
+    public List<String> getAllProductBrands() {
+        QProduct qProduct = QProduct.product;
+        return query().
+                select(qProduct.brand)
+                .from(qProduct)
+                .where(qProduct.deleted.eq(false))
+                .distinct()
+                .fetch();
     }
 
 

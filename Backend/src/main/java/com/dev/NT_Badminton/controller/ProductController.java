@@ -91,7 +91,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<?> searchProducts(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) List<String> brands,
             @RequestParam(required = false) List<Integer> categoryIds,
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
@@ -99,7 +99,7 @@ public class ProductController {
             Pageable pageable
     ) {
         SearchProductRequest searchRequest = new SearchProductRequest(
-                name, brand, categoryIds, minPrice, maxPrice, rating
+                name, brands, categoryIds, minPrice, maxPrice, rating
         );
         ApiResponse<?> response = new ApiResponse<>(true, "Products fetched successfully", productService.searchProducts(searchRequest, pageable));
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -152,6 +152,13 @@ public class ProductController {
     public ResponseEntity<?> deleteProductImage(@RequestParam int imageId) throws Exception {
         productService.deleteProductImage(imageId);
         ApiResponse<String> response = new ApiResponse<>(true,"Product image deleted successfully");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/brands")
+    public ResponseEntity<?> getAllBrands() {
+        List<String> brands = productService.getAllProductBrands();
+        ApiResponse<List<String>> response = new ApiResponse<>(true, "Brands fetched successfully", brands);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

@@ -14,7 +14,7 @@ public class SearchProductRequest {
 
     String name;
 
-    String brand;
+    List<String> brands;
 
     List<Integer> categoryIds;
 

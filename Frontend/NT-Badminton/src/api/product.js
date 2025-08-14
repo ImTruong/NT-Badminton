@@ -5,7 +5,7 @@ export const searchProducts = async (filters, page, size) => {
   try {
     const params = {
       name: filters.name,
-      brand: filters.brands?.[0] || null,
+      brands: filters.brands?.length ? filters.brands : null,
       categoryIds: filters.categoryIds?.length ? filters.categoryIds : null,
       minPrice: filters.minPrice,
       maxPrice: filters.maxPrice,
@@ -18,10 +18,47 @@ export const searchProducts = async (filters, page, size) => {
       params,
       paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' })
     });
-    console.log(response);
-    return response.data;
+    const { success, data, message } = response.data;
+    if (success) {
+      return data;
+    } else {
+      console.error("Error searching products:", message);
+      throw new Error(message);
+    }
   } catch (error) {
     console.error("Error searching products:", error);
+    throw error;
+  }
+};
+
+export const getAllProductBrands = async () => {
+  try {
+    const response = await axios.get('/product/brands');
+    const {success, data, message} = response.data;
+    if (success) {
+      return data;
+    } else {
+      console.error("Error fetching product brands:", message);
+      throw new Error(message);
+    }
+  } catch (error) {
+    console.error("Error fetching product brands:", error);
+    throw error;
+  }
+};
+
+export const getProductDetail = async (productId) => {
+  try {
+    const response = await axios.get(`/product/${productId}`);
+    const { success, data, message } = response.data;
+    if (success) {
+      return data;
+    } else {
+      console.error("Error fetching product detail:", message);
+      throw new Error(message);
+    }
+  } catch (error) {
+    console.error("Error fetching product detail:", error);
     throw error;
   }
 };

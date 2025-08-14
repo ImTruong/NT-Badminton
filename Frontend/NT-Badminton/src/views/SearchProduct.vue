@@ -2,17 +2,13 @@
   import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
   import { ref, computed, onMounted, watch, reactive } from "vue";
   import { getRootCategories } from "@/api/category";
-  import { searchProducts } from "@/api/product";
+  import { searchProducts, getAllProductBrands } from "@/api/product";
 
   const categories = ref(null);
 
-  const brands = [
-    { id: "nike", label: "Nike", value: "nike" },
-    { id: "adidas", label: "Adidas", value: "adidas" },
-    { id: "puma", label: "Puma", value: "puma" },
-  ];
+  const brands = ref(null);
 
-  const ratings = [5, 4, 3, 2, 1];
+  const ratings = [5, 4, 3, 2, 1, 0];
 
   const searchQuery = ref(null);
 
@@ -31,7 +27,7 @@
 
   watch(
     () => ({
-      ...filters, // destructure reactive object để Vue track từng field
+      ...filters, 
       currentPage: currentPage.value,
       pageSize: pageSize.value
     }),
@@ -40,9 +36,14 @@
     },
     { deep: true }
   )
-
-  const fetchProducts = async () => {
-    const response = await searchProducts({ ...filters, page: currentPage.value, size: pageSize.value })
+  async function fetchProducts() {
+    try {
+      const fetchedProducts = await searchProducts({ ...filters, page: currentPage.value, size: pageSize.value });
+      products.value = fetchedProducts.content;
+      totalPages.value = fetchedProducts.totalPages;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
   }
 
   const sortOptions = [
@@ -54,30 +55,7 @@
 
   const sortMode = ref("Mặc định");
 
-  const products = [
-    {id: 3, name: "Vợt cầu lông Yonex Astrox 99", price: 1500000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 4, name: "Giày cầu lông Yonex Power Cushion Aerus 3", price: 2500000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 5, name: "Quả cầu lông Yonex AS-50", price: 500000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 6, name: "Dây vợt cầu lông Yonex BG66 Ultimax", price: 200000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 7, name: "Grip vợt cầu lông Yonex Super Grap", price: 100000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 8, name: "Túi vợt cầu lông Yonex Pro Bag", price: 800000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 9, name: "Quần áo cầu lông Yonex Team", price: 600000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 10, name: "Vợt cầu lông Victor Thruster K", price: 1800000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 11, name: "Giày cầu lông Li-Ning Windstorm 72", price: 2200000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 12, name: "Quả cầu lông RSL Classic Tourney", price: 600000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 13, name: "Dây vợt cầu lông Ashaway ZyMax 62", price: 180000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 14, name: "Grip vợt cầu lông Babolat VS Original", price: 120000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 15, name: "Túi vợt cầu lông Victor Bag 9226", price: 900000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 16, name: "Quần áo cầu lông Li-Ning Super Series", price: 700000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 17, name: "Vợt cầu lông Wilson Blade 98", price: 2000000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 18, name: "Giày cầu lông Mizuno Wave Fang", price: 2400000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 19, name: "Quả cầu lông Carlton GT1", price: 550000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 20, name: "Dây vợt cầu lông Tecnifibre 305", price: 150000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 21, name: "Grip vợt cầu lông Head Hydrosorb", price: 110000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 22, name: "Túi vợt cầu lông Yonex 9826", price: 950000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 23, name: "Quần áo cầu lông Victor Team", price: 650000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-    {id: 24, name: "Vợt cầu lông Yonex Nanoflare 800", price: 1700000, image: "https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp"},
-  ]
+  const products = ref([]);
 
   function goToPage(page) {
     if (page >= 0 && page < totalPages.value) {
@@ -96,11 +74,21 @@
   });
 
   onMounted(async () => {
+
+    await fetchProducts();
+
     try {
       const fetchedCategories = await getRootCategories();
       categories.value = fetchedCategories;
     } catch (error) {
       console.error("Error fetching categories:", error);
+    }
+
+    try {
+      const fetchedBrands = await getAllProductBrands();
+      brands.value = fetchedBrands;
+    } catch (error) {
+      console.error("Error fetching brands:", error);
     }
   });
 
@@ -142,9 +130,9 @@
             Thương hiệu:
           </h3>
           <ul class="options scroll-limit">
-            <li class="option-item" v-for="brand in brands" :key="brand.id">
-              <input type="checkbox" :id="brand.id" name="brand" :value="brand.value" v-model="filters.brands" />
-              <label :for="brand.id">{{ brand.label }}</label>
+            <li class="option-item" v-for="brand in brands" :key="brand">
+              <input type="checkbox" :id="brand" name="brand" :value="brand" v-model="filters.brands" />
+              <label :for="brand">{{ brand }}</label>
             </li>
           </ul>
         </div>
@@ -201,10 +189,13 @@
       <div class="product-list">
         <div class="product-item" v-for="product in products" :key="product.id">
           <router-link :to="`/product/${product.id}`" class="product-link">
-            <img class="product-image" :src="product.image" alt="Product Image" />
+            <img class="product-image" src="https://cdn.shopvnb.com/img/300x300/uploads/san_pham/giay-cau-long-taro-tr024-1_1732240510.webp" alt="Product Image" />
             <h3>{{ product.name }}</h3>
           </router-link>
-          <p class="price">{{ product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) }}</p>
+          <div class="price-wrap">
+            <span class="price">{{ product.priceAfterDiscount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) }}</span>
+            <span class="old-price">{{ product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) }}</span>
+          </div>
         </div>
       </div>
       <div class="pagination">
@@ -406,7 +397,6 @@
   .price {
     font-weight: bold;
     color: var(--main-color);
-    margin-top: 10px;
   }
   .pagination{
     display: flex;
@@ -434,6 +424,16 @@
     background-color: var(--main-color);
     color: #ffffff;
     transition: background-color 0.3s ease;
+  }
+  .price-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+  .old-price{
+    text-decoration: line-through;
+    color: #999;
   }
 
 
