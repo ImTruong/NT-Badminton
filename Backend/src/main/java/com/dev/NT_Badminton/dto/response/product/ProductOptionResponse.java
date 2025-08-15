@@ -16,7 +16,7 @@ public class ProductOptionResponse {
 
     String name;
 
-    Map<String, Integer> values = new HashMap<>();
+    Map<Integer, String> values = new HashMap<>();
 
     public ProductOptionResponse(Integer id, String name) {
         this.id = id;

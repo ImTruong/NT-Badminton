@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Map;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,8 +26,13 @@ public class ProductVariantResponse {
 
     Integer stock;
 
-    Integer optionId;
+    Map<Integer,Integer> optionValues;
 
-    Integer optionValueId;
-
+    public ProductVariantResponse(Integer id, String sku, Double price, Double priceAfterDiscount, Integer stock) {
+        this.id = id;
+        this.sku = sku;
+        this.price = price;
+        this.priceAfterDiscount = priceAfterDiscount;
+        this.stock = stock;
+    }
 }

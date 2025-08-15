@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ProductRepositoryImpl extends BaseRepository implements ProductRepositoryCustom {
 
@@ -244,7 +245,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
 
                 optionMap.putIfAbsent(optionId, new ProductOptionResponse(optionId, optionName));
 
-                optionMap.get(optionId).getValues().put(value, valueId);
+                optionMap.get(optionId).getValues().put(valueId,value);
             }
 
             List<ProductOptionResponse> options = new ArrayList<>(optionMap.values());
@@ -266,9 +267,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                                             qDiscount.discountPercentages.max().coalesce(0).divide(100)
                                     ).subtract(1).multiply(-1)
                             ).coalesce(qProductVariants.price),
-                            qProductVariants.quantity,
-                            qProductOptionValue.productOptionId,
-                            qProductOptionValue.id
+                            qProductVariants.quantity
                     ))
                     .from(qProductVariants)
                     .leftJoin(qDiscount).on(qProductVariants.productId.eq(qDiscount.productId)
@@ -276,14 +275,30 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                             .and(qDiscount.deleted.eq(false))
                             .and(qDiscount.timeStarted.before(Timestamp.valueOf(LocalDateTime.now())))
                     )
-                    .leftJoin(qProductVariantOptionValues).on(qProductVariants.id.eq(qProductVariantOptionValues.productVariantId))
-                    .leftJoin(qProductOptionValue).on(qProductVariantOptionValues.productOptionValueId.eq(qProductOptionValue.id))
                     .where(qProductVariants.productId.eq(productId)
                             .and(qProductVariants.deleted.eq(false))
                     )
-                    .groupBy(qProductVariants.id, qProductVariants.sku, qProductVariants.price, qProductVariants.quantity,
-                            qProductOptionValue.productOptionId, qProductOptionValue.id)
+                    .groupBy(qProductVariants.id, qProductVariants.sku, qProductVariants.price, qProductVariants.quantity)
                     .fetch();
+            for (ProductVariantResponse variant : variants) {
+                List<Tuple> variantOptionValues = query()
+                        .select(
+                                qProductOptionValue.productOptionId,
+                                qProductVariantOptionValues.productOptionValueId
+                        )
+                        .from(qProductVariantOptionValues)
+                        .join(qProductOptionValue).on(qProductVariantOptionValues.productOptionValueId.eq(qProductOptionValue.id))
+                        .where(qProductVariantOptionValues.productVariantId.eq(variant.getId())
+                                .and(qProductOptionValue.deleted.eq(false))
+                        )
+                        .fetch();
+                variant.setOptionValues(variantOptionValues.stream()
+                        .collect(Collectors.toMap(
+                                t -> t.get(qProductOptionValue.productOptionId),
+                                t -> t.get(qProductVariantOptionValues.productOptionValueId)
+                        )));
+
+            }
             productDetailResponse.setImages(images);
             productDetailResponse.setRatings(ratings);
             productDetailResponse.setOptions(options);

@@ -91,8 +91,7 @@
     snapToIndex(idx);
   };
 
-  const choosenOptions = ref([
-  ]);
+  const choosenOptions = ref([]);
   const chooseOption = (optionId, valueId) => {
     const idx = choosenOptions.value.findIndex(o => o.optionId === optionId);
     if (idx !== -1) {
@@ -146,6 +145,67 @@
       }
     }
     return product.priceAfterDiscount;
+  };
+  // public class ProductVariantResponse {
+
+  //   Integer id;
+
+  //   String sku;
+
+  //   Double price;
+
+  //   Double priceAfterDiscount;
+
+  //   Integer stock;
+
+  //   Map<Integer,Integer> optionValues;
+
+  const checkMatchVariant = () => {
+    for (const variant of product.value.variants) {
+      // Nếu số lượng lựa chọn không khớp thì bỏ qua
+      if (choosenOptions.value.size !== Object.keys(variant.optionValues).length) {
+        continue;
+      }
+      console.log("Test");
+      // Kiểm tra tất cả các key-value trong Map có khớp variant.options không
+      let isMatch = true;
+      for (const [optionId, valueId] of choosenOptions.value.entries()) {
+        if (variant.optionValues[optionId] !== valueId) {
+          isMatch = false;
+          break;
+        }
+      }
+
+      if (isMatch) {
+        return variant;
+      }
+    }
+    return null;
+  };
+
+  const minPriceVariant = () => {
+    if (!product.value || !product.value.variants || product.value.variants.length === 0) {
+      return { priceAfterDiscount: 0, price: 0 };
+    }
+    
+    return product.value.variants.reduce((minVariant, currentVariant) => {
+      return (currentVariant.priceAfterDiscount < minVariant.priceAfterDiscount) ? 
+        currentVariant : minVariant;
+    }, product.value.variants[0]);
+  };
+
+  const currentVariant = () => {
+    
+    if (!product.value) {
+      return { priceAfterDiscount: 0, price: 0 };
+    }
+    
+    const matchedVariant = checkMatchVariant();
+    if (matchedVariant) {
+      console.log(matchedVariant)
+      return matchedVariant;
+    }
+    return minPriceVariant();
   };
 
   onMounted(() => {
@@ -227,8 +287,8 @@
           <span class="stock">Tình trạng: <span class="stock highlight-text">Còn hàng</span></span>
         </div>
         <div class="price-container">
-          <h2 class="highlight-text price">{{product.priceAfterDiscount}}<span class="underline price">đ</span> </h2>
-          <span class="original-price"><del>Giá gốc: {{product.price}}<span class="underline">đ</span></del></span>
+          <h2 class="highlight-text price">{{currentVariant().priceAfterDiscount}}<span class="underline price">đ</span> </h2>
+          <span class="original-price"><del>Giá gốc: {{currentVariant().price}}<span class="underline">đ</span></del></span>
         </div>
         <div class="options">
           <div class="option" v-for="option in product.options" :key="option.id">
@@ -238,7 +298,7 @@
             <div class="option-values">
               <div class="option-values">
                 <div
-                  v-for="(val, key) in option.values"
+                  v-for="(key, val) in option.values"
                   :key="key"
                   class="option-value-box"
                   :class="{ selected: isSelected(option.id, val) }"

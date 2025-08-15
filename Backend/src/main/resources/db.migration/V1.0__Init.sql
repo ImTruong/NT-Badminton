@@ -413,3 +413,5 @@ CREATE TABLE `order_items`
 -- (5, 13, 0, NOW(), NOW()), -- Size M
 -- (5, 16, 0, NOW(), NOW()); -- Màu Trắng
 
+
+
