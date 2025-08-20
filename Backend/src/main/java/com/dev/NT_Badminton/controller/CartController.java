@@ -22,7 +22,7 @@ public class CartController {
     @Autowired
     CartService cartService;
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<?> addCart(@RequestBody @Valid AddProductToCartRequest addProductToCartRequest) {
         cartService.addProductToCart(addProductToCartRequest);
         ApiResponse<String> response = new ApiResponse<String>(true,"Add Cart Successful");

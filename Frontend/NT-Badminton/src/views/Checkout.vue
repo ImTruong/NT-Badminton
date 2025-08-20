@@ -1,7 +1,7 @@
 <script setup lang="ts">
     import { ref } from 'vue';
     import OrderItems from '@/components/OrderItems.vue';
-
+    import ContactListModal from '@/components/ContactListModal.vue';
     const user = ref({
         name: 'Nguyễn Văn A',
         phone: '0123456789',
@@ -10,14 +10,20 @@
     const products = ref([
         {
             name: 'Vợt Cầu Lông',
-            type: 'Thể thao',
+            options: {
+                color: 'Hồng',
+                size: 'Trung bình'
+            },
             price: 200000,
             quantity: 2,
             image: "https://cdn.shopvnb.com/img/40x40/uploads/san_pham/vot-cau-long-vnb-v200i-hong-3.webp"
         },
         {
             name: 'Bóng Cầu Lông',
-            type: 'Thể thao',
+            options: {
+                color: 'Trắng',
+                size: 'Nhỏ'
+            },
             price: 50000,
             quantity: 5,
             image: "https://cdn.shopvnb.com/img/40x40/uploads/san_pham/vot-cau-long-vnb-v200i-hong-3.webp"
@@ -34,6 +40,10 @@
         console.log(`Selected payment method: ${id}`);
         selectedPaymentMethod.value = id;
     };
+    const showContactListModal = ref(false);
+    const handleCloseContactListModel = () => {
+        showContactListModal.value = false;
+    };
 </script>
 
 <template>
@@ -49,7 +59,7 @@
                     <p class="user-name"><span class="bold-text">Họ tên:</span> {{ user.name }}</p>
                     <p class="user-phone"><span class="bold-text">Số điện thoại:</span> {{ user.phone }}</p>
                     <p class="user-address"><span class="bold-text">Địa chỉ:</span> {{ user.address }}</p>
-                    <button class="edit-button">Thay đổi</button>
+                    <button class="edit-button" @click="showContactListModal = true">Thay đổi</button>
                 </div>
             </div>
             <div class="split-box"></div>
@@ -75,6 +85,9 @@
             </div>
         </div>
     </div>
+    <ContactListModal 
+        :show="showContactListModal"
+        @close="handleCloseContactListModel" />
 </template>
 
 <style scoped>

@@ -13,6 +13,13 @@
 
   const categories = ref(null);
 
+  const calTotalCart = () => {
+    if (!cartItems.value) return 0;
+    return cartItems.value.reduce((total, item) => {
+      return total + item.salePrice * item.quantity;
+    }, 0);
+  };
+
   onMounted(() => {
     (async () => {
       try {
@@ -25,7 +32,6 @@
         try {
           const fetchedCartItems = await getCart(token, pageCart.value, itemsPerPage.value);
           cartItems.value = fetchedCartItems.content;
-          console.log(fetchedCartItems)
         } catch (error) {
           console.error("Error fetching cart items:", error);
         }
@@ -86,9 +92,13 @@
               <div class="cart-end">
                 <div class="total">
                   <span class="total-word">Tổng tiền:</span>
-                  <span class="total-price">100.000đ</span>
+                  <span class="total-price">{{ calTotalCart().toLocaleString() }}đ</span>
                 </div>
-                <button class="cart-btn">Thanh toán</button>
+                <router-link to="/cart">
+                  <button class="cart-btn">
+                    Thanh toán
+                  </button>
+                </router-link>
               </div>
             </div>
           </li>
@@ -137,7 +147,7 @@
   /* === LAYOUT === */
   .container {
     width: 100%;
-    height: 120px;
+    height: var(--header-height);
     top: 0;
     z-index: 1000;
     display: grid;

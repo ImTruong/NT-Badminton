@@ -1,24 +1,23 @@
 <script setup>
-    import { ref } from 'vue';
+    import { ref, onMounted } from 'vue';
     import CartItem from "@/components/CartItem.vue";
+    import { getCart } from '@/api/cart';
 
-    const cartItems = ref([
-        {
-            id: 1,
-            name: "Racket Yonex Voltric Z Force II",
-            img: "https://cdn.shopvnb.com/img/180x180/uploads/san_pham/vot-cau-long-vnb-v200i-hong-3.webp",
-            price: 100000,
-            quantity: 1
-        },
-        {
-            id: 2,
-            name: "Vợt Cầu Lông Victor Brave Sword 12",
-            img: "https://cdn.shopvnb.com/img/180x180/uploads/san_pham/vot-cau-long-victor-brave-sword-12.webp",
-            price: 120000,
-            quantity: 1
+    const cartItems = ref([]);
+    
+
+    onMounted(async () => {
+        const token = localStorage.getItem("token");
+        try{
+            const fetchedCartItems = await getCart(token);
+            cartItems.value = fetchedCartItems.content;
+            console.log(cartItems.value);
+        }catch (error){
+            console.error("Error fetching cart items:", error);
         }
-    ]);
+    });
 </script>
+
 <template>
     
     <Header class="header"></Header> 
@@ -36,7 +35,7 @@
         <div class="total-box">
             <div class="upper-box">
                 <h3 class="total-title">Tổng cộng</h3>
-                <h2 class="total-price price">{{ cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) }} <span class="underline price">đ</span></h2>
+                <h2 class="total-price price">{{ cartItems.reduce((acc, item) => acc + item.salePrice * item.quantity, 0).toLocaleString() }} <span class="underline price">đ</span></h2>
             </div>
             <div class="lower-box">
                 <button class="checkout-button">Thanh toán</button>

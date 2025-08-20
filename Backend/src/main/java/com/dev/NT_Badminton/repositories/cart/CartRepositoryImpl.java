@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CartRepositoryImpl extends BaseRepository implements CartRepositoryCustom {
 
-    ProductOptionValueRepository productOptionValueRepository;
-    DiscountRepository discountRepository;
+    private final ProductOptionValueRepository productOptionValueRepository;
+    private final DiscountRepository discountRepository;
 
     @Override
     public PageImpl<CartProductResponse> getCartProductResponseByUserId(Integer userId, Pageable pageable) {
@@ -42,6 +42,7 @@ public class CartRepositoryImpl extends BaseRepository implements CartRepository
 
         QueryResults<CartProductResponse> results = query()
                 .select(Projections.constructor(CartProductResponse.class,
+                        qProduct.id,
                         qProductVariants.id,
                         qCart.quantity,
                         qProduct.name,

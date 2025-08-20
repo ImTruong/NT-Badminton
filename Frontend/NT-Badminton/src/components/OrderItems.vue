@@ -3,7 +3,7 @@
     const props = defineProps<{
         products: Array<{
             name: string;
-            type: string;
+            options: object;
             price: number;
             quantity: number;
             image: string;
@@ -38,7 +38,11 @@
             </div>
           </div>
         </td>
-        <td class="blur-text">{{ product.type }}</td>
+        <td class="blur-text">
+          <div v-for="(value, key) in product.options" :key="key">
+            <span class="bold-text">{{ key }}:</span> {{ value }}
+          </div>
+        </td>
         <td>{{ formatPrice(product.price) }}</td>
         <td>{{ product.quantity }}</td>
         <td>{{ formatPrice(product.price * product.quantity) }}</td>

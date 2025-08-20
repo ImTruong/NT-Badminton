@@ -11,11 +11,11 @@
 
 <template>
     <div class="cart-item">
-        <img class="item-image" :src="item.img" alt="Product Image"/>
+        <img class="item-image" :src="item.productCoverImage" alt="Product Image"/>
         <div class="cart-item-details">
         <div class="cart-item-name">
             <a class="item-name" href="">
-                {{ item.name }}
+                {{ item.productName }}
             </a>
             <font-awesome-icon class="cart-item-details-icon" :icon="['fas', 'trash']" />
         </div>
@@ -25,7 +25,7 @@
             <input type="number" class="item-quantity" v-model="item.quantity" min="1" />
             <button class="increase-quantity">+</button>
             </div>
-            <span class="cart-item-price">Giá: {{ item.price }}đ</span>
+            <span class="cart-item-price">Giá: {{ item.salePrice.toLocaleString() }}đ</span>
         </div>
         </div>
     </div>

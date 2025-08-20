@@ -21,6 +21,8 @@ public class RatingResponse {
 
     Integer userId;
 
+    String userName;
+
     Integer rating;
 
     String description;

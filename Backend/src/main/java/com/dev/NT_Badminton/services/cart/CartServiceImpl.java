@@ -36,26 +36,9 @@ public class CartServiceImpl implements CartService{
     @Override
     public Cart addProductToCart(AddProductToCartRequest addProductToCartRequest) {
         AppUser user = userService.getUserFromSecurityContext();
-        ProductVariants cartProduct = null;
-        if (addProductToCartRequest.getQuantity() <= 0)
-            throw new IllegalArgumentException("Quantity must be greater than 0");
-        if (addProductToCartRequest.getProductId()==null && (addProductToCartRequest.getProductOptionalValueId() == null || addProductToCartRequest.getProductOptionalValueId().isEmpty()))
-            throw new IllegalArgumentException("Product id or product option value ids is required");
-        if ((addProductToCartRequest.getProductOptionalValueId() == null || addProductToCartRequest.getProductOptionalValueId().isEmpty()) && productService.checkIfProductHasOption(addProductToCartRequest.getProductId()))
-            throw new IllegalArgumentException("Product option value id is required for this product");
-        if (addProductToCartRequest.getProductOptionalValueId() == null || addProductToCartRequest.getProductOptionalValueId().isEmpty()) {
-            ProductVariants productVariant = productService.getProductVariantOfNonOptionedProduct(addProductToCartRequest.getProductId());
-            if (productVariant.getQuantity() < addProductToCartRequest.getQuantity()) {
-                throw new OutOfStockException("This combination of product is out of stock");
-            }
-            cartProduct = productVariant;
-        } else {
-            ProductVariants productVariant = productService.getProductVariantByProductOptionValueIds(addProductToCartRequest.getProductOptionalValueId());
-            if (productVariant.getQuantity() < addProductToCartRequest.getQuantity()) {
-                throw new OutOfStockException("This combination of product is out of stock");
-            }
-            cartProduct = productVariant;
-        }
+        ProductVariants cartProduct = productService.getProductVariantById(addProductToCartRequest.getProductVariantId());
+        if (cartProduct.getQuantity() < addProductToCartRequest.getQuantity())
+            throw new OutOfStockException("This combination of product is out of stock");
         Optional<Cart> cart = cartRepository.findByUserIdAndProductVariantId(user.getId(), cartProduct.getId());
         if(cart.isEmpty()){
             return cartRepository.save(new Cart(cartProduct.getId(), user.getId(), addProductToCartRequest.getQuantity()));

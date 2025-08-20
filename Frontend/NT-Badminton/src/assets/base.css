@@ -1,5 +1,6 @@
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
+  --header-height: 120px;
   --main-color: rgba(251, 60, 60, 0.93);
   --vt-c-white: #ffffff;
   --vt-c-white-soft: #f8f8f8;

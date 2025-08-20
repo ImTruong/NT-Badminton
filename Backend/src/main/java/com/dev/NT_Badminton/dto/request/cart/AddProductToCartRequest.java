@@ -12,10 +12,6 @@ import java.util.List;
 @Builder
 public class AddProductToCartRequest {
 
-    private Integer productId;
-
-    private List<Integer> productOptionalValueId;
-
     private Integer productVariantId;
 
     @NotNull(message = "Quantity is required")

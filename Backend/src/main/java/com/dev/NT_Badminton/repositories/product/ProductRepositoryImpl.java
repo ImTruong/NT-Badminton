@@ -9,6 +9,7 @@ import com.dev.NT_Badminton.entities.products.*;
 import com.dev.NT_Badminton.entities.products.constant.ProductImageType;
 import com.dev.NT_Badminton.entities.rating.QRating;
 import com.dev.NT_Badminton.entities.upload_file.QUploadFile;
+import com.dev.NT_Badminton.entities.users.QAppUser;
 import com.dev.NT_Badminton.repositories.BaseRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
@@ -170,6 +171,7 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
         QProductImage qProductImage = QProductImage.productImage;
         QUploadFile qUploadFile = QUploadFile.uploadFile;
         QRating qRating = QRating.rating;
+        QAppUser qAppUser = QAppUser.appUser;
         QProductOptionValue qProductOptionValue = QProductOptionValue.productOptionValue;
         QProductOption qProductOption = QProductOption.productOption;
         QDiscount qDiscount = QDiscount.discount;
@@ -209,11 +211,13 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                             RatingResponse.class,
                             qRating.id,
                             qRating.userId,
+                            qAppUser.name,
                             qRating.rate,
                             qRating.description,
                             qRating.createdAt
                     ))
                     .from(qRating)
+                    .join(qAppUser).on(qRating.userId.eq(qAppUser.id))
                     .where(qRating.productId.eq(productId)
                             .and(qRating.deleted.eq(false))
                     )

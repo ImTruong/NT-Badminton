@@ -1,8 +1,9 @@
 <script setup>
   import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-  import {ref, onMounted, nextTick, reactive, onBeforeMount} from 'vue';
+  import {ref, onMounted, nextTick, reactive, onBeforeMount, computed} from 'vue';
   import { useRoute } from "vue-router";
   import { getProductDetail } from "@/api/product";
+  import { addToCart } from "@/api/cart";
 
   const route = useRoute();
 
@@ -105,18 +106,59 @@
   const isSelected = (optionId, valueId) => {
     return choosenOptions.value.some(o => o.optionId === optionId && o.valueId === valueId);
   };
+  const isOptionDisabled = (optionId,valueId) => {
+    const outOfStock = product.value.variants.every(variant => {
+      for (const [key, value] of Object.entries(variant.optionValues)) {
+        if (parseInt(key) === optionId && parseInt(value) === valueId) {
+          return variant.stock <= 0;
+        }
+      }
+    });
+    if (outOfStock) 
+      return true;
+    const inChoosenOptions = choosenOptions.value.some(o => o.optionId === optionId && o.valueId === valueId);
+    if (inChoosenOptions) {
+      return false; // Đã chọn, không vô hiệu hóa
+    }
+    const tempChoosenOptions = choosenOptions.value
+      .filter(o => o.optionId != optionId)
+      .map(o => ({ ...o }));
+    const emptyChoosenOptions = tempChoosenOptions.length === 0;
+    if (emptyChoosenOptions) {
+      return false; // Không có lựa chọn nào, không vô hiệu hóa
+    }
+    const anyMatchCurrentOptions = product.value.variants.some(variant => {
+      for (const [key, value] of Object.entries(variant.optionValues)) {
+        if (parseInt(key) == optionId && parseInt(value) == valueId) {
+          const checkChosenOptions = tempChoosenOptions.every(o => {
+            for (const [subKey, subValue] of Object.entries(variant.optionValues)) {
+              if (o.optionId == subKey && o.valueId == subValue) {
+                return true;
+              }
+            }
+            return false;
+          });
+          if (checkChosenOptions) {
+            return variant.stock > 0; // Chỉ cho phép chọn nếu còn hàng
+          }
+        }
+      }
+      return false;
+    });
+    return !anyMatchCurrentOptions;
+  };
 
   const calAverageRating = () => {
-    if (product.ratings.length === 0) return 0;
-    const total = product.ratings.reduce((sum, r) => sum + r.rating, 0);
-    return (total / product.ratings.length).toFixed(1);
+    if (product.value.ratings.length === 0) return 0;
+    const total = product.value.ratings.reduce((sum, r) => sum + r.rating, 0);
+    return (total / product.value.ratings.length).toFixed(1);
   };
 
   const starAverageDetail = (star) => {
-    const count = product.ratings.filter(r => r.rating === star).length;
+    const count = product.value.ratings.filter(r => r.rating === star).length;
     return {
       count,
-      percentage: ((count / product.ratings.length) * 100).toFixed(1)
+      percentage: ((count / product.value.ratings.length) * 100).toFixed(1)
     };
   }
 
@@ -133,48 +175,19 @@
     return i <= active ? ['fas', 'star'] : ['far', 'star']
   }
 
-  const getPriceForSelectedOption = () => {
-    const selectedOption = choosenOptions.value.find(o => o.optionId === product.options[0].id);
-    if (selectedOption) {
-      const option = product.options.find(o => o.id === selectedOption.optionId);
-      if (option) {
-        const value = option.values.find(v => v.id === selectedOption.valueId);
-        if (value) {
-          return value.price;
-        }
-      }
-    }
-    return product.priceAfterDiscount;
-  };
-  // public class ProductVariantResponse {
-
-  //   Integer id;
-
-  //   String sku;
-
-  //   Double price;
-
-  //   Double priceAfterDiscount;
-
-  //   Integer stock;
-
-  //   Map<Integer,Integer> optionValues;
-
   const checkMatchVariant = () => {
     for (const variant of product.value.variants) {
-      // Nếu số lượng lựa chọn không khớp thì bỏ qua
-      if (choosenOptions.value.size !== Object.keys(variant.optionValues).length) {
+      if (choosenOptions.value.length !== Object.keys(variant.optionValues).length) {
         continue;
       }
-      console.log("Test");
-      // Kiểm tra tất cả các key-value trong Map có khớp variant.options không
-      let isMatch = true;
-      for (const [optionId, valueId] of choosenOptions.value.entries()) {
-        if (variant.optionValues[optionId] !== valueId) {
-          isMatch = false;
-          break;
+      let isMatch = choosenOptions.value.every(({ optionId, valueId }) => {
+        for (const [key, value] of Object.entries(variant.optionValues)) {
+          if (parseInt(key) == optionId && parseInt(value) == valueId) {
+            return true;
+          }
         }
-      }
+        return false;
+      });
 
       if (isMatch) {
         return variant;
@@ -194,18 +207,37 @@
     }, product.value.variants[0]);
   };
 
-  const currentVariant = () => {
-    
+  const isTempVariant = ref(true);
+
+  const currentVariant = computed(() => {
+
     if (!product.value) {
       return { priceAfterDiscount: 0, price: 0 };
     }
     
     const matchedVariant = checkMatchVariant();
     if (matchedVariant) {
-      console.log(matchedVariant)
+      isTempVariant.value = false;
       return matchedVariant;
     }
+    isTempVariant.value = true;
     return minPriceVariant();
+  });
+
+  const handleAddToCart = async () => {
+    if(isTempVariant.value) {
+      alert('Vui lòng chọn đầy đủ các tùy chọn sản phẩm trước khi thêm vào giỏ hàng.');
+      return;
+    }
+    const variantId = currentVariant.value.id;
+    const token = localStorage.getItem('token');
+    try {
+      await addToCart(token, variantId, quantity.value);
+      alert('Sản phẩm đã được thêm vào giỏ hàng.');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Đã có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
+    }
   };
 
   onMounted(() => {
@@ -287,8 +319,8 @@
           <span class="stock">Tình trạng: <span class="stock highlight-text">Còn hàng</span></span>
         </div>
         <div class="price-container">
-          <h2 class="highlight-text price">{{currentVariant().priceAfterDiscount}}<span class="underline price">đ</span> </h2>
-          <span class="original-price"><del>Giá gốc: {{currentVariant().price}}<span class="underline">đ</span></del></span>
+          <h2 class="highlight-text price">{{currentVariant.priceAfterDiscount.toLocaleString()}}<span class="underline price">đ</span> </h2>
+          <span class="original-price"><del>Giá gốc: {{currentVariant.price.toLocaleString()}}<span class="underline">đ</span></del></span>
         </div>
         <div class="options">
           <div class="option" v-for="option in product.options" :key="option.id">
@@ -301,8 +333,15 @@
                   v-for="(key, val) in option.values"
                   :key="key"
                   class="option-value-box"
-                  :class="{ selected: isSelected(option.id, val) }"
-                  @click="chooseOption(option.id, val)"
+                  :class="{ 
+                    selected: isSelected(option.id, val),
+                    disabled: isOptionDisabled(option.id, val)
+                  }"
+                  @click="() => {
+                    if (!isOptionDisabled(option.id, val)) {
+                      chooseOption(option.id, val);
+                    }
+                  }"
                 >
                   {{ key }}
                 </div>
@@ -310,7 +349,7 @@
             </div>
           </div>
         </div>
-        <!-- <div class="quantity-wrap">
+        <div class="quantity-wrap">
           <span>
             Số lượng:
           </span>
@@ -318,13 +357,13 @@
             <button class="btn reduce-quantity"
               @click="quantity = Math.max(1, quantity - 1)"
             >-</button>
-            <input type="number" class="item-quantity" :value="quantity" min="1" />
+            <input type="number" class="item-quantity" v-model.number="quantity" min="1" :max="currentVariant.stock" />
             <button class="btn increase-quantity"
-              @click="quantity++"
+              @click="quantity = Math.min(currentVariant.stock, quantity + 1)"
             >+</button>
           </div>
         </div>
-        <button class="btn cart-btn">
+        <button class="btn cart-btn" @click="handleAddToCart">
           <FontAwesomeIcon icon="fa-solid fa-cart-plus" />
           Thêm vào giỏ hàng</button>
       </div>
@@ -441,12 +480,12 @@
             <div class="rating-item" v-for="(rating, index) in product.ratings" :key="index">
               <div class="left-rating-wrap">
                 <div class="rating-user-avatar">
-                  <span class="user-avatar">{{ getFirstLetter(rating.name) }}</span>
+                  <span class="user-avatar">{{ getFirstLetter(rating.userName) }}</span>
                 </div>
               </div>
               <div class="right-rating-wrap">
                 <div class="upper-rating-box">
-                  <div class="rating-user bold-text">{{ rating.name }}</div>
+                  <div class="rating-user bold-text">{{ rating.userName }}</div>
                   <div class="rating-stars star-icon">
                     <font-awesome-icon
                         v-for="i in 5"
@@ -457,7 +496,7 @@
                     />
                   </div>
                 </div>
-                <div class="rating-comment">{{ rating.comment }}</div>
+                <div class="rating-comment">{{ rating.description }}</div>
                 <div class="time-comments">
                   <span class="time bold-text">{{ new Date(rating.timeCreated).toLocaleDateString() }}</span>
                 </div>
@@ -494,7 +533,7 @@
               </div>
             </form>
           </div>
-        </div> -->
+        </div> 
       </div>
     </div>
   </div>
@@ -843,6 +882,22 @@
     cursor: pointer;
     transition: color .2s;
   }
+  .disabled {
+  position: relative;
+  color: #999;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.disabled::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  border-top: 2px solid red;
+  transform: rotate(-20deg);
+}
 
 
 </style>
