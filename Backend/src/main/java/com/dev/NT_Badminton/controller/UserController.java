@@ -3,6 +3,7 @@ package com.dev.NT_Badminton.controller;
 import com.dev.NT_Badminton.dto.request.contact.UserContactRequest;
 import com.dev.NT_Badminton.dto.request.user.*;
 import com.dev.NT_Badminton.dto.response.ApiResponse;
+import com.dev.NT_Badminton.services.contact.ContactService;
 import com.dev.NT_Badminton.services.user.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -20,6 +21,9 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    ContactService contactService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
@@ -60,42 +64,36 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/cities-districts")
-    public ResponseEntity<?> getAllCitiesAndDistricts() {
-        ApiResponse<?> response = new ApiResponse<>(true, "Cities and Districts Fetched Successfully", userService.getAllCitiesAndDistricts());
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/contacts")
+    @GetMapping("/contact/all")
     public ResponseEntity<?> getUserContacts() {
-        ApiResponse<?> response = new ApiResponse<>(true, "User Contacts Fetched Successfully", userService.getUserContacts());
+        ApiResponse<?> response = new ApiResponse<>(true, "User Contacts Fetched Successfully", contactService.getUserContacts());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/contact")
     public ResponseEntity<?> deleteContact(@RequestParam int contactId) {
-        userService.deleteContact(contactId);
+        contactService.deleteContact(contactId);
         ApiResponse<String> response = new ApiResponse<String>(true, "Contact Deleted Successfully");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/contact")
     public ResponseEntity<?> addContact(@Valid @RequestBody UserContactRequest userContactRequest) {
-        userService.addContact(userContactRequest);
+        contactService.addContact(userContactRequest);
         ApiResponse<?> response = new ApiResponse<>(true, "Contact Added Successfully");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PutMapping("/switch-main-contact")
     public ResponseEntity<?> switchMainContact(@RequestParam @NotNull(message = "Contact Id is required") int contactId) {
-        userService.switchMainContact(contactId);
+        contactService.switchMainContact(contactId);
         ApiResponse<String> response = new ApiResponse<String>(true, "Main Contact Switched Successfully");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/contact")
     public ResponseEntity<?> updateContact(@Valid @RequestBody UserContactRequest modifyContactRequest) {
-        userService.updateContact(modifyContactRequest);
+        contactService.updateContact(modifyContactRequest);
         ApiResponse<String> response = new ApiResponse<String>(true, "Contact Updated Successfully");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

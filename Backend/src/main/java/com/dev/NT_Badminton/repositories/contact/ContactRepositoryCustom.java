@@ -7,6 +7,4 @@ import java.util.Optional;
 
 public interface ContactRepositoryCustom {
 
-    List<Contact> getContactsByUserId(int userId);
-
 }

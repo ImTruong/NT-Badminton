@@ -34,7 +34,9 @@
                 <button class="increase-quantity">+</button>
             </div>
             <h3 class="cart-item-price">Giá: <span class="price">{{ item.salePrice.toLocaleString() }} <span class="underline price">đ</span></span></h3>
-            <font-awesome-icon class="cart-item-details-icon" :icon="['fas', 'trash']" />
+            <div class="cart-item-details-icon">
+                <font-awesome-icon class="icon" :icon="['fas', 'trash']" />
+            </div>
         </div>
     </div>
 </template>
@@ -45,33 +47,41 @@
         flex-direction: row;
         padding: 10px;
         align-items: center;
+        height: fit-content;
+    }
+    .cart-item-details{
+        display: flex;
         justify-content: space-around;
+        flex: 1;
     }
     .cart-item-name{
         display: flex;
         margin-left: 20px;
+        align-items: center;
     }
     .item-quantity-choice {
-      display: flex;
-      gap: 3px;
-      height: 30px;
+        display: flex;
+        gap: 3px;
+        align-items: center;
     }
 
     .item-quantity-choice input {
-      width: 70px;
-      text-align: center;
-      border: 1px solid var(--main-color);
-      border-radius: 7px;
-      gap: 10px;
+        width: 70px;
+        height: 30px;
+        text-align: center;
+        border: 1px solid var(--main-color);
+        border-radius: 7px;
+        gap: 10px;
     }
 
     .item-quantity-choice button {
-      border: none;
-      background-color: var(--main-color);
-      color: #ffffff;
-      cursor: pointer;
-      border-radius: 20px;
-    width: 30px;
+        border: none;
+        background-color: var(--main-color);
+        color: #ffffff;
+        cursor: pointer;
+        border-radius: 20px;
+        width: 30px;
+        height: 30px;
     }
     a{
         text-decoration: none;
@@ -90,7 +100,6 @@
     .item-choice-wrap {
         width: 200px;
         height: 100%;
-        position: relative;
         display: flex;
         justify-content: center;
     }
@@ -99,13 +108,22 @@
         height: 100%;
         display: flex;
         flex-direction: column;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
     }
     p ,h4{
         text-align: center;
+    }
+    .cart-item-price {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .cart-item-details-icon{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .icon{
+        height: 20px;
     }
 
 </style>

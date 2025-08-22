@@ -22,12 +22,6 @@ public class UserDetailResponse {
 
     String phone;
 
-    Integer city;
-
-    Integer district;
-
-    String streetAddress;
-
     String avatarUrl;
 
     Integer gender;

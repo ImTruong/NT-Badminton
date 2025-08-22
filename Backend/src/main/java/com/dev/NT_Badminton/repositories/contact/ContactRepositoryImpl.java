@@ -9,16 +9,5 @@ import java.util.Optional;
 
 public class ContactRepositoryImpl extends BaseRepository implements ContactRepositoryCustom {
 
-    @Override
-    public List<Contact> getContactsByUserId(int userId) {
-        QContact qContact = QContact.contact;
-        return query()
-                .selectFrom(qContact)
-                .where(
-                        qContact.userId.eq(userId),
-                        qContact.deleted.eq(false)
-                )
-                .fetch();
-    }
 
 }

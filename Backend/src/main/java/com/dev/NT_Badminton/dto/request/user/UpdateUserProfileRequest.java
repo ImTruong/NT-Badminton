@@ -30,11 +30,5 @@ public class UpdateUserProfileRequest {
 
     private int gender;
 
-    Integer city;
-
-    Integer district;
-
-    String streetAddress;
-
     private MultipartFile avatar;
 }

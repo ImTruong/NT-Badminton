@@ -1,5 +1,6 @@
 package com.dev.NT_Badminton.dto.request.contact;
 
+import com.dev.NT_Badminton.entities.contacts.ContactType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -36,13 +37,16 @@ public class UserContactRequest {
     @NotNull(message = "District is required")
     Integer district;
 
+    @NotNull(message = "Ward is required")
+    Integer ward;
+
     @NotBlank(message = "Street address is required")
     String streetAddress;
 
     String note;
 
     @NotBlank(message = "Type is required")
-    String type;
+    ContactType type;
 
     Integer contactId;
 

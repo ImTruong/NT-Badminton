@@ -26,16 +26,6 @@ public interface UserService {
 
     List<Map<String, Object>> getAllGenders();
 
-    List<Map<String, Object>> getAllCitiesAndDistricts();
 
-    List<UserContactResponse> getUserContacts();
-
-    Contact addContact(UserContactRequest userContactRequest);
-
-    void deleteContact(int contactId);
-
-    void switchMainContact(int contactId);
-
-    void updateContact(UserContactRequest userContactRequest);
 
 }

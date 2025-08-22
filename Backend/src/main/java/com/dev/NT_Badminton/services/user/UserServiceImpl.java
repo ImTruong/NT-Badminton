@@ -5,12 +5,10 @@ import com.dev.NT_Badminton.dto.request.contact.UserContactRequest;
 import com.dev.NT_Badminton.dto.request.user.*;
 import com.dev.NT_Badminton.dto.response.user.UserContactResponse;
 import com.dev.NT_Badminton.dto.response.user.UserDetailResponse;
-import com.dev.NT_Badminton.entities.contacts.CityDistrictPair;
 import com.dev.NT_Badminton.entities.contacts.Contact;
 import com.dev.NT_Badminton.entities.contacts.ContactType;
 import com.dev.NT_Badminton.entities.role.constant.PermissionType;
 import com.dev.NT_Badminton.entities.upload_file.UploadFile;
-import com.dev.NT_Badminton.entities.upload_file.constant.UploadFileType;
 import com.dev.NT_Badminton.entities.users.AppUser;
 import com.dev.NT_Badminton.entities.users.constant.Gender;
 import com.dev.NT_Badminton.exception.AuthenticationFailedException;
@@ -35,7 +33,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -119,7 +116,7 @@ public class UserServiceImpl implements UserService {
         appUser = userRepository.save(appUser);
         Contact contact = modelMapper.map(registerRequest, Contact.class);
         contact.setUserId(appUser.getId());
-        contact.setType(ContactType.MAIN.getTypeId());
+        contact.setType(ContactType.MAIN);
         contactService.saveContact(contact);
         return appUser;
     }
@@ -157,9 +154,6 @@ public class UserServiceImpl implements UserService {
                 user.setAvatarId(avatar.getId());
             }
         }
-        Contact contact = contactService.getUserMainContact(user.getId());
-        modelMapper.map(updateUserProfileRequest, contact);
-        contactService.saveContact(contact);
         modelMapper.map(updateUserProfileRequest, user);
         userRepository.save(user);
         return true;
@@ -168,9 +162,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDetailResponse getUserDetail() {
         AppUser user = getUserFromSecurityContext();
-        Contact contact = contactService.getUserMainContact(user.getId());
         UserDetailResponse userDetail = modelMapper.map(user, UserDetailResponse.class);
-        modelMapper.map(contact, userDetail);
         Optional<UploadFile> avatarFile = user.getAvatarId() == null ? null : uploadFileService.getUserAvatar(user.getAvatarId());
         userDetail.setAvatarUrl(avatarFile!=null&&avatarFile.isPresent() ? avatarFile.get().getOriginUrl() : null);
         return userDetail;
@@ -186,87 +178,6 @@ public class UserServiceImpl implements UserService {
                     return map;
                 })
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Map<String, Object>> getAllCitiesAndDistricts() {
-        return Arrays.stream(CityDistrictPair.values())
-                .map(cityDistrictPair -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("id", cityDistrictPair.getId());
-                    map.put("name", cityDistrictPair.name());
-                    map.put("districts", cityDistrictPair.getDistricts());
-                    return map;
-                })
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<UserContactResponse> getUserContacts() {
-        AppUser user = getUserFromSecurityContext();
-        List<Contact> contacts = contactService.getUserContactsByUserId(user.getId());
-        return contacts.stream()
-                .map(contact -> {
-                    UserContactResponse responseContact = modelMapper.map(contact, UserContactResponse.class);
-                    responseContact.setType(ContactType.fromTypeId(contact.getType()).name());
-                    return responseContact;
-                })
-                .collect(Collectors.toList());
-    }
-
-    @Transactional
-    @Override
-    public Contact addContact(UserContactRequest userContactRequest) {
-        AppUser user = getUserFromSecurityContext();
-        Contact contact = modelMapper.map(userContactRequest, Contact.class);
-        contact.setType(ContactType.SUB.getTypeId());
-        if(userContactRequest.getType().equals("MAIN")){
-            Contact mainContact = contactService.getUserMainContact(user.getId());
-            mainContact.setType(ContactType.SUB.getTypeId());
-            contactService.saveContact(mainContact);
-        }
-        else if(!userContactRequest.getType().equals("SUB"))
-            throw new IllegalArgumentException("Invalid contact type");
-        contact.setType(ContactType.fromValue(userContactRequest.getType()).getTypeId());
-        contact.setUserId(user.getId());
-        return contactService.saveContact(contact);
-    }
-
-    @Transactional
-    @Override
-    public void deleteContact(int contactId) {
-        AppUser user = getUserFromSecurityContext();
-        Contact contact = contactService.getContactById(contactId);
-        if(contact.getUserId() != user.getId())
-            throw new IllegalArgumentException("You are not allowed to delete this contact");
-        if(contact.getType()==ContactType.MAIN.getTypeId())
-            throw new IllegalArgumentException("You need to switch main contact before deleting this contact");
-        contact.setDeleted(true);
-        contactService.saveContact(contact);
-    }
-
-    @Transactional
-    @Override
-    public void switchMainContact(int contactId) {
-        AppUser user = getUserFromSecurityContext();
-        Contact contact = contactService.getContactById(contactId);
-        if(contact.getUserId() != user.getId())
-            throw new IllegalArgumentException("You are not allowed to switch this contact");
-        Contact mainContact = contactService.getUserMainContact(user.getId());
-        mainContact.setType(ContactType.SUB.getTypeId());
-        contact.setType(ContactType.MAIN.getTypeId());
-        contactService.saveContact(mainContact);
-        contactService.saveContact(contact);
-    }
-
-    @Override
-    public void updateContact(UserContactRequest modifyContactRequest) {
-        AppUser user = getUserFromSecurityContext();
-        Contact contact = contactService.getContactById(modifyContactRequest.getContactId());
-        if(contact.getUserId() != user.getId())
-            throw new IllegalArgumentException("You are not allowed to update this contact");
-        modelMapper.map(modifyContactRequest, contact);
-        contactService.saveContact(contact);
     }
 
 }

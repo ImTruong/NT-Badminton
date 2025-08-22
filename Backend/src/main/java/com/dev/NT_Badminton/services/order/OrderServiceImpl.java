@@ -100,7 +100,7 @@ public class OrderServiceImpl implements OrderService {
         Contact contact = contactService.getContactById(contactId);
         if (contact.getUserId() != user.getId())
             throw new UnauthorizedException("You are not authorized user of this contact");
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found"));
         if (!order.getUserId().equals(user.getId()))
             throw new UnauthorizedException("You are not authorized to update this order");
         if (!order.getDeliveryStatus().equals(DeliveryStatus.PENDING))

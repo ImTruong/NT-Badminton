@@ -1,10 +1,7 @@
 package com.dev.NT_Badminton.entities.contacts;
 
-import com.dev.NT_Badminton.dto.constant.ActiveStatus;
 import com.dev.NT_Badminton.entities.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -25,17 +22,35 @@ public class Contact extends BaseEntity {
 
     String email;
 
-    Integer city;
-
-    Integer district;
-
     String streetAddress;
 
     String note;
 
-    @Column(name = "type", columnDefinition = "tinyint")
-    int type;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    ContactType type;
 
     @Column(name = "user_id", columnDefinition = "int")
     Integer userId;
+
+    @Column(name = "city_id", columnDefinition = "int")
+    Integer cityId;
+
+    @Column(name = "district_id", columnDefinition = "int")
+    Integer districtId;
+
+    @Column(name = "ward_id", columnDefinition = "int")
+    Integer wardId;
+
+    @ManyToOne
+    @JoinColumn(name = "city_id", insertable = false, updatable = false)
+    City city;
+
+    @ManyToOne
+    @JoinColumn(name = "district_id", insertable = false, updatable = false)
+    District district;
+
+    @ManyToOne
+    @JoinColumn(name = "ward_id", insertable = false, updatable = false)
+    Ward ward;
 }

@@ -243,6 +243,34 @@ CREATE TABLE `carts`
     FOREIGN KEY (`product_variant_id`) REFERENCES `product_variants` (`id`)  ON DELETE CASCADE
 );
 
+CREATE TABLE `cities`
+(
+    `id`            int unsigned NOT NULL AUTO_INCREMENT,
+    `name`          varchar(255) NOT NULL,
+    `deleted`       bit(1)       NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `districts`
+(
+    `id`            int unsigned NOT NULL AUTO_INCREMENT,
+    `name`          varchar(255) NOT NULL,
+    `deleted`       bit(1)       NOT NULL DEFAULT 0,
+    `city_id`       int unsigned DEFAULT NULL, -- Khóa ngoại tham chiếu đến thành phố
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`) ON DELETE SET NULL
+);
+
+CREATE TABLE `wards`
+(
+    `id`            int unsigned NOT NULL AUTO_INCREMENT,
+    `name`          varchar(255) NOT NULL,
+    `deleted`       bit(1)       NOT NULL DEFAULT 0,
+    `district_id`   int unsigned DEFAULT NULL, -- Khóa ngoại tham chiếu đến quận/huyện
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`district_id`) REFERENCES `districts` (`id`) ON DELETE SET NULL
+);
+
 CREATE TABLE `contacts`
 (
     `id`            int unsigned NOT NULL AUTO_INCREMENT,
@@ -254,13 +282,19 @@ CREATE TABLE `contacts`
     `district`          int unsigned DEFAULT NULL,
     `street_address`    varchar(255) DEFAULT NULL,
     `note`          text                  DEFAULT NULL,
-    `type`          tinyint      NOT NULL, -- 0 - Contact chính của user, 1 - Contact phụ của user
+    `type`          varchar(20)      NOT NULL,
     `deleted`       bit(1)       NOT NULL DEFAULT 0,
     `created_at`    datetime     NOT NULL,
     `updated_at`    datetime     NOT NULL,
     `user_id`       int unsigned DEFAULT NULL, -- Khóa ngoại tham chiếu đến người dùng
+    `city_id`       int unsigned DEFAULT NULL, -- Khóa ngoại tham chiếu đến thành phố
+    `district_id`   int unsigned DEFAULT NULL, -- Khóa ngoại tham chiếu đến quận/huyện
+    `ward_id`       int unsigned DEFAULT NULL, -- Khóa ngoại tham chiếu đến phường/xã
     PRIMARY KEY (`id`),
-    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`) ON DELETE SET NULL,
+    FOREIGN KEY (`district_id`) REFERENCES `districts` (`id`) ON DELETE SET NULL,
+    FOREIGN KEY (`ward_id`) REFERENCES `wards` (`id`) ON DELETE SET NULL
 );
 
 CREATE TABLE `orders`
@@ -338,7 +372,7 @@ CREATE TABLE `order_items`
 -- (7, 'Vợt Yonex', 'vot-yonex', 'Vợt cầu lông Yonex chính hãng', 2, b'0', NOW(), NOW()),
 -- (8, 'Vợt Lining', 'vot-lining', 'Vợt cầu lông Lining chính hãng', 2, b'0', NOW(), NOW());
 --
--- -- Sản phẩm gán vào category con
+-- -- Sản phẩm (giữ nguyên categories đã có)
 -- INSERT INTO products (name, slug, short_description, description, brand, category_id, deleted, created_at, updated_at)
 -- VALUES
 --     ('Giày Cầu Lông Yonex 65Z3', 'giay-yonex-65z3', 'Giày cầu lông cao cấp', 'Công nghệ chống lật cổ chân, bám sân tốt', 'Yonex', 5, 0, NOW(), NOW()),
@@ -347,71 +381,325 @@ CREATE TABLE `order_items`
 --     ('Vợt Cầu Lông Lining Aeronaut 9000C', 'vot-lining-aeronaut-9000c', 'Vợt điều khiển linh hoạt', 'Khung carbon bền, trợ lực tốt', 'Lining', 8, 0, NOW(), NOW()),
 --     ('Quần Áo Cầu Lông Yonex 2024', 'quan-ao-yonex-2024', 'Bộ quần áo thể thao', 'Chất liệu thấm hút mồ hôi tốt', 'Yonex', 3, 0, NOW(), NOW());
 --
---
+-- -- Product Options
 -- INSERT INTO product_options (name, description, product_id, deleted, created_at, updated_at)
 -- VALUES
+--     -- Giày Yonex 65Z3 (product_id = 1)
 --     ('Size Giày', 'Kích cỡ giày cầu lông', 1, 0, NOW(), NOW()),
---     ('Size Giày', 'Kích cỡ giày cầu lông', 2, 0, NOW(), NOW()),
 --     ('Màu Giày', 'Màu sắc giày cầu lông', 1, 0, NOW(), NOW()),
+--
+--     -- Giày Lining AYAS006 (product_id = 2)
+--     ('Size Giày', 'Kích cỡ giày cầu lông', 2, 0, NOW(), NOW()),
 --     ('Màu Giày', 'Màu sắc giày cầu lông', 2, 0, NOW(), NOW()),
+--
+--     -- Vợt Yonex Astrox 88D (product_id = 3)
 --     ('Trọng Lượng Vợt', 'Trọng lượng vợt cầu lông', 3, 0, NOW(), NOW()),
+--     ('Màu Vợt', 'Màu sắc vợt cầu lông', 3, 0, NOW(), NOW()),
+--
+--     -- Vợt Lining Aeronaut 9000C (product_id = 4)
 --     ('Trọng Lượng Vợt', 'Trọng lượng vợt cầu lông', 4, 0, NOW(), NOW()),
+--     ('Màu Vợt', 'Màu sắc vợt cầu lông', 4, 0, NOW(), NOW()),
+--
+--     -- Quần Áo Yonex 2024 (product_id = 5)
 --     ('Size Áo', 'Size quần áo thể thao', 5, 0, NOW(), NOW()),
 --     ('Màu Áo', 'Màu sắc quần áo thể thao', 5, 0, NOW(), NOW());
 --
+-- -- Product Option Values
 -- INSERT INTO product_option_values (product_option_id, value, deleted, created_at, updated_at)
 -- VALUES
---     -- Size Giày
+--     -- Size Giày Yonex (option_id = 1)
 --     (1, '39', 0, NOW(), NOW()),
 --     (1, '40', 0, NOW(), NOW()),
---     (2, '41', 0, NOW(), NOW()),
---     (2, '42', 0, NOW(), NOW()),
---     -- Màu Giày
---     (3, 'Trắng/Xanh', 0, NOW(), NOW()),
---     (3, 'Đen/Đỏ', 0, NOW(), NOW()),
+--     (1, '41', 0, NOW(), NOW()),
+--     (1, '42', 0, NOW(), NOW()),
+--
+--     -- Màu Giày Yonex (option_id = 2)
+--     (2, 'Trắng/Xanh', 0, NOW(), NOW()),
+--     (2, 'Đen/Đỏ', 0, NOW(), NOW()),
+--     (2, 'Xanh/Vàng', 0, NOW(), NOW()),
+--
+--     -- Size Giày Lining (option_id = 3)
+--     (3, '39', 0, NOW(), NOW()),
+--     (3, '40', 0, NOW(), NOW()),
+--     (3, '41', 0, NOW(), NOW()),
+--     (3, '42', 0, NOW(), NOW()),
+--     (3, '43', 0, NOW(), NOW()),
+--
+--     -- Màu Giày Lining (option_id = 4)
 --     (4, 'Xanh Lá', 0, NOW(), NOW()),
 --     (4, 'Xám/Bạc', 0, NOW(), NOW()),
---     -- Trọng Lượng Vợt
+--     (4, 'Đen/Trắng', 0, NOW(), NOW()),
+--
+--     -- Trọng Lượng Vợt Yonex (option_id = 5)
 --     (5, '3U (85-89g)', 0, NOW(), NOW()),
 --     (5, '4U (80-84g)', 0, NOW(), NOW()),
---     (6, '3U (85-89g)', 0, NOW(), NOW()),
---     (6, '5U (75-79g)', 0, NOW(), NOW()),
---     -- Size Áo
---     (7, 'M', 0, NOW(), NOW()),
---     (7, 'L', 0, NOW(), NOW()),
---     (7, 'XL', 0, NOW(), NOW()),
---     -- Màu Áo
---     (8, 'Trắng', 0, NOW(), NOW()),
---     (8, 'Xanh Dương', 0, NOW(), NOW()),
---     (8, 'Đỏ', 0, NOW(), NOW());
 --
+--     -- Màu Vợt Yonex (option_id = 6)
+--     (6, 'Đen/Đỏ', 0, NOW(), NOW()),
+--     (6, 'Xanh/Vàng', 0, NOW(), NOW()),
+--
+--     -- Trọng Lượng Vợt Lining (option_id = 7)
+--     (7, '3U (85-89g)', 0, NOW(), NOW()),
+--     (7, '4U (80-84g)', 0, NOW(), NOW()),
+--     (7, '5U (75-79g)', 0, NOW(), NOW()),
+--
+--     -- Màu Vợt Lining (option_id = 8)
+--     (8, 'Xanh Dương', 0, NOW(), NOW()),
+--     (8, 'Đỏ/Đen', 0, NOW(), NOW()),
+--
+--     -- Size Áo (option_id = 9)
+--     (9, 'S', 0, NOW(), NOW()),
+--     (9, 'M', 0, NOW(), NOW()),
+--     (9, 'L', 0, NOW(), NOW()),
+--     (9, 'XL', 0, NOW(), NOW()),
+--
+--     -- Màu Áo (option_id = 10)
+--     (10, 'Trắng', 0, NOW(), NOW()),
+--     (10, 'Xanh Dương', 0, NOW(), NOW()),
+--     (10, 'Đỏ', 0, NOW(), NOW()),
+--     (10, 'Đen', 0, NOW(), NOW());
+--
+-- -- Product Variants - Tạo đầy đủ các tổ hợp
 -- INSERT INTO product_variants (product_id, sku, quantity, price, deleted, created_at, updated_at)
 -- VALUES
---     (1, 'YONEX-65Z3-39-TRANG-XANH', 10, 2000000, 0, NOW(), NOW()),
---     (2, 'LINING-AYAS006-41-XANH-LA', 5, 1800000, 0, NOW(), NOW()),
---     (3, 'YONEX-ASTROX-88D-3U', 12, 3000000, 0, NOW(), NOW()),
---     (4, 'LINING-AERONAUT-9000C-5U', 11, 2800000, 0, NOW(), NOW()),
---     (5, 'YONEX-AO-2024-M-TRANG', 20, 500000, 0, NOW(), NOW());
+--     -- Giày Yonex 65Z3 (4 size x 3 màu = 12 variants)
+--     (1, 'YONEX-65Z3-39-TRANG-XANH', 8, 2000000, 0, NOW(), NOW()),
+--     (1, 'YONEX-65Z3-39-DEN-DO', 6, 2000000, 0, NOW(), NOW()),
+--     (1, 'YONEX-65Z3-39-XANH-VANG', 5, 2000000, 0, NOW(), NOW()),
+--     (1, 'YONEX-65Z3-40-TRANG-XANH', 10, 2000000, 0, NOW(), NOW()),
+--     (1, 'YONEX-65Z3-40-DEN-DO', 7, 2000000, 0, NOW(), NOW()),
+--     (1, 'YONEX-65Z3-40-XANH-VANG', 4, 2000000, 0, NOW(), NOW()),
+--     (1, 'YONEX-65Z3-41-TRANG-XANH', 12, 2000000, 0, NOW(), NOW()),
+--     (1, 'YONEX-65Z3-41-DEN-DO', 9, 2000000, 0, NOW(), NOW()),
+--     (1, 'YONEX-65Z3-41-XANH-VANG', 6, 2000000, 0, NOW(), NOW()),
+--     (1, 'YONEX-65Z3-42-TRANG-XANH', 15, 2000000, 0, NOW(), NOW()),
+--     (1, 'YONEX-65Z3-42-DEN-DO', 8, 2000000, 0, NOW(), NOW()),
+--     (1, 'YONEX-65Z3-42-XANH-VANG', 3, 2000000, 0, NOW(), NOW()),
 --
+--     -- Giày Lining AYAS006 (5 size x 3 màu = 15 variants)
+--     (2, 'LINING-AYAS006-39-XANH-LA', 5, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-39-XAM-BAC', 4, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-39-DEN-TRANG', 6, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-40-XANH-LA', 7, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-40-XAM-BAC', 8, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-40-DEN-TRANG', 5, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-41-XANH-LA', 10, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-41-XAM-BAC', 6, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-41-DEN-TRANG', 9, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-42-XANH-LA', 12, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-42-XAM-BAC', 7, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-42-DEN-TRANG', 8, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-43-XANH-LA', 4, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-43-XAM-BAC', 3, 1800000, 0, NOW(), NOW()),
+--     (2, 'LINING-AYAS006-43-DEN-TRANG', 5, 1800000, 0, NOW(), NOW()),
+--
+--     -- Vợt Yonex Astrox 88D (2 trọng lượng x 2 màu = 4 variants)
+--     (3, 'YONEX-ASTROX-88D-3U-DEN-DO', 8, 3000000, 0, NOW(), NOW()),
+--     (3, 'YONEX-ASTROX-88D-3U-XANH-VANG', 6, 3000000, 0, NOW(), NOW()),
+--     (3, 'YONEX-ASTROX-88D-4U-DEN-DO', 10, 3000000, 0, NOW(), NOW()),
+--     (3, 'YONEX-ASTROX-88D-4U-XANH-VANG', 7, 3000000, 0, NOW(), NOW()),
+--
+--     -- Vợt Lining Aeronaut 9000C (3 trọng lượng x 2 màu = 6 variants)
+--     (4, 'LINING-AERONAUT-9000C-3U-XANH-DUONG', 5, 2800000, 0, NOW(), NOW()),
+--     (4, 'LINING-AERONAUT-9000C-3U-DO-DEN', 7, 2800000, 0, NOW(), NOW()),
+--     (4, 'LINING-AERONAUT-9000C-4U-XANH-DUONG', 9, 2800000, 0, NOW(), NOW()),
+--     (4, 'LINING-AERONAUT-9000C-4U-DO-DEN', 6, 2800000, 0, NOW(), NOW()),
+--     (4, 'LINING-AERONAUT-9000C-5U-XANH-DUONG', 8, 2800000, 0, NOW(), NOW()),
+--     (4, 'LINING-AERONAUT-9000C-5U-DO-DEN', 4, 2800000, 0, NOW(), NOW()),
+--
+--     -- Quần Áo Yonex 2024 (4 size x 4 màu = 16 variants)
+--     (5, 'YONEX-AO-2024-S-TRANG', 15, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-S-XANH-DUONG', 12, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-S-DO', 8, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-S-DEN', 10, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-M-TRANG', 20, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-M-XANH-DUONG', 18, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-M-DO', 15, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-M-DEN', 16, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-L-TRANG', 25, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-L-XANH-DUONG', 22, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-L-DO', 18, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-L-DEN', 20, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-XL-TRANG', 12, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-XL-XANH-DUONG', 10, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-XL-DO', 8, 500000, 0, NOW(), NOW()),
+--     (5, 'YONEX-AO-2024-XL-DEN', 9, 500000, 0, NOW(), NOW());
+--
+-- -- Product Variant Option Values - Liên kết từng variant với các option values tương ứng
 -- INSERT INTO product_variant_option_values (product_variant_id, product_option_value_id, deleted, created_at, updated_at)
 -- VALUES
--- -- Giày Yonex 65Z3 (Size: 39, Màu: Trắng/Xanh)
--- (1, 1, 0, NOW(), NOW()),  -- Size 39
--- (1, 5, 0, NOW(), NOW()),  -- Trắng/Xanh
+--     -- Giày Yonex 65Z3 variants (12 variants)
+--     -- Variant 1: Size 39 + Trắng/Xanh
+--     (1, 1, 0, NOW(), NOW()),   -- Size 39
+--     (1, 5, 0, NOW(), NOW()),   -- Trắng/Xanh
+--     -- Variant 2: Size 39 + Đen/Đỏ
+--     (2, 1, 0, NOW(), NOW()),   -- Size 39
+--     (2, 6, 0, NOW(), NOW()),   -- Đen/Đỏ
+--     -- Variant 3: Size 39 + Xanh/Vàng
+--     (3, 1, 0, NOW(), NOW()),   -- Size 39
+--     (3, 7, 0, NOW(), NOW()),   -- Xanh/Vàng
+--     -- Variant 4: Size 40 + Trắng/Xanh
+--     (4, 2, 0, NOW(), NOW()),   -- Size 40
+--     (4, 5, 0, NOW(), NOW()),   -- Trắng/Xanh
+--     -- Variant 5: Size 40 + Đen/Đỏ
+--     (5, 2, 0, NOW(), NOW()),   -- Size 40
+--     (5, 6, 0, NOW(), NOW()),   -- Đen/Đỏ
+--     -- Variant 6: Size 40 + Xanh/Vàng
+--     (6, 2, 0, NOW(), NOW()),   -- Size 40
+--     (6, 7, 0, NOW(), NOW()),   -- Xanh/Vàng
+--     -- Variant 7: Size 41 + Trắng/Xanh
+--     (7, 3, 0, NOW(), NOW()),   -- Size 41
+--     (7, 5, 0, NOW(), NOW()),   -- Trắng/Xanh
+--     -- Variant 8: Size 41 + Đen/Đỏ
+--     (8, 3, 0, NOW(), NOW()),   -- Size 41
+--     (8, 6, 0, NOW(), NOW()),   -- Đen/Đỏ
+--     -- Variant 9: Size 41 + Xanh/Vàng
+--     (9, 3, 0, NOW(), NOW()),   -- Size 41
+--     (9, 7, 0, NOW(), NOW()),   -- Xanh/Vàng
+--     -- Variant 10: Size 42 + Trắng/Xanh
+--     (10, 4, 0, NOW(), NOW()),  -- Size 42
+--     (10, 5, 0, NOW(), NOW()),  -- Trắng/Xanh
+--     -- Variant 11: Size 42 + Đen/Đỏ
+--     (11, 4, 0, NOW(), NOW()),  -- Size 42
+--     (11, 6, 0, NOW(), NOW()),  -- Đen/Đỏ
+--     -- Variant 12: Size 42 + Xanh/Vàng
+--     (12, 4, 0, NOW(), NOW()),  -- Size 42
+--     (12, 7, 0, NOW(), NOW()),  -- Xanh/Vàng
 --
--- -- Giày Lining AYAS006 (Size: 41, Màu: Xanh Lá)
--- (2, 3, 0, NOW(), NOW()),  -- Size 41
--- (2, 7, 0, NOW(), NOW()),  -- Xanh Lá
+--     -- Giày Lining AYAS006 variants (15 variants)
+--     -- Size 39
+--     (13, 8, 0, NOW(), NOW()),  -- Size 39
+--     (13, 12, 0, NOW(), NOW()), -- Xanh Lá
+--     (14, 8, 0, NOW(), NOW()),  -- Size 39
+--     (14, 13, 0, NOW(), NOW()), -- Xám/Bạc
+--     (15, 8, 0, NOW(), NOW()),  -- Size 39
+--     (15, 14, 0, NOW(), NOW()), -- Đen/Trắng
+--     -- Size 40
+--     (16, 9, 0, NOW(), NOW()),  -- Size 40
+--     (16, 12, 0, NOW(), NOW()), -- Xanh Lá
+--     (17, 9, 0, NOW(), NOW()),  -- Size 40
+--     (17, 13, 0, NOW(), NOW()), -- Xám/Bạc
+--     (18, 9, 0, NOW(), NOW()),  -- Size 40
+--     (18, 14, 0, NOW(), NOW()), -- Đen/Trắng
+--     -- Size 41
+--     (19, 10, 0, NOW(), NOW()), -- Size 41
+--     (19, 12, 0, NOW(), NOW()), -- Xanh Lá
+--     (20, 10, 0, NOW(), NOW()), -- Size 41
+--     (20, 13, 0, NOW(), NOW()), -- Xám/Bạc
+--     (21, 10, 0, NOW(), NOW()), -- Size 41
+--     (21, 14, 0, NOW(), NOW()), -- Đen/Trắng
+--     -- Size 42
+--     (22, 11, 0, NOW(), NOW()), -- Size 42
+--     (22, 12, 0, NOW(), NOW()), -- Xanh Lá
+--     (23, 11, 0, NOW(), NOW()), -- Size 42
+--     (23, 13, 0, NOW(), NOW()), -- Xám/Bạc
+--     (24, 11, 0, NOW(), NOW()), -- Size 42
+--     (24, 14, 0, NOW(), NOW()), -- Đen/Trắng
+--     -- Size 43
+--     (25, 12, 0, NOW(), NOW()), -- Size 43
+--     (25, 12, 0, NOW(), NOW()), -- Xanh Lá
+--     (26, 12, 0, NOW(), NOW()), -- Size 43
+--     (26, 13, 0, NOW(), NOW()), -- Xám/Bạc
+--     (27, 12, 0, NOW(), NOW()), -- Size 43
+--     (27, 14, 0, NOW(), NOW()), -- Đen/Trắng
 --
--- -- Vợt Yonex Astrox 88D (Trọng Lượng: 3U)
--- (3, 9, 0, NOW(), NOW()),  -- 3U (85-89g)
+--     -- Vợt Yonex Astrox 88D variants (4 variants)
+--     -- 3U variants
+--     (28, 15, 0, NOW(), NOW()), -- 3U
+--     (28, 17, 0, NOW(), NOW()), -- Đen/Đỏ
+--     (29, 15, 0, NOW(), NOW()), -- 3U
+--     (29, 18, 0, NOW(), NOW()), -- Xanh/Vàng
+--     -- 4U variants
+--     (30, 16, 0, NOW(), NOW()), -- 4U
+--     (30, 17, 0, NOW(), NOW()), -- Đen/Đỏ
+--     (31, 16, 0, NOW(), NOW()), -- 4U
+--     (31, 18, 0, NOW(), NOW()), -- Xanh/Vàng
 --
--- -- Vợt Lining Aeronaut 9000C (Trọng Lượng: 5U)
--- (4, 12, 0, NOW(), NOW()), -- 5U (75-79g)
+--     -- Vợt Lining Aeronaut 9000C variants (6 variants)
+--     -- 3U variants
+--     (32, 19, 0, NOW(), NOW()), -- 3U
+--     (32, 21, 0, NOW(), NOW()), -- Xanh Dương
+--     (33, 19, 0, NOW(), NOW()), -- 3U
+--     (33, 22, 0, NOW(), NOW()), -- Đỏ/Đen
+--     -- 4U variants
+--     (34, 20, 0, NOW(), NOW()), -- 4U
+--     (34, 21, 0, NOW(), NOW()), -- Xanh Dương
+--     (35, 20, 0, NOW(), NOW()), -- 4U
+--     (35, 22, 0, NOW(), NOW()), -- Đỏ/Đen
+--     -- 5U variants
+--     (36, 21, 0, NOW(), NOW()), -- 5U
+--     (36, 21, 0, NOW(), NOW()), -- Xanh Dương
+--     (37, 21, 0, NOW(), NOW()), -- 5U
+--     (37, 22, 0, NOW(), NOW()), -- Đỏ/Đen
 --
--- -- Áo Yonex 2024 (Size: M, Màu: Trắng)
--- (5, 13, 0, NOW(), NOW()), -- Size M
--- (5, 16, 0, NOW(), NOW()); -- Màu Trắng
-
-
-
+--     -- Quần Áo Yonex 2024 variants (16 variants)
+--     -- Size S
+--     (38, 23, 0, NOW(), NOW()), -- Size S
+--     (38, 26, 0, NOW(), NOW()), -- Trắng
+--     (39, 23, 0, NOW(), NOW()), -- Size S
+--     (39, 27, 0, NOW(), NOW()), -- Xanh Dương
+--     (40, 23, 0, NOW(), NOW()), -- Size S
+--     (40, 28, 0, NOW(), NOW()), -- Đỏ
+--     (41, 23, 0, NOW(), NOW()), -- Size S
+--     (41, 29, 0, NOW(), NOW()), -- Đen
+--     -- Size M
+--     (42, 24, 0, NOW(), NOW()), -- Size M
+--     (42, 26, 0, NOW(), NOW()), -- Trắng
+--     (43, 24, 0, NOW(), NOW()), -- Size M
+--     (43, 27, 0, NOW(), NOW()), -- Xanh Dương
+--     (44, 24, 0, NOW(), NOW()), -- Size M
+--     (44, 28, 0, NOW(), NOW()), -- Đỏ
+--     (45, 24, 0, NOW(), NOW()), -- Size M
+--     (45, 29, 0, NOW(), NOW()), -- Đen
+--     -- Size L
+--     (46, 25, 0, NOW(), NOW()), -- Size L
+--     (46, 26, 0, NOW(), NOW()), -- Trắng
+--     (47, 25, 0, NOW(), NOW()), -- Size L
+--     (47, 27, 0, NOW(), NOW()), -- Xanh Dương
+--     (48, 25, 0, NOW(), NOW()), -- Size L
+--     (48, 28, 0, NOW(), NOW()), -- Đỏ
+--     (49, 25, 0, NOW(), NOW()), -- Size L
+--     (49, 29, 0, NOW(), NOW()), -- Đen
+--     -- Size XL
+--     (50, 26, 0, NOW(), NOW()), -- Size XL
+--     (50, 26, 0, NOW(), NOW()), -- Trắng
+--     (51, 26, 0, NOW(), NOW()), -- Size XL
+--     (51, 27, 0, NOW(), NOW()), -- Xanh Dương
+--     (52, 26, 0, NOW(), NOW()), -- Size XL
+--     (52, 28, 0, NOW(), NOW()), -- Đỏ
+--     (53, 26, 0, NOW(), NOW()), -- Size XL
+--     (53, 29, 0, NOW(), NOW()); -- Đen
+--
+-- -- Cities
+-- INSERT INTO cities (name) VALUES
+--                               ('Hà Nội'),
+--                               ('Hồ Chí Minh'),
+--                               ('Đà Nẵng');
+--
+-- -- Districts
+-- INSERT INTO districts (name, city_id) VALUES
+--                                           ('Ba Đình', 1),      -- Hà Nội
+--                                           ('Hoàn Kiếm', 1),
+--                                           ('Quận 1', 2),       -- HCM
+--                                           ('Quận 3', 2),
+--                                           ('Hải Châu', 3),     -- Đà Nẵng
+--                                           ('Thanh Khê', 3);
+--
+-- -- Wards (phường/xã)
+-- INSERT INTO wards (name, district_id) VALUES
+--                                           ('Phường Phúc Xá', 1),      -- Ba Đình, HN
+--                                           ('Phường Trúc Bạch', 1),
+--                                           ('Phường Hàng Bạc', 2),     -- Hoàn Kiếm, HN
+--                                           ('Phường Hàng Đào', 2),
+--
+--                                           ('Phường Bến Nghé', 3),     -- Quận 1, HCM
+--                                           ('Phường Bến Thành', 3),
+--                                           ('Phường Võ Thị Sáu', 4),   -- Quận 3, HCM
+--                                           ('Phường 6', 4),
+--
+--                                           ('Phường Thạch Thang', 5), -- Hải Châu, Đà Nẵng
+--                                           ('Phường Hải Châu I', 5),
+--                                           ('Phường Thanh Khê Đông', 6), -- Thanh Khê, Đà Nẵng
+--                                           ('Phường An Khê', 6);
+--
+--

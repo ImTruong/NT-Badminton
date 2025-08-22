@@ -29,7 +29,7 @@ public class OrderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/update-contact")
+    @PutMapping("/contact")
     public ResponseEntity<?> updateContact(@RequestParam @NotNull(message = "contactId is required") Integer contactId,
                                            @RequestParam @NotNull(message = "orderId is required") Integer orderId) {
         orderService.updateContact(contactId, orderId);
@@ -37,7 +37,7 @@ public class OrderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/update-payment")
+    @PutMapping("/payment")
     public ResponseEntity<?> updatePayment(HttpServletRequest request) {
         ApiResponse<String> response = new ApiResponse<String>(true, "Update Payment Successful", orderService.updatePayment(request));
         return new ResponseEntity<>(response, HttpStatus.OK);
