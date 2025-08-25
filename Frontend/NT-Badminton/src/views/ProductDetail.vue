@@ -1,11 +1,14 @@
 <script setup>
   import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-  import {ref, onMounted, nextTick, reactive, onBeforeMount, computed} from 'vue';
+  import {ref, onMounted, onBeforeMount, computed} from 'vue';
   import { useRoute } from "vue-router";
   import { getProductDetail } from "@/api/product";
   import { addToCart } from "@/api/cart";
+  import { useCartStore } from "@/stores/cart";
 
   const route = useRoute();
+  const cartStore = useCartStore();
+  const addingToCart = ref(false);
 
   const product = ref(null);
 
@@ -216,27 +219,32 @@
     }
     
     const matchedVariant = checkMatchVariant();
-    if (matchedVariant) {
-      isTempVariant.value = false;
-      return matchedVariant;
-    }
-    isTempVariant.value = true;
-    return minPriceVariant();
-  });
+      if (matchedVariant) {
+        isTempVariant.value = false;
+        return matchedVariant;
+      }
+      isTempVariant.value = true;
+      return minPriceVariant();
+    });
 
   const handleAddToCart = async () => {
     if(isTempVariant.value) {
       alert('Vui lòng chọn đầy đủ các tùy chọn sản phẩm trước khi thêm vào giỏ hàng.');
       return;
     }
-    const variantId = currentVariant.value.id;
-    const token = localStorage.getItem('token');
+    addingToCart.value = true;
     try {
-      await addToCart(token, variantId, quantity.value);
-      alert('Sản phẩm đã được thêm vào giỏ hàng.');
+      const result = await cartStore.addItemToCart(currentVariant.value.id, quantity.value);
+      if (result.success) {
+        // Show success notification if needed
+      } else {
+        // Handle error
+        alert(result.message || 'Could not add to cart');
+      }
     } catch (error) {
       console.error('Error adding to cart:', error);
-      alert('Đã có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
+    } finally {
+      addingToCart.value = false;
     }
   };
 
@@ -363,9 +371,12 @@
             >+</button>
           </div>
         </div>
-        <button class="btn cart-btn" @click="handleAddToCart">
-          <FontAwesomeIcon icon="fa-solid fa-cart-plus" />
-          Thêm vào giỏ hàng</button>
+        <button 
+          @click="handleAddToCart" 
+          :disabled="addingToCart"
+          class="add-to-cart-button">
+          {{ addingToCart ? 'Đang thêm...' : 'Thêm vào giỏ hàng' }}
+        </button>
       </div>
     </div>
     <div class="tab-container">

@@ -39,7 +39,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getProductById(int productId) {
         Optional<Product> product = productRepository.findProductById(productId);
-        if(product.isEmpty())
+        if (product.isEmpty())
             throw new EntityNotFoundException("Product with id " + productId + " not found");
         return product.get();
     }
@@ -47,7 +47,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductOption getProductOptionById(int productOptionId) {
         Optional<ProductOption> productOption = productOptionRepository.findById(productOptionId);
-        if(productOption.isEmpty())
+        if (productOption.isEmpty())
             throw new EntityNotFoundException("Product option with id " + productOptionId + " not found");
         return productOption.get();
     }
@@ -55,16 +55,16 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductOptionValue getProductOptionValueById(int productOptionValueId) {
         Optional<ProductOptionValue> productOptionValue = productOptionValueRepository.findById(productOptionValueId);
-        if(productOptionValue.isEmpty())
+        if (productOptionValue.isEmpty())
             throw new EntityNotFoundException("Product option value with id " + productOptionValueId + " not found");
         return productOptionValue.get();
     }
 
     @Override
     public boolean checkIfProductHasOption(int productId) {
-         List<ProductVariants> productVariants = productVariantsRepository.findByProductIdAndDeleted(productId, false);
-         if (productVariants.size() >= 2) return true;
-         return !productVariantOptionValuesRepository.findByProductVariantId(productVariants.getFirst().getId()).isEmpty();
+        List<ProductVariants> productVariants = productVariantsRepository.findByProductIdAndDeleted(productId, false);
+        if (productVariants.size() >= 2) return true;
+        return !productVariantOptionValuesRepository.findByProductVariantId(productVariants.getFirst().getId()).isEmpty();
     }
 
     @Override
@@ -76,7 +76,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductVariants getProductVariantByProductOptionValueIds(List<Integer> productOptionValueIds) {
         Optional<ProductVariants> productVariants = productVariantsRepository.findProductVariantByProductVariantOptionValuesIds(productOptionValueIds);
-        if(productVariants.isEmpty())
+        if (productVariants.isEmpty())
             throw new EntityNotFoundException("Product variant with option values " + productOptionValueIds + " not found");
         return productVariants.get();
     }
@@ -84,7 +84,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductVariants getProductVariantById(int productVariantId) {
         Optional<ProductVariants> productVariants = productVariantsRepository.findById(productVariantId);
-        if(productVariants.isEmpty())
+        if (productVariants.isEmpty())
             throw new EntityNotFoundException("Product variant with id " + productVariantId + " not found");
         return productVariants.get();
     }
@@ -104,7 +104,7 @@ public class ProductServiceImpl implements ProductService {
                 ? modelMapper.map(modifyProductRequest, Product.class)
                 : productRepository.findById(modifyProductRequest.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-        if("UPDATE".equals(modifyProductRequest.getType()))
+        if ("UPDATE".equals(modifyProductRequest.getType()))
             modelMapper.map(modifyProductRequest, product);
         product.setSlug(Utils.removeCharacterVn(modifyProductRequest.getName()));
         productRepository.save(product);
@@ -116,7 +116,7 @@ public class ProductServiceImpl implements ProductService {
                 ? modelMapper.map(modifyProductOptionRequest, ProductOption.class)
                 : productOptionRepository.findById(modifyProductOptionRequest.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Product option not found"));
-        if("UPDATE".equals(modifyProductOptionRequest.getType()))
+        if ("UPDATE".equals(modifyProductOptionRequest.getType()))
             modelMapper.map(modifyProductOptionRequest, productOption);
         productOptionRepository.save(productOption);
     }
@@ -127,7 +127,7 @@ public class ProductServiceImpl implements ProductService {
                 ? modelMapper.map(modifyProductOptionValueRequest, ProductOptionValue.class)
                 : productOptionValueRepository.findById(modifyProductOptionValueRequest.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Product option value not found"));
-        if("UPDATE".equals(modifyProductOptionValueRequest.getType()))
+        if ("UPDATE".equals(modifyProductOptionValueRequest.getType()))
             modelMapper.map(modifyProductOptionValueRequest, productOptionValue);
         productOptionValueRepository.save(productOptionValue);
     }
@@ -139,11 +139,11 @@ public class ProductServiceImpl implements ProductService {
                 ? modelMapper.map(modifyProductVariantRequest, ProductVariants.class)
                 : productVariantsRepository.findById(modifyProductVariantRequest.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Product variant not found"));
-        if("UPDATE".equals(modifyProductVariantRequest.getType()))
+        if ("UPDATE".equals(modifyProductVariantRequest.getType()))
             modelMapper.map(modifyProductVariantRequest, productVariants);
         productVariantsRepository.save(productVariants);
         List<Integer> productIds = productRepository.findProductIdsByOptionValueIds(modifyProductVariantRequest.getProductOptionValueIds(), modifyProductVariantRequest.getProductId());
-        if (productIds.size()!=1)
+        if (productIds.size() != 1)
             throw new EntityNotFoundException("Product variant with option values " + modifyProductVariantRequest.getProductOptionValueIds() + " not found");
         else
             productVariantOptionValuesRepository.deleteAllByProductVariantId(productVariants.getId());
@@ -195,7 +195,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PageImpl<SearchProductReponse> searchProducts(SearchProductRequest searchProductRequest, Pageable pageable) {
-        PageImpl<SearchProductReponse> result = productRepository.findProducts(searchProductRequest,pageable);
+        PageImpl<SearchProductReponse> result = productRepository.findProducts(searchProductRequest, pageable);
         return result;
     }
 
@@ -233,6 +233,4 @@ public class ProductServiceImpl implements ProductService {
     public List<String> getAllProductBrands() {
         return productRepository.getAllProductBrands();
     }
-
-
 }

@@ -66,8 +66,8 @@ public class CartRepositoryImpl extends BaseRepository implements CartRepository
             cartProductResponse.setProductOptionalValue(productOptionValueRepository.getProductVariantOptionValuesByProductVariantId(cartProductResponse.getProductVariantId()));
             Integer discountPercentage = discountRepository.getNewestUnexpiredDiscountWithHighestPercentage(cartProductResponse.getProductVariantId());
 
-            cartProductResponse.setSalePrice(cartProductResponse.getOriginalPrice() * (100 - discountPercentage) / 100 * cartProductResponse.getQuantity());
-            cartProductResponse.setOriginalPrice(cartProductResponse.getOriginalPrice() * cartProductResponse.getQuantity());
+            cartProductResponse.setPrice(cartProductResponse.getPriceBeforeDiscount() * (100 - discountPercentage) / 100 * cartProductResponse.getQuantity());
+            cartProductResponse.setPriceBeforeDiscount(cartProductResponse.getPriceBeforeDiscount() * cartProductResponse.getQuantity());
         });
 
         return new PageImpl<>(results.getResults(), pageable, results.getTotal());

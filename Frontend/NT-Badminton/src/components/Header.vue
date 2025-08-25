@@ -3,22 +3,15 @@
   import {getCategories} from "@/api/category.js";
   import { ref, onMounted } from 'vue';
   import HeaderCartItem from "@/components/HeaderCartItem.vue";
-  import { getCart } from "@/api/cart.js";
+  import { useCartStore } from '@/stores/cart';
+
+  const cartStore = useCartStore();
 
   const token = localStorage.getItem("token");
 
   const cartItems = ref(null);
-  const pageCart = ref(1);
-  const itemsPerPage = ref(5);
-
   const categories = ref(null);
 
-  const calTotalCart = () => {
-    if (!cartItems.value) return 0;
-    return cartItems.value.reduce((total, item) => {
-      return total + item.salePrice * item.quantity;
-    }, 0);
-  };
 
   onMounted(() => {
     (async () => {
@@ -28,16 +21,7 @@
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
-      if (token) {
-        try {
-          const fetchedCartItems = await getCart(token, pageCart.value, itemsPerPage.value);
-          cartItems.value = fetchedCartItems.content;
-        } catch (error) {
-          console.error("Error fetching cart items:", error);
-        }
-      } else {
-        cartItems.value = [];
-      }
+      await cartStore.fetchCartItems();
     })();
   });
 </script>
@@ -85,14 +69,14 @@
               <div class="cart-title">Giỏ hàng</div>
               <div class="cart-items">
                 <HeaderCartItem
-                  v-for="item in cartItems" :key="item.id"
+                  v-for="item in cartStore.cartItems" :key="item.id"
                   :item="item"
                 />
               </div>
               <div class="cart-end">
                 <div class="total">
                   <span class="total-word">Tổng tiền:</span>
-                  <span class="total-price">{{ calTotalCart().toLocaleString() }}đ</span>
+                  <span class="total-price">{{ cartStore.totalCartAmount.toLocaleString() }}đ</span>
                 </div>
                 <router-link to="/cart">
                   <button class="cart-btn">

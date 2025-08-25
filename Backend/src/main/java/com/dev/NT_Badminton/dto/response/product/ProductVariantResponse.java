@@ -20,19 +20,19 @@ public class ProductVariantResponse {
 
     String sku;
 
-    Double price;
+    Double priceBeforeDiscount;
 
-    Double priceAfterDiscount;
+    Double price;
 
     Integer stock;
 
     Map<Integer,Integer> optionValues;
 
-    public ProductVariantResponse(Integer id, String sku, Double price, Double priceAfterDiscount, Integer stock) {
+    public ProductVariantResponse(Integer id, String sku, Double priceBeforeDiscount, Double price, Integer stock) {
         this.id = id;
         this.sku = sku;
+        this.priceBeforeDiscount = priceBeforeDiscount;
         this.price = price;
-        this.priceAfterDiscount = priceAfterDiscount;
         this.stock = stock;
     }
 }

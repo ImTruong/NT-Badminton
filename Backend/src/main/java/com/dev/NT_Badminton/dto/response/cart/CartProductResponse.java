@@ -27,17 +27,17 @@ public class CartProductResponse {
 
     String productCoverImage;
 
-    Double originalPrice;
+    Double priceBeforeDiscount;
 
-    Double salePrice;
+    Double price;
 
-    public CartProductResponse(Integer productId,Integer productVariantId, Integer quantity, String productName, String productCoverImage, Double originalPrice) {
+    public CartProductResponse(Integer productId,Integer productVariantId, Integer quantity, String productName, String productCoverImage, Double priceBeforeDiscount) {
         this.productId = productId;
         this.productVariantId = productVariantId;
         this.quantity = quantity;
         this.productName = productName;
         this.productCoverImage = productCoverImage;
-        this.originalPrice = originalPrice;
+        this.priceBeforeDiscount = priceBeforeDiscount;
     }
 
 }

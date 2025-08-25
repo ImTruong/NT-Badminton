@@ -702,4 +702,4 @@ CREATE TABLE `order_items`
 --                                           ('Phường Thanh Khê Đông', 6), -- Thanh Khê, Đà Nẵng
 --                                           ('Phường An Khê', 6);
 --
---
+

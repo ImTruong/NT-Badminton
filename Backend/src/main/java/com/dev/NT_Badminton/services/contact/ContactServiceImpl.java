@@ -128,8 +128,12 @@ public class ContactServiceImpl implements ContactService {
             mainContact.setType(ContactType.SUB);
             saveContact(mainContact);
         }
-        else if (modifyContactRequest.getType() != ContactType.SUB)
-            throw new IllegalArgumentException("Invalid contact type");
+        else if (modifyContactRequest.getType() == ContactType.SUB){
+            if(contact.getType() == ContactType.MAIN){
+                throw new IllegalArgumentException("You need to switch main contact before changing this contact to sub");
+            }
+        }
+         else throw new IllegalArgumentException("Invalid contact type");
         modelMapper.map(modifyContactRequest, contact);
         saveContact(contact);
     }

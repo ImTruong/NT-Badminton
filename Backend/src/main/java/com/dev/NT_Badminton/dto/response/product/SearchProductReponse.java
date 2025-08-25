@@ -19,17 +19,17 @@ public class SearchProductReponse {
 
     Double rating;
 
+    Double priceBeforeDiscount;
+
     Double price;
 
-    Double priceAfterDiscount;
-
-    public SearchProductReponse(Integer id, String name, String brand, String mainImageUrl, Double price, Double priceAfterDiscount, Double Rating) {
+    public SearchProductReponse(Integer id, String name, String brand, String mainImageUrl, Double priceBeforeDiscount, Double price, Double Rating) {
         this.id = id;
         this.name = name;
         this.brand = brand;
         this.mainImageUrl = mainImageUrl;
+        this.priceBeforeDiscount = priceBeforeDiscount;
         this.price = price;
-        this.priceAfterDiscount = priceAfterDiscount;
         this.rating = Rating;
     }
 }
