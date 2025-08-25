@@ -277,7 +277,7 @@ CREATE TABLE `contacts`
     `first_name`    varchar(255) NOT NULL,
     `last_name`     varchar(255) NOT NULL,
     `phone`         varchar(20)  NOT NULL,
-    `email`         varchar(255) NOT NULL,
+    `email`         varchar(255) DEFAULT NULL,
     `city`              int unsigned DEFAULT NULL,
     `district`          int unsigned DEFAULT NULL,
     `street_address`    varchar(255) DEFAULT NULL,

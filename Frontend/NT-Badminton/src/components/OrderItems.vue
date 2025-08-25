@@ -2,9 +2,9 @@
     import { defineProps } from 'vue';
     const props = defineProps<{
         products: Array<{
-            name: string;
-            options: object;
-            price: number;
+            productName: string;
+            productOptionalValue: object;
+            salePrice: number;
             quantity: number;
             image: string;
         }>
@@ -33,23 +33,23 @@
         <td>
           <div class="product-info">
             <img :src="product.image" alt="Product image" class="product-image" />
-            <div class="product-name-ellipsis" :title="product.name">
-              {{ product.name.length > 30 ? product.name.slice(0, 30) + '...' : product.name }}
+            <div class="product-name-ellipsis" :title="product.productName">
+              {{ product.productName.length > 30 ? product.productName.slice(0, 30) + '...' : product.productName }}
             </div>
           </div>
         </td>
         <td class="blur-text">
-          <div v-for="(value, key) in product.options" :key="key">
+          <div v-for="(value, key) in product.productOptionalValue" :key="key">
             <span class="bold-text">{{ key }}:</span> {{ value }}
           </div>
         </td>
-        <td>{{ formatPrice(product.price) }}</td>
+        <td>{{ formatPrice(product.salePrice) }}</td>
         <td>{{ product.quantity }}</td>
-        <td>{{ formatPrice(product.price * product.quantity) }}</td>
+        <td>{{ formatPrice(product.salePrice * product.quantity) }}</td>
       </tr>
       <tr>
         <td colspan="4" class="bold-text no-border">Tổng cộng</td>
-        <td class="bold-text highlight-text no-border">{{ formatPrice(products.reduce((total, product) => total + product.price * product.quantity, 0)) }}</td>
+        <td class="bold-text highlight-text no-border">{{ formatPrice(products.reduce((total, product) => total + product.salePrice * product.quantity, 0)) }}</td>
       </tr>
       </tbody>
     </table>

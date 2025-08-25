@@ -1,21 +1,39 @@
 <script setup>
     import { ref, onMounted } from 'vue';
+    import { useRouter } from 'vue-router';
     import CartItem from "@/components/CartItem.vue";
     import { getCart } from '@/api/cart';
 
+    const router = useRouter();
     const cartItems = ref([]);
+    const token = localStorage.getItem("token");
     
-
     onMounted(async () => {
-        const token = localStorage.getItem("token");
-        try{
+        try {
             const fetchedCartItems = await getCart(token);
             cartItems.value = fetchedCartItems.content;
-            console.log(cartItems.value);
-        }catch (error){
+            // console.log(cartItems.value);
+        } catch (error) {
             console.error("Error fetching cart items:", error);
         }
     });
+
+    const checkout = () => {
+        localStorage.setItem("OrderItems", JSON.stringify(cartItems.value));
+        router.push('/checkout');
+    }
+
+    const updateQuantity = ({ id, quantity }) => {
+        const product = cartItems.value.find((i) => i.id === id);
+        if (product) {
+            product.quantity = quantity;
+        }
+    };
+
+    const removeItem = (id) => {
+        cartItems.value = cartItems.value.filter((i) => i.id !== id);
+    };
+
 </script>
 
 <template>
@@ -27,9 +45,12 @@
         </div>
         <div class="item-list-box">
             <CartItem
-                class = "cart-item"
-                v-for="item in cartItems" :key="item.id"
+                class="cart-item"
+                v-for="item in cartItems"
+                :key="item.id"
                 :item="item"
+                @updateQuantity="updateQuantity"
+                @removeItem="removeItem"
             />
         </div>
         <div class="total-box">
@@ -38,7 +59,7 @@
                 <h2 class="total-price price">{{ cartItems.reduce((acc, item) => acc + item.salePrice * item.quantity, 0).toLocaleString() }} <span class="underline price">đ</span></h2>
             </div>
             <div class="lower-box">
-                <button class="checkout-button">Thanh toán</button>
+                <button class="checkout-button" @click="checkout">Thanh toán</button>
             </div>
         </div>
     </div>

@@ -1,8 +1,6 @@
 package com.dev.NT_Badminton.services.order;
 
-import com.dev.NT_Badminton.dto.request.cart.AddProductToCartRequest;
-import com.dev.NT_Badminton.dto.request.cart.QuantityChangeRequest;
-import com.dev.NT_Badminton.dto.request.order.OrderItemRequest;
+import com.dev.NT_Badminton.dto.request.order.CreateOrderRequest;
 import com.dev.NT_Badminton.dto.response.order.OrderResponse;
 import com.dev.NT_Badminton.entities.carts.Cart;
 import com.dev.NT_Badminton.entities.contacts.Contact;
@@ -33,9 +31,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,45 +49,38 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public Integer checkOutFromCart(List<OrderItemRequest> orderItems) {
+    public String checkOutFromCart(CreateOrderRequest orderRequest) {
         AppUser user = userService.getUserFromSecurityContext();
         Order order = Order.builder()
                 .userId(user.getId())
+                .contactId(orderRequest.getContactId())
                 .paymentStatus(PaymentStatus.PENDING)
                 .deliveryStatus(DeliveryStatus.PENDING)
+                .paymentMethod(orderRequest.getPaymentMethod())
                 .build();
         orderRepository.save(order);
-        Map<Integer, Integer> groupedOrderItems = orderItems.stream()
-                .collect(Collectors.toMap(
-                        OrderItemRequest::getProductVariantId,
-                        OrderItemRequest::getQuantity,
-                        Integer::sum
-                ));
-
-        groupedOrderItems.forEach((productVariantId, quantity) -> {
-            Cart cart = cartService.checkProductExistenceInUserCart(productVariantId, user.getId());
-            if (cart == null) {
-                cart = cartService.addProductToCart(
-                        AddProductToCartRequest.builder()
-                                .productVariantId(productVariantId)
-                                .quantity(quantity)
-                                .build()
-                );
-            } else {
-                cart = cartService.changeProductQuantity(QuantityChangeRequest.builder()
-                        .productVariantId(productVariantId)
-                        .quantity(quantity)
-                        .build());
-            }
+        orderRequest.getOrderItems().forEach((item) -> {
+            Cart cart = cartService.checkProductExistenceInUserCart(item.getProductVariantId(), user.getId());
+            if (cart != null)
+                cartService.deleteProductFromCart(cart.getProductVariantId());
 
             OrderItems orderItemEntity = OrderItems.builder()
                     .orderId(order.getId())
-                    .productVariantId(cart.getProductVariantId())
-                    .quantity(cart.getQuantity())
+                    .productVariantId(item.getProductVariantId())
+                    .quantity(item.getQuantity())
                     .build();
             orderItemRepository.save(orderItemEntity);
         });
-        return order.getId();
+        if (Objects.equals(orderRequest.getPaymentMethod(), PaymentMethod.VNPAY)){
+            orderRequest.getVnpayRequest().setAmount(orderRepository.getOrderTotalPrice(order.getId()));
+            orderRequest.getVnpayRequest().setOrderId(order.getId());
+            return paymentService.createVnPayPayment(orderRequest);
+        }else if(Objects.equals(orderRequest.getPaymentMethod(), PaymentMethod.COD)){
+            updatePaymentStatus(order.getId(), PaymentStatus.UNPAID);
+            updateDeliveryStatus(order.getId(), DeliveryStatus.DELIVERING);
+            productService.changeQuantityOfProductDueToOrderAct(order.getId(), "order");
+        }
+        return null;
     }
 
     @Override
@@ -103,38 +92,18 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found"));
         if (!order.getUserId().equals(user.getId()))
             throw new UnauthorizedException("You are not authorized to update this order");
-        if (!order.getDeliveryStatus().equals(DeliveryStatus.PENDING))
-            throw new NotInPendingException("You can only update contact of pending orders");
         order.setContactId(contactId);
         orderRepository.save(order);
     }
 
     @Transactional
     @Override
-    public String updatePayment(HttpServletRequest request) {
-        AppUser user = userService.getUserFromSecurityContext();
-        Integer orderId = Integer.parseInt(request.getParameter("orderId"));
-        Integer payMethod = Integer.parseInt(request.getParameter("payMethod"));
+    public void updatePaymentStatus(Integer orderId, PaymentStatus paymentStatus) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found"));
-        if (!order.getUserId().equals(user.getId()))
-            throw new UnauthorizedException("You are not authorized to update this order");
-        if (order.getContactId() == null)
-            throw new OrderCycleException("You must update contact before payment");
+        order.setPaymentStatus(paymentStatus);
         if (!order.getPaymentStatus().equals(PaymentStatus.PENDING))
-            throw new NotInPendingException("You can only update payment of pending orders");
-        order.setPaymentMethod(PaymentMethod.fromValue(payMethod));
-        order.setPaymentStatus(PaymentStatus.UNPAID);
+            throw new NotInPendingException("Only pending order can update payment method");
         orderRepository.save(order);
-        if (Objects.equals(payMethod, PaymentMethod.VNPAY.toValue())){
-            request.setAttribute("orderId", orderId);
-            request.setAttribute("amount", orderRepository.getOrderTotalPrice(orderId));
-            return paymentService.createVnPayPayment(request);
-        }else if(Objects.equals(payMethod, PaymentMethod.COD.toValue())){
-            updateDeliveryStatus(orderId, DeliveryStatus.DELIVERING.toValue());
-        }
-        else
-            throw new PaymentException("Invalid payment method");
-        return null;
     }
 
     @Transactional
@@ -145,8 +114,9 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found"));
         if(statusCode.equals("00")) {
             order.setPaymentStatus(PaymentStatus.PAID);
-            updateDeliveryStatus(orderId, DeliveryStatus.DELIVERING.toValue());
+            updateDeliveryStatus(orderId, DeliveryStatus.DELIVERING);
             orderRepository.save(order);
+            productService.changeQuantityOfProductDueToOrderAct(order.getId(), "order");
             return true;
         }
         return false;
@@ -173,9 +143,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public void updateDeliveryStatus(int orderId, int status) {
+    public void updateDeliveryStatus(Integer orderId, DeliveryStatus status) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found"));
-        order.setDeliveryStatus(DeliveryStatus.fromValue(status));
+        order.setDeliveryStatus(status);
         productService.changeQuantityOfProductDueToOrderAct(orderId, "order");
         orderRepository.save(order);
     }

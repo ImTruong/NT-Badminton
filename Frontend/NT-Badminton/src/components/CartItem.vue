@@ -1,5 +1,5 @@
 <script setup>
-    import { defineProps } from 'vue';
+    import { defineProps, defineEmits } from 'vue';
     const props = defineProps({
         item: {
             type: Object,
@@ -7,6 +7,22 @@
         }
     });
     const item = props.item;
+
+    const emit = defineEmits(["updateQuantity", "removeItem"]);
+
+    const increaseQuantity = () => {
+        emit("updateQuantity", { id: props.item.id, quantity: props.item.quantity + 1 });
+    };
+
+    const decreaseQuantity = () => {
+        if (props.item.quantity > 1) {
+            emit("updateQuantity", { id: props.item.id, quantity: props.item.quantity - 1 });
+        }
+    };
+
+    const removeItem = () => {
+        emit("removeItem", props.item.id);
+    };
 </script>
 <template>
     <div class="cart-item">
@@ -29,13 +45,14 @@
                 </div>
             </div>
             <div class="item-quantity-choice">
-                <button class="reduce-quantity">-</button>
-                <input type="number" class="item-quantity" v-model="item.quantity" min="1" />
-                <button class="increase-quantity">+</button>
+                <button class="reduce-quantity" @click="decreaseQuantity">-</button>
+                <input type="number" class="item-quantity" v-model="item.quantity" min="1" 
+                    @input="emit('updateQuantity', { id: item.id, quantity: +$event.target.value })"/>
+                <button class="increase-quantity" @click="increaseQuantity">+</button>
             </div>
             <h3 class="cart-item-price">Giá: <span class="price">{{ item.salePrice.toLocaleString() }} <span class="underline price">đ</span></span></h3>
             <div class="cart-item-details-icon">
-                <font-awesome-icon class="icon" :icon="['fas', 'trash']" />
+                <font-awesome-icon class="icon" :icon="['fas', 'trash']" @click="removeItem" />
             </div>
         </div>
     </div>
@@ -121,6 +138,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        cursor: pointer;
     }
     .icon{
         height: 20px;

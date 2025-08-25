@@ -37,9 +37,9 @@ cloudinary:
 payment:
   vnPay:
     url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-    tmnCode: 3MQKLPGV
-    secretKey: ZIQN1T5Y2UX20RBUXUKDWEUQF83FZWII
-    returnUrl: http://localhost:8080/api/v1/payment/vn-pay-callback
+    tmnCode: VLNOTBHW
+    secretKey: DUCO31I03QLSA6FN57CI03BCPUCE6AD0
+    returnUrl: http://localhost:8080/order/finish-online-payment
     version: 2.1.0
     command: pay
     orderType: other

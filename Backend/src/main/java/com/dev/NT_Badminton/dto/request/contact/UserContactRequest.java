@@ -32,20 +32,20 @@ public class UserContactRequest {
     String email;
 
     @NotNull(message = "City is required")
-    Integer city;
+    Integer cityId;
 
     @NotNull(message = "District is required")
-    Integer district;
+    Integer districtId;
 
     @NotNull(message = "Ward is required")
-    Integer ward;
+    Integer wardId;
 
     @NotBlank(message = "Street address is required")
     String streetAddress;
 
     String note;
 
-    @NotBlank(message = "Type is required")
+    @NotNull(message = "Type is required")
     ContactType type;
 
     Integer contactId;

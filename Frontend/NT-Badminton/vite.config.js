@@ -22,6 +22,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       },
+      '/contact': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
       '/user': {
         target: 'http://localhost:8080',
         changeOrigin: true,
@@ -33,6 +38,11 @@ export default defineConfig({
         secure: false
       },
       '/product': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      },
+      '/order': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false

@@ -108,6 +108,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(VNPayException.class)
+    public ResponseEntity<ApiResponse<String>> handleVNPayException(VNPayException ex) {
+        ApiResponse<String> response = new ApiResponse<>(false, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<String>> handleRuntimeException(RuntimeException ex) {
         ApiResponse<String> response = new ApiResponse<>(false, "A runtime error occurred: " + ex.getMessage());

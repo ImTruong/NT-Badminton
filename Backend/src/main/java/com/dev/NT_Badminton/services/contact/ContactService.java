@@ -1,7 +1,8 @@
 package com.dev.NT_Badminton.services.contact;
 
 import com.dev.NT_Badminton.dto.request.contact.UserContactRequest;
-import com.dev.NT_Badminton.dto.response.contact.UserContactResponse;
+import com.dev.NT_Badminton.dto.response.contact.locationsResponse.LocationsResponse;
+import com.dev.NT_Badminton.dto.response.contact.userContactResponse.UserContactResponse;
 import com.dev.NT_Badminton.entities.contacts.Contact;
 
 import java.util.List;
@@ -25,6 +26,8 @@ public interface ContactService {
     void switchMainContact(int contactId);
 
     void updateContact(UserContactRequest userContactRequest);
+
+    LocationsResponse getAllLocations();
 
 
 }

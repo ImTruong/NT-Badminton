@@ -299,8 +299,10 @@ public class ProductRepositoryImpl extends BaseRepository implements ProductRepo
                 variant.setOptionValues(variantOptionValues.stream()
                         .collect(Collectors.toMap(
                                 t -> t.get(qProductOptionValue.productOptionId),
-                                t -> t.get(qProductVariantOptionValues.productOptionValueId)
-                        )));
+                                t -> t.get(qProductVariantOptionValues.productOptionValueId),
+                                (oldVal, newVal) -> newVal // nếu trùng thì giữ newVal
+                        ))
+                );
 
             }
             productDetailResponse.setImages(images);

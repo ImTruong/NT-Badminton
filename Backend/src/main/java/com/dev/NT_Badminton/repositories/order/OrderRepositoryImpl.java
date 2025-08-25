@@ -1,9 +1,12 @@
 package com.dev.NT_Badminton.repositories.order;
 
+import com.dev.NT_Badminton.dto.response.order.OrderContactResponse;
 import com.dev.NT_Badminton.dto.response.order.OrderItemResponse;
 import com.dev.NT_Badminton.dto.response.order.OrderResponse;
-import com.dev.NT_Badminton.dto.response.user.UserContactResponse;
+import com.dev.NT_Badminton.entities.contacts.QCity;
 import com.dev.NT_Badminton.entities.contacts.QContact;
+import com.dev.NT_Badminton.entities.contacts.QDistrict;
+import com.dev.NT_Badminton.entities.contacts.QWard;
 import com.dev.NT_Badminton.entities.orders.QOrder;
 import com.dev.NT_Badminton.entities.orders.QOrderItems;
 import com.dev.NT_Badminton.entities.orders.constant.DeliveryStatus;
@@ -13,7 +16,6 @@ import com.dev.NT_Badminton.repositories.BaseRepository;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -30,6 +32,7 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
         return query().select(orderItems.quantity.multiply(productVariant.price))
                 .from(orderItems)
                 .join(productVariant).on(orderItems.productVariantId.eq(productVariant.id))
+                .where(orderItems.orderId.eq(orderId))
                 .fetch()
                 .stream()
                 .reduce(0, Integer::sum);
@@ -41,34 +44,26 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
         QOrderItems qOrderItems = QOrderItems.orderItems;
         QProductVariants qProductVariants = QProductVariants.productVariants;
         QContact qContact = QContact.contact;
+        QCity qCity = QCity.city;
+        QDistrict qDistrict = QDistrict.district;
+        QWard qWard = QWard.ward;
 
         JPAQuery<OrderResponse> UnfinishQuery = query().select(Projections.bean(
                         OrderResponse.class,
                         qOrder.id.as("orderId"),
                         Expressions.cases()
-                                .when(qOrder.deliveryStatus.eq(DeliveryStatus.PENDING)).then("PENDING")
-                                .when(qOrder.deliveryStatus.eq(DeliveryStatus.DELIVERING)).then("DELIVERING")
-                                .when(qOrder.deliveryStatus.eq(DeliveryStatus.SHIPPED)).then("SHIPPED")
-                                .when(qOrder.deliveryStatus.eq(DeliveryStatus.CANCELLED)).then("CANCELLED")
+                                .when(qOrder.deliveryStatus.eq(DeliveryStatus.PENDING)).then("Chờ xác nhận")
+                                .when(qOrder.deliveryStatus.eq(DeliveryStatus.DELIVERING)).then("Đang giao")
+                                .when(qOrder.deliveryStatus.eq(DeliveryStatus.SHIPPED)).then("Đã giao")
+                                .when(qOrder.deliveryStatus.eq(DeliveryStatus.CANCELLED)).then("Đã hủy")
                                 .otherwise("UNKNOWN")
                                 .as("deliveryStatus"),
                         Expressions.cases()
-                                .when(qOrder.paymentStatus.eq(PaymentStatus.PENDING)).then("PENDING")
-                                .when(qOrder.paymentStatus.eq(PaymentStatus.PAID)).then("PAID")
-                                .when(qOrder.paymentStatus.eq(PaymentStatus.UNPAID)).then("UNPAID")
+                                .when(qOrder.paymentStatus.eq(PaymentStatus.PENDING)).then("Chờ thanh toán")
+                                .when(qOrder.paymentStatus.eq(PaymentStatus.PAID)).then("Đã thanh toán")
+                                .when(qOrder.paymentStatus.eq(PaymentStatus.UNPAID)).then("Chưa thanh toán")
                                 .otherwise("UNKNOWN")
                                 .as("paymentStatus"),
-                        Projections.bean(
-                                UserContactResponse.class,
-                                qContact.id,
-                                qContact.firstName,
-                                qContact.lastName,
-                                qContact.phone,
-                                qContact.email,
-                                qContact.city,
-                                qContact.district,
-                                qContact.streetAddress
-                        ).as("userContact"),
                         Expressions.cases()
                                 .when(qOrder.deleted.isTrue()).then(true)
                                 .otherwise(false).as("isCanceled")
@@ -90,7 +85,28 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
         }
         List<OrderResponse> result = UnfinishQuery.fetch();
         result.forEach(orderResponse -> {
-            List<OrderItemResponse> orderItemList = orderItemRepository.getAllItemResponseByOrderId(orderResponse.getOrderId());
+            orderResponse.setContact(
+                    query().select(Projections.bean(
+                                    OrderContactResponse.class,
+                                    qContact.firstName.as("firstName"),
+                                    qContact.lastName.as("lastName"),
+                                    qContact.phone.as("phone"),
+                                    qContact.streetAddress.as("streetAddress"),
+                                    qCity.name.as("cityName"),
+                                    qDistrict.name.as("districtName"),
+                                    qWard.name.as("wardName")
+                            ))
+                            .from(qContact)
+                            .leftJoin(qCity).on(qContact.cityId.eq(qCity.id))
+                            .leftJoin(qDistrict).on(qContact.districtId.eq(qDistrict.id))
+                            .leftJoin(qWard).on(qContact.wardId.eq(qWard.id))
+                            .where(qContact.id.eq(
+                                    query().select(qOrder.contactId)
+                                            .from(qOrder)
+                                            .where(qOrder.id.eq(orderResponse.getOrderId()))
+                            )).fetchOne()
+            );
+
             orderResponse.setOrderItemList(orderItemRepository.getAllItemResponseByOrderId(orderResponse.getOrderId()));
             orderResponse.setTotalPrice(orderResponse.getOrderItemList().stream().mapToDouble(OrderItemResponse::getPrice).sum());
             orderResponse.setTotalPriceAfterDiscount(orderResponse.getOrderItemList().stream().mapToDouble(OrderItemResponse::getPriceAfterDiscount).sum());

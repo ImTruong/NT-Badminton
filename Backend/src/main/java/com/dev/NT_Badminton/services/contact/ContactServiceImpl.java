@@ -1,7 +1,8 @@
 package com.dev.NT_Badminton.services.contact;
 
 import com.dev.NT_Badminton.dto.request.contact.UserContactRequest;
-import com.dev.NT_Badminton.dto.response.contact.UserContactResponse;
+import com.dev.NT_Badminton.dto.response.contact.locationsResponse.LocationsResponse;
+import com.dev.NT_Badminton.dto.response.contact.userContactResponse.UserContactResponse;
 import com.dev.NT_Badminton.entities.contacts.Contact;
 import com.dev.NT_Badminton.entities.contacts.ContactType;
 import com.dev.NT_Badminton.entities.users.AppUser;
@@ -121,8 +122,21 @@ public class ContactServiceImpl implements ContactService {
         Contact contact = getContactById(modifyContactRequest.getContactId());
         if(contact.getUserId() != user.getId())
             throw new IllegalArgumentException("You are not allowed to update this contact");
+
+        if (modifyContactRequest.getType() == ContactType.MAIN) {
+            Contact mainContact = getUserMainContact(user.getId());
+            mainContact.setType(ContactType.SUB);
+            saveContact(mainContact);
+        }
+        else if (modifyContactRequest.getType() != ContactType.SUB)
+            throw new IllegalArgumentException("Invalid contact type");
         modelMapper.map(modifyContactRequest, contact);
         saveContact(contact);
+    }
+
+    @Override
+    public LocationsResponse getAllLocations() {
+        return contactRepository.getAllLocations();
     }
 
 }

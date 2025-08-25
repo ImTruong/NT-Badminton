@@ -1,26 +1,27 @@
 package com.dev.NT_Badminton.services.order;
 
-import com.dev.NT_Badminton.dto.request.order.OrderItemRequest;
+import com.dev.NT_Badminton.dto.request.order.CreateOrderRequest;
 import com.dev.NT_Badminton.dto.response.order.OrderResponse;
-import com.dev.NT_Badminton.entities.orders.Order;
+import com.dev.NT_Badminton.entities.orders.constant.DeliveryStatus;
+import com.dev.NT_Badminton.entities.orders.constant.PaymentMethod;
+import com.dev.NT_Badminton.entities.orders.constant.PaymentStatus;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
-import java.util.Map;
 
 public interface OrderService {
 
-    Integer checkOutFromCart(List<OrderItemRequest> orderItems);
+    String checkOutFromCart(CreateOrderRequest orderRequest);
 
     void updateContact(Integer contactId, Integer orderId);
 
-    String updatePayment(HttpServletRequest request);
+    void updatePaymentStatus(Integer orderId, PaymentStatus paymentStatus);
 
     boolean finishOnlinePayment(HttpServletRequest request);
 
     void cancelOrder(int orderId);
 
-    void updateDeliveryStatus(int orderId, int status);
+    void updateDeliveryStatus(Integer orderId, DeliveryStatus status);
 
     List<OrderResponse> getAllOrders();
 

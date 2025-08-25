@@ -1,6 +1,5 @@
-package com.dev.NT_Badminton.dto.response.contact;
+package com.dev.NT_Badminton.dto.response.order;
 
-import com.dev.NT_Badminton.entities.contacts.ContactType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,9 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserContactResponse {
-
-    Integer id;
+public class OrderContactResponse {
 
     String firstName;
 
@@ -28,14 +25,10 @@ public class UserContactResponse {
 
     String note;
 
-    ContactType type;
+    String city;
 
-    Integer userId;
+    String district;
 
-    CityResponse city;
-
-    DistrictResponse district;
-
-    WardResponse ward;
+    String ward;
 
 }

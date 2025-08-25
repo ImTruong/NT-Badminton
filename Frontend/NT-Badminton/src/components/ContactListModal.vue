@@ -1,27 +1,51 @@
 <script setup lang="ts">
-    import { ref, defineProps, defineEmits } from 'vue'
+    import { ref, defineProps, defineEmits, watch } from 'vue'
     import ContactDetailModal from './ContactDetailModal.vue'
 
     const props = defineProps({
-    show: { type: Boolean, required: true }
+        show: { type: Boolean, required: true },
+        contacts: { type: Array, required: true }
     })
 
-    const emit = defineEmits(['close'])
+    const emit = defineEmits(['close', 'update', 'choose'])
 
     const close = () => {
         emit('close')
     }
-    const contacts = ref([
-        { id:1, name: 'Nguyễn Văn A', phone: '0123456789', address: '123 Đường ABC, Quận 1, TP.HCM', mainContact: false },
-        { id:2, name: 'Trần Thị B', phone: '0987654321', address: '456 Đường DEF, Quận 2, TP.HCM', mainContact: true }
-    ])
-    const selectedContactId = ref<number | null>(null)
+    const modifyContact = ref(null)
+    const selectedContactId = ref(null);
+    watch(
+        () => props.contacts,
+        (newVal) => {
+            if (selectedContactId.value === null && newVal.length > 0) {
+            const main = newVal.find((c: any) => c.type === 'MAIN');
+            if (main) {
+                selectedContactId.value = main.id;
+            }
+            }
+        },
+        { immediate: true } // chạy luôn khi khởi tạo
+    );
     const showContactModal = ref(false)
-    const handleOpenContactModal = () => {
+    const contactModalMode = ref('create') 
+    const handleOpenContactModal = (contact, mode) => {
+        contactModalMode.value = mode
+        modifyContact.value = contact
         showContactModal.value = true
     }
     const handleCloseContactModel = () => {
         showContactModal.value = false
+    }
+
+    const handleUpdateContactModel = () => {
+        showContactModal.value = false
+        emit('update');
+    }
+
+    const handleChooseContact = (newId) => {
+        selectedContactId.value = newId;
+        const chosenContact = props.contacts.find(c => c.id === selectedContactId.value);
+        emit('choose', chosenContact);
     }
 </script>
 
@@ -33,8 +57,8 @@
                 <p>Địa chỉ của tôi</p>
             </div>
             <div class="contacts">
-                <div class="contact" v-for="contact in contacts" :key="contact.id">
-                    <label :for="'contact-' + contact.id">
+                <div class="contact" v-for="contact in props.contacts" :key="contact.id">
+                    <label :for="'contact-' + contact.id" @click="handleChooseContact(contact.id)">
                         <div class="choosen-btn">
                         <input type="radio"
                             :value="contact.id" 
@@ -42,34 +66,38 @@
                             :id="'contact-' + contact.id"/>
                         </div>
                     </label>
-                    <label :for="'contact-' + contact.id" class="contact-info-wrap">
+                    <label :for="'contact-' + contact.id" class="contact-info-wrap" @click="handleChooseContact(contact.id)">
                         <div class="contact-info">
                             <div class="upper-info">
-                                <p class="info-name">{{ contact.name }}</p>
+                                <p class="info-name">{{ contact.firstName + " " + contact.lastName }}</p>
                                 <p class="sub-info">{{ contact.phone }}</p>
                             </div>
                             <div class="lower-info">
-                                <p class="sub-info">{{ contact.address }}</p>
+                                <p class="sub-info">{{ contact.fullAddress || '(Chưa có địa chỉ !)' }}</p>
                             </div>
                         </div>
-                        <div class="main-contact" v-if="contact.mainContact">
+                        <div class="main-contact" v-if="contact.type == 'MAIN'">
                             <div class="main-contact-label">Mặc định</div>
                         </div>
                     </label>    
                     
                     <div class="modify-contact">
-                        <span class="edit-contact" @click="handleOpenContactModal">Cập nhật</span>
+                        <span class="edit-contact" @click="handleOpenContactModal(contact, 'update')">Cập nhật</span>
                     </div>
                 </div>
             </div>
             <div class="footer">
-                <button class="add-contact" @click="close">Thêm địa chỉ</button>
+                <button class="add-contact" @click="handleOpenContactModal(null, 'create')">Thêm địa chỉ</button>
                 <button class="close-modal" @click="close">Đóng</button>
             </div>
         </div>
         <ContactDetailModal 
-            :show="showContactModal"
-            @close="handleCloseContactModel" />
+            v-if="showContactModal"
+            :contact="modifyContact"
+            :mode="contactModalMode"
+            @close="handleCloseContactModel"
+            @update="handleUpdateContactModel"
+            />
     </div>
   
     

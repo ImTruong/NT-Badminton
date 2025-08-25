@@ -1,6 +1,5 @@
 package com.dev.NT_Badminton.dto.response.order;
 
-import com.dev.NT_Badminton.dto.response.user.UserContactResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,12 +30,11 @@ public class OrderResponse {
 
     Boolean isCanceled;
 
-    UserContactResponse contact;
+    OrderContactResponse contact;
 
-    public OrderResponse(String deliveryStatus, String paymentStatus, UserContactResponse contact, Boolean isCanceled) {
+    public OrderResponse(String deliveryStatus, String paymentStatus,Boolean isCanceled) {
         this.deliveryStatus = deliveryStatus;
         this.paymentStatus = paymentStatus;
-        this.contact = contact;
         this.isCanceled = isCanceled;
     }
 

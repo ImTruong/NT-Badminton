@@ -22,6 +22,8 @@ public class SecurityPermitAllHttp {
         PERMIT_ALL_ENDPOINTS.put("/product", Set.of("GET"));
         PERMIT_ALL_ENDPOINTS.put("/product/{id}", Set.of("GET"));
         PERMIT_ALL_ENDPOINTS.put("/product/brands", Set.of("GET"));
+        PERMIT_ALL_ENDPOINTS.put("/product/search", Set.of("GET"));
+        PERMIT_ALL_ENDPOINTS.put("/contact/locations", Set.of("GET"));
     }
 
     public static Map<String, Set<String>> getPermitAllEndpoints() {

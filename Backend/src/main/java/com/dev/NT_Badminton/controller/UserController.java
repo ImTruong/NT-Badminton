@@ -64,7 +64,7 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/contact/all")
+    @GetMapping("/contacts")
     public ResponseEntity<?> getUserContacts() {
         ApiResponse<?> response = new ApiResponse<>(true, "User Contacts Fetched Successfully", contactService.getUserContacts());
         return new ResponseEntity<>(response, HttpStatus.OK);
