@@ -1,31 +1,40 @@
 <script setup>
     import { defineProps } from 'vue';
+    import { useCartStore } from '@/stores/cart';
+
+    const cartStore = useCartStore();
     const props = defineProps({
         item: {
             type: Object,
             required: true
         }
     });
-    const item = props.item;
+    const handleRemoveCartItem = () => {
+      cartStore.removeItemFromCart(props.item.productVariantId);
+    };
+    const handleUpdateQuantity = (newQuantity) => {
+      cartStore.updateItemQuantity(props.item.productVariantId, newQuantity);
+    };
+
 </script>
 
 <template>
     <div class="cart-item">
-        <img class="item-image" :src="item.productCoverImage" alt="Product Image"/>
+        <img class="item-image" :src="props.item.productCoverImage" alt="Product Image"/>
         <div class="cart-item-details">
         <div class="cart-item-name">
             <a class="item-name" href="">
-                {{ item.productName }}
+                {{ props.item.productName }}
             </a>
-            <font-awesome-icon class="cart-item-details-icon" :icon="['fas', 'trash']" />
+            <font-awesome-icon class="cart-item-details-icon" :icon="['fas', 'trash']" @click="handleRemoveCartItem" />
         </div>
         <div class="cart-item-control">
             <div class="item-quantity-choice">
-            <button class="reduce-quantity">-</button>
-            <input type="number" class="item-quantity" v-model="item.quantity" min="1" />
-            <button class="increase-quantity">+</button>
+            <button class="reduce-quantity" @click="handleUpdateQuantity(props.item.quantity - 1 ? props.item.quantity - 1 : 1)">-</button>
+            <input type="number" class="item-quantity" v-model="props.item.quantity" min="1" />
+            <button class="increase-quantity" @click="handleUpdateQuantity(props.item.quantity + 1)">+</button>
             </div>
-            <span class="cart-item-price">Giá: {{ item.salePrice.toLocaleString() }}đ</span>
+            <span class="cart-item-price">Giá: {{ props.item.price.toLocaleString() }}đ</span>
         </div>
         </div>
     </div>
@@ -94,5 +103,8 @@
   a{
     text-decoration: none;
     color: #000000;
+  }
+  .cart-item-details-icon {
+    cursor: pointer;
   }
 </style>

@@ -3,7 +3,6 @@
   import {ref, onMounted, onBeforeMount, computed} from 'vue';
   import { useRoute } from "vue-router";
   import { getProductDetail } from "@/api/product";
-  import { addToCart } from "@/api/cart";
   import { useCartStore } from "@/stores/cart";
 
   const route = useRoute();
@@ -201,11 +200,11 @@
 
   const minPriceVariant = () => {
     if (!product.value || !product.value.variants || product.value.variants.length === 0) {
-      return { priceAfterDiscount: 0, price: 0 };
+      return { priceBeforeDiscount: 0, price: 0 };
     }
     
     return product.value.variants.reduce((minVariant, currentVariant) => {
-      return (currentVariant.priceAfterDiscount < minVariant.priceAfterDiscount) ? 
+      return (currentVariant.price < minVariant.price) ?
         currentVariant : minVariant;
     }, product.value.variants[0]);
   };
@@ -215,7 +214,7 @@
   const currentVariant = computed(() => {
 
     if (!product.value) {
-      return { priceAfterDiscount: 0, price: 0 };
+      return { priceBeforeDiscount: 0, price: 0 };
     }
     
     const matchedVariant = checkMatchVariant();
@@ -266,7 +265,7 @@
   onBeforeMount(async () => {
     const productId = route.params.id;
     product.value = await getProductDetail(productId);
-    console.log(product.value);
+    // console.log(product.value);
   });
 </script>
 
@@ -327,8 +326,8 @@
           <span class="stock">Tình trạng: <span class="stock highlight-text">Còn hàng</span></span>
         </div>
         <div class="price-container">
-          <h2 class="highlight-text price">{{currentVariant.priceAfterDiscount.toLocaleString()}}<span class="underline price">đ</span> </h2>
-          <span class="original-price"><del>Giá gốc: {{currentVariant.price.toLocaleString()}}<span class="underline">đ</span></del></span>
+          <h2 class="highlight-text price">{{currentVariant.price.toLocaleString()}}<span class="underline price">đ</span> </h2>
+          <span class="original-price"><del>Giá gốc: {{currentVariant.priceBeforeDiscount.toLocaleString()}}<span class="underline">đ</span></del></span>
         </div>
         <div class="options">
           <div class="option" v-for="option in product.options" :key="option.id">
@@ -374,7 +373,7 @@
         <button 
           @click="handleAddToCart" 
           :disabled="addingToCart"
-          class="add-to-cart-button">
+          class="add-to-cart-button btn">
           {{ addingToCart ? 'Đang thêm...' : 'Thêm vào giỏ hàng' }}
         </button>
       </div>
@@ -898,17 +897,30 @@
   color: #999;
   opacity: 0.6;
   cursor: not-allowed;
-}
+  }
 
-.disabled::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 100%;
-  border-top: 2px solid red;
-  transform: rotate(-20deg);
-}
+  .disabled::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    border-top: 2px solid red;
+    transform: rotate(-20deg);
+  }
+  .add-to-cart-button {
+    background-color: var(--main-color);
+    border: none;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    width: 200px;
+    cursor: pointer;
+    transition: background-color .2s, color .2s, border-color .2s;
+  }
 
+  .add-to-cart-button:hover {
+    background-color: darken(var(--main-color), 5%);
+  }
 
 </style>

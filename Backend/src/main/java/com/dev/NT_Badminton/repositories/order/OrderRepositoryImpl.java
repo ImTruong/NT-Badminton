@@ -92,9 +92,9 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
                                     qContact.lastName.as("lastName"),
                                     qContact.phone.as("phone"),
                                     qContact.streetAddress.as("streetAddress"),
-                                    qCity.name.as("cityName"),
-                                    qDistrict.name.as("districtName"),
-                                    qWard.name.as("wardName")
+                                    qCity.name.as("city"),
+                                    qDistrict.name.as("district"),
+                                    qWard.name.as("ward")
                             ))
                             .from(qContact)
                             .leftJoin(qCity).on(qContact.cityId.eq(qCity.id))
@@ -109,7 +109,6 @@ public class OrderRepositoryImpl extends BaseRepository implements OrderReposito
 
             orderResponse.setOrderItemList(orderItemRepository.getAllItemResponseByOrderId(orderResponse.getOrderId()));
             orderResponse.setTotalPrice(orderResponse.getOrderItemList().stream().mapToDouble(OrderItemResponse::getPrice).sum());
-            orderResponse.setTotalPriceAfterDiscount(orderResponse.getOrderItemList().stream().mapToDouble(OrderItemResponse::getPriceAfterDiscount).sum());
         });
         return result;
     }

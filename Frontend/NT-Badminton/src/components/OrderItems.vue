@@ -4,7 +4,7 @@
         products: Array<{
             productName: string;
             productOptionalValue: object;
-            salePrice: number;
+            price: number;
             quantity: number;
             image: string;
         }>
@@ -43,13 +43,13 @@
             <span class="bold-text">{{ key }}:</span> {{ value }}
           </div>
         </td>
-        <td>{{ formatPrice(product.salePrice) }}</td>
+        <td>{{ formatPrice(product.price) }}</td>
         <td>{{ product.quantity }}</td>
-        <td>{{ formatPrice(product.salePrice * product.quantity) }}</td>
+        <td>{{ formatPrice(product.price * product.quantity) }}</td>
       </tr>
       <tr>
         <td colspan="4" class="bold-text no-border">Tổng cộng</td>
-        <td class="bold-text highlight-text no-border">{{ formatPrice(products.reduce((total, product) => total + product.salePrice * product.quantity, 0)) }}</td>
+        <td class="bold-text highlight-text no-border">{{ formatPrice(products.reduce((total, product) => total + product.price * product.quantity, 0)) }}</td>
       </tr>
       </tbody>
     </table>

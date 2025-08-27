@@ -1,17 +1,14 @@
 <script setup>
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
   import {getCategories} from "@/api/category.js";
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, watch } from 'vue';
   import HeaderCartItem from "@/components/HeaderCartItem.vue";
   import { useCartStore } from '@/stores/cart';
+  import { useRouter } from 'vue-router';
 
   const cartStore = useCartStore();
-
-  const token = localStorage.getItem("token");
-
-  const cartItems = ref(null);
   const categories = ref(null);
-
+  const router = useRouter();
 
   onMounted(() => {
     (async () => {
@@ -24,6 +21,20 @@
       await cartStore.fetchCartItems();
     })();
   });
+
+  const checkEmptyCart = () => {
+    return cartStore.cartItemCount === 0;
+  };
+
+  const searchQuery = ref('');
+  const onSearch = () => {
+    const currentQuery = { ...router.currentRoute.value.query, productName: searchQuery.value };
+    if (router.currentRoute.value.path === '/search') {
+      router.replace({ path: '/search', query: currentQuery });
+    } else {
+      router.push({ path: '/search', query: { productName: searchQuery.value } });
+    }    
+  };
 </script>
 
 <template>
@@ -43,7 +54,12 @@
             </a>
           </li>
           <li class="middle-menu-item search-bar">
-            <input type="text" placeholder="Tìm kiếm"/>
+            <input
+              type="text"
+              placeholder="Tìm kiếm"
+              v-model="searchQuery"
+              @keyup.enter="onSearch"
+            />
             <font-awesome-icon class="search-icon" :icon="['fas', 'search']" />
           </li>
         </ul>
@@ -61,37 +77,42 @@
             </div>
           </li>
           <li class="header-item">
-            <a class="top-right-item" href="">
+            <router-link class="top-right-item" to="/cart">
               <font-awesome-icon :icon="['fas', 'cart-shopping']" />
               <span class="item-text">Giỏ hàng</span>
-            </a>
+            </router-link>
             <div class="cart-dropdown dropdown">
               <div class="cart-title">Giỏ hàng</div>
-              <div class="cart-items">
-                <HeaderCartItem
-                  v-for="item in cartStore.cartItems" :key="item.id"
-                  :item="item"
-                />
+              <div v-if="checkEmptyCart()" class="empty-cart">
+                <p>Chưa có sản phẩm trong giỏ hàng</p>
               </div>
-              <div class="cart-end">
-                <div class="total">
-                  <span class="total-word">Tổng tiền:</span>
-                  <span class="total-price">{{ cartStore.totalCartAmount.toLocaleString() }}đ</span>
+              <div v-else class="not-empty-cart">
+                <div class="cart-items">
+                  <HeaderCartItem
+                    v-for="(item, index) in cartStore.cartItems"
+                    :key="item.id + '-' + index"
+                    :item="item"
+                  />
                 </div>
-                <router-link to="/cart">
-                  <button class="cart-btn">
-                    Thanh toán
-                  </button>
-                </router-link>
+                <div class="cart-end">
+                  <div class="total">
+                    <span class="total-word">Tổng tiền:</span>
+                    <span class="total-price">{{ cartStore.totalCartAmount.toLocaleString() }}đ</span>
+                  </div>
+                  <router-link to="/cart">
+                    <button class="cart-btn">
+                      Thanh toán
+                    </button>
+                  </router-link>
+                </div>
               </div>
             </div>
           </li>
           <li class="header-item">
-            <a class="top-right-item" href="">
+            <router-link to="/purchase" class="top-right-item">
               <font-awesome-icon :icon="['fas', 'box-open']" />
               <span class="item-text">Đơn hàng</span>
-            </a>
-
+            </router-link>
           </li>
 
         </ul>
@@ -437,5 +458,10 @@
     /* nếu muốn, đảm bảo vẫn rõ ràng là số */
     -webkit-appearance: none;
     appearance: none;
+  }
+  .empty-cart {
+    text-align: center;
+    padding: 20px;
+    color: #999;
   }
 </style>

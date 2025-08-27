@@ -3,6 +3,9 @@
   import { ref, computed, onMounted, watch, reactive } from "vue";
   import { getRootCategories } from "@/api/category";
   import { searchProducts, getAllProductBrands } from "@/api/product";
+  import { useRoute, useRouter } from "vue-router";
+  const route = useRoute();
+  const router = useRouter();
 
   const categories = ref(null);
 
@@ -10,32 +13,58 @@
 
   const ratings = [5, 4, 3, 2, 1, 0];
 
-  const searchQuery = ref(null);
+
+  const searchQuery = computed(() => route.query.productName || " ");
 
   const filters = reactive({
-    name: null,
-    categoryIds: [],
-    brands: [], 
-    minPrice: null,
-    maxPrice: null,
-    rating: null
-  })
+    name: ref(''),
+    categoryIds: ref([]),
+    brands: ref([]),
+    minPrice: ref(null),
+    maxPrice: ref(null),
+    rating: ref(null),
+  });
 
   const pageSize = ref(20);
   const currentPage = ref(0);
   const totalPages = ref(8);
 
   watch(
-    () => ({
-      ...filters, 
-      currentPage: currentPage.value,
-      pageSize: pageSize.value
-    }),
-    () => {
-      fetchProducts()
+    [() => route.query, currentPage, pageSize],
+    ([newQuery]) => {
+      filters.name = newQuery.productName || '';
+      filters.categoryIds = newQuery.categoryIds
+        ? newQuery.categoryIds.split(',').map(id => parseInt(id))
+        : [];
+      filters.brands = newQuery.brands ? newQuery.brands.split(',') : [];
+      filters.minPrice = newQuery.minPrice ? parseFloat(newQuery.minPrice) : null;
+      filters.maxPrice = newQuery.maxPrice ? parseFloat(newQuery.maxPrice) : null;
+      filters.rating = newQuery.rating ? parseInt(newQuery.rating) : null;
+      console.log(filters);
+      fetchProducts();
     },
-    { deep: true }
-  )
+    { immediate: true, deep: true }
+  );
+  watch(searchQuery, (newValue) => {
+    filters.name = newValue;
+  });
+  watch(filters, () => {
+    currentPage.value = 0; 
+    updateRoute();
+  }, { deep: true });
+
+  const updateRoute = () => {
+    const query = {
+      productName: filters.name || undefined,
+      categoryIds: filters.categoryIds.length > 0 ? filters.categoryIds.join(',') : undefined,
+      brands: filters.brands.length > 0 ? filters.brands.join(',') : undefined,
+      minPrice: filters.minPrice || undefined,
+      maxPrice: filters.maxPrice || undefined,
+      rating: filters.rating || undefined,
+    };
+    router.push({ path: '/search', query });
+  };
+
   async function fetchProducts() {
     try {
       const fetchedProducts = await searchProducts({ ...filters, page: currentPage.value, size: pageSize.value });
@@ -193,8 +222,8 @@
             <h3>{{ product.name }}</h3>
           </router-link>
           <div class="price-wrap">
-            <span class="price">{{ product.priceAfterDiscount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) }}</span>
-            <span class="old-price">{{ product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) }}</span>
+            <span class="price">{{ product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) }}</span>
+            <span class="old-price">{{ product.priceBeforeDiscount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) }}</span>
           </div>
         </div>
       </div>

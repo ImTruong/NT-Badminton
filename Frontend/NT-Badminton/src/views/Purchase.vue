@@ -12,13 +12,29 @@
         try {
             const token = localStorage.getItem("token");
             orders.value = await getOrders(token);
-            console.log("Fetched orders:", orders.value);
         } catch (error) {
             console.error("Error fetching orders:", error);
         }
     }
 
     fetchOrders();
+
+    const categories = [
+        { id: 0, name: 'Tất cả đơn hàng' },
+        { id: 1, name: 'Đơn hàng đã thanh toán' },
+        { id: 2, name: 'Đơn hàng chưa thanh toán' },
+        { id: 3, name: 'Đơn hàng đang giao' },
+        { id: 4, name: 'Đơn hàng đã giao' },
+        { id: 5, name: 'Đơn hàng đã hủy' }
+    ];
+    const activeCategory = ref(categories[0].id);
+    const changeCategory = (categoryId) => {
+        activeCategory.value = categoryId;
+    }
+
+    const concatFullAddress = (order) => {
+        return `${order.contact.streetAddress}, ${order.contact.ward}, ${order.contact.district}, ${order.contact.city}`;
+    }
 </script>
 
 <template>
@@ -59,7 +75,7 @@
                         <h4>Thông tin liên hệ</h4>
                         <div class="contact-item">
                             <span class="contact-label">Tên:</span>
-                            <span>{{ order.contact.name }}</span>
+                            <span>{{ order.contact.firstName + " " + order.contact.lastName }}</span>
                         </div>
                         <div class="contact-item">
                             <span class="contact-label">Điện thoại:</span>
@@ -67,7 +83,7 @@
                         </div>
                         <div class="contact-item">
                             <span class="contact-label">Địa chỉ:</span>
-                            <span>{{ order.contact.address }}</span>
+                            <span>{{ concatFullAddress(order) }}</span>
                         </div>
                     </div>
                     <div class="order-detail-box">
@@ -82,6 +98,7 @@
 <style scoped>
     .wrapper {
         width: 65vw;
+        min-width: 650px;
         margin: 0 auto;
     }
     .order-choice {

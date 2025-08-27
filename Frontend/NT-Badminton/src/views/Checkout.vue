@@ -91,6 +91,7 @@
             router.push('/purchase');
             
         } catch (error) {
+            alert(error);
             console.error("Failed to create order:", error);
         }
     };

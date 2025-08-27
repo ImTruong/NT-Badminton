@@ -29,21 +29,21 @@ public class CartController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/update-quantity")
+    @PutMapping("/quantity")
     public ResponseEntity<?> updateQuantity(@RequestBody @Valid QuantityChangeRequest quantityChangeRequest) {
         cartService.changeProductQuantity(quantityChangeRequest);
         ApiResponse<String> response = new ApiResponse<String>(true,"Update Quantity Successful");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping
     public ResponseEntity<?> deleteCart(@RequestParam Integer productVariantId) {
         cartService.deleteProductFromCart(productVariantId);
         ApiResponse<String> response = new ApiResponse<String>(true,"Delete From Cart Successful");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete-all")
+    @DeleteMapping("/all")
     public ResponseEntity<?> deleteAllCart() {
         cartService.deleteAllProductFromCart();
         ApiResponse<String> response = new ApiResponse<String>(true,"Delete All From Cart Successful");

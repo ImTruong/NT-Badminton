@@ -56,7 +56,7 @@
         <div class="total-box">
             <div class="upper-box">
                 <h3 class="total-title">Tổng cộng</h3>
-                <h2 class="total-price price">{{ cartItems.reduce((acc, item) => acc + item.salePrice * item.quantity, 0).toLocaleString() }} <span class="underline price">đ</span></h2>
+                <h2 class="total-price price">{{ cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toLocaleString() }} <span class="underline price">đ</span></h2>
             </div>
             <div class="lower-box">
                 <button class="checkout-button" @click="checkout">Thanh toán</button>

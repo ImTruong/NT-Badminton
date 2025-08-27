@@ -26,8 +26,6 @@ public class OrderItemResponse {
 
     Double price;
 
-    Double priceAfterDiscount;
-
     String image;
 
     public OrderItemResponse(Integer productVariantId,String image, Double price, String productName, Integer quantity) {

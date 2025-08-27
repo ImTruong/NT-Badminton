@@ -9,11 +9,9 @@ import com.dev.NT_Badminton.entities.orders.OrderItems;
 import com.dev.NT_Badminton.entities.orders.constant.DeliveryStatus;
 import com.dev.NT_Badminton.entities.orders.constant.PaymentMethod;
 import com.dev.NT_Badminton.entities.orders.constant.PaymentStatus;
+import com.dev.NT_Badminton.entities.products.ProductVariants;
 import com.dev.NT_Badminton.entities.users.AppUser;
-import com.dev.NT_Badminton.exception.NotInPendingException;
-import com.dev.NT_Badminton.exception.OrderCycleException;
-import com.dev.NT_Badminton.exception.PaymentException;
-import com.dev.NT_Badminton.exception.UnauthorizedException;
+import com.dev.NT_Badminton.exception.*;
 import com.dev.NT_Badminton.repositories.cart.CartRepository;
 import com.dev.NT_Badminton.repositories.order.OrderItemRepository;
 import com.dev.NT_Badminton.repositories.order.OrderRepository;
@@ -63,7 +61,9 @@ public class OrderServiceImpl implements OrderService {
             Cart cart = cartService.checkProductExistenceInUserCart(item.getProductVariantId(), user.getId());
             if (cart != null)
                 cartService.deleteProductFromCart(cart.getProductVariantId());
-
+            ProductVariants productVariant = productService.getProductVariantById(item.getProductVariantId());
+            if (item.getQuantity() > productVariant.getQuantity())
+                throw new OutOfStockException("Not enough quantity for product variant id: " + item.getProductVariantId());
             OrderItems orderItemEntity = OrderItems.builder()
                     .orderId(order.getId())
                     .productVariantId(item.getProductVariantId())
@@ -101,8 +101,6 @@ public class OrderServiceImpl implements OrderService {
     public void updatePaymentStatus(Integer orderId, PaymentStatus paymentStatus) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new EntityNotFoundException("Order not found"));
         order.setPaymentStatus(paymentStatus);
-        if (!order.getPaymentStatus().equals(PaymentStatus.PENDING))
-            throw new NotInPendingException("Only pending order can update payment method");
         orderRepository.save(order);
     }
 

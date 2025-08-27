@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { getCart, addToCart } from '@/api/cart.js';
+import { getCart, addToCart, removeProductFromCart, updateCartItemQuantity } from '@/api/cart.js';
 
 export const useCartStore = defineStore('cart', () => {
   // State
@@ -9,11 +9,12 @@ export const useCartStore = defineStore('cart', () => {
   const error = ref(null);
   const currentPage = ref(1);
   const itemsPerPage = ref(5);
+  const token = localStorage.getItem('token');
 
   // Getters
   const totalCartAmount = computed(() => {
     return cartItems.value.reduce((total, item) => {
-      return total + item.salePrice * item.quantity;
+      return total + item.price;
     }, 0);
   });
 
@@ -44,7 +45,6 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   async function addItemToCart(productVariantId, quantity) {
-    const token = localStorage.getItem('token');
     if (!token) {
       // Handle not logged in case
       return { success: false, message: 'Please log in to add items to cart' };
@@ -67,6 +67,31 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
+  async function removeItemFromCart(cartItemId) {
+    try {
+      await removeProductFromCart(token, cartItemId);
+      // Refresh cart items after removing
+      await fetchCartItems();
+      return { success: true };
+    } catch (err) {
+      error.value = err.message || 'Failed to remove item from cart';
+      console.error('Error removing from cart:', err);
+      return { success: false, message: error.value };
+    }
+  }
+
+  async function updateItemQuantity(cartItemId, quantity) {
+    try {
+      await updateCartItemQuantity(token, cartItemId, quantity);
+      await fetchCartItems();
+      return { success: true };
+    } catch (err) {
+      error.value = err.message || 'Failed to update item quantity';
+      console.error('Error updating item quantity:', err);
+      return { success: false, message: error.value };
+    }
+  }
+
   return {
     cartItems,
     isLoading,
@@ -76,6 +101,8 @@ export const useCartStore = defineStore('cart', () => {
     currentPage,
     itemsPerPage,
     fetchCartItems,
-    addItemToCart
+    addItemToCart,
+    removeItemFromCart,
+    updateItemQuantity
   };
 });

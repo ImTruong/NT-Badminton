@@ -41,7 +41,7 @@ public class OrderItemRepositoryImpl extends BaseRepository implements OrderItem
                                 OrderItemResponse.class,
                                 qProductVariants.id,
                                 qUploadFile.originUrl,
-                                qProductVariants.price.multiply(qOrderItems.quantity),
+                                qProductVariants.price,
                                 qProduct.name,
                                 qOrderItems.quantity
                         ))
@@ -60,7 +60,7 @@ public class OrderItemRepositoryImpl extends BaseRepository implements OrderItem
         result.forEach(orderItemResponse -> {
             orderItemResponse.setProductOptions(productOptionValueRepository.getProductVariantOptionValuesByProductVariantId(orderItemResponse.getProductVariantId()));
             Integer discountPercentage = discountRepository.getNewestUnexpiredDiscountWithHighestPercentage(orderItemResponse.getProductVariantId());
-            orderItemResponse.setPriceAfterDiscount(orderItemResponse.getPrice() * (100 - discountPercentage) / 100);
+            orderItemResponse.setPrice(orderItemResponse.getPrice() * (100 - discountPercentage) / 100);
         });
         return result;
     }

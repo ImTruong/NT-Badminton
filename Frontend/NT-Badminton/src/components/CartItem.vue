@@ -50,7 +50,7 @@
                     @input="emit('updateQuantity', { id: item.id, quantity: +$event.target.value })"/>
                 <button class="increase-quantity" @click="increaseQuantity">+</button>
             </div>
-            <h3 class="cart-item-price">Giá: <span class="price">{{ item.salePrice.toLocaleString() }} <span class="underline price">đ</span></span></h3>
+            <h3 class="cart-item-price">Giá: <span class="price">{{ item.price.toLocaleString() }} <span class="underline price">đ</span></span></h3>
             <div class="cart-item-details-icon">
                 <font-awesome-icon class="icon" :icon="['fas', 'trash']" @click="removeItem" />
             </div>

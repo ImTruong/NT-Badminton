@@ -22,8 +22,6 @@ public class OrderResponse {
 
     Double totalPrice;
 
-    Double totalPriceAfterDiscount;
-
     String deliveryStatus;
 
     String paymentStatus;
